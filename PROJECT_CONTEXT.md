@@ -471,3 +471,90 @@ E:\warp projects\kotlin mobile application\
 **Can Start**: Immediately (no dependencies blocking)
 
 **Sprint Progress Update**: 15% complete (DEV-001-T1 finished ahead of schedule)
+
+---
+
+### **UPDATE: October 17, 2025, 06:17 UTC - DEV-001-T2 Execution Plan**
+
+#### **🔄 NEXT ACTIVE TASK: DEV-001-T2**
+**Task**: Set Up Team Development Standards  
+**Estimated Duration**: 3 hours  
+**Started**: October 17, 2025, 06:17 UTC  
+**Expected Completion**: October 17, 2025, 09:17 UTC  
+**Dependencies**: DEV-001-T1 (✅ Complete)  
+**Status**: Ready to execute immediately
+
+#### **📋 DEV-001-T2 Execution Breakdown**
+
+**Phase 1: Kotlin Coding Standards (45 minutes)**
+- [ ] Create `KOTLIN_CODING_STANDARDS.md` document
+- [ ] Define naming conventions for classes, functions, variables
+- [ ] Document Kotlin-specific guidelines (extensions, data classes, null safety)
+- [ ] Establish comment standards and KDoc format
+- [ ] Set import organization and code quality rules
+
+**Phase 2: EditorConfig Setup (30 minutes)**
+- [ ] Create `.editorconfig` file in project root
+- [ ] Configure indent style: 4 spaces for Kotlin
+- [ ] Set charset: UTF-8, end of line: LF
+- [ ] Configure max line length: 120 characters
+- [ ] Add file-specific rules for .kt, .xml, .gradle, .md
+
+**Phase 3: Ktlint Integration (60 minutes)**
+- [ ] Add Ktlint Gradle plugin to build configuration
+- [ ] Configure Ktlint rules and exceptions
+- [ ] Set up Gradle tasks: `ktlintCheck`, `ktlintFormat`
+- [ ] Configure Android Studio integration
+- [ ] Test formatting on sample Kotlin files
+
+**Phase 4: Detekt Static Analysis (45 minutes)**
+- [ ] Add Detekt Gradle plugin
+- [ ] Create `detekt.yml` configuration file
+- [ ] Configure complexity rules and code smell detection
+- [ ] Set up failure thresholds and Android Studio integration
+- [ ] Test analysis on sample code
+
+**Phase 5: Development Guidelines (45 minutes)**
+- [ ] Create `TEAM_DEVELOPMENT_GUIDELINES.md`
+- [ ] Document Git workflow and code review process
+- [ ] Define testing standards and architecture patterns
+- [ ] Establish error handling and performance guidelines
+- [ ] Document security practices and documentation requirements
+
+**Phase 6: IDE Settings Template (15 minutes)**
+- [ ] Configure Android Studio settings for team consistency
+- [ ] Create settings export file
+- [ ] Document plugin recommendations
+- [ ] Set up code style and inspection profiles
+
+#### **📁 Expected Project Structure After Completion**
+```
+E:\warp projects\kotlin mobile application\
+├── .editorconfig                      # NEW - Editor consistency
+├── KOTLIN_CODING_STANDARDS.md        # NEW - Coding standards
+├── TEAM_DEVELOPMENT_GUIDELINES.md    # NEW - Development workflow
+├── detekt.yml                         # NEW - Static analysis config
+├── android-studio-settings.zip       # NEW - IDE settings template
+├── [existing files...]
+```
+
+#### **✅ Success Criteria for DEV-001-T2**
+- All team members can follow consistent coding standards
+- Code formatting is automated and enforced
+- Static analysis catches common issues before code review
+- Development workflow is documented and clear
+- IDE settings provide consistent development experience
+- Ready for team onboarding and parallel development
+
+#### **🔗 Integration Impact**
+- **DEV-004 (Mobile Apps)**: Projects will use these standards from creation
+- **DEV-005 (CI/CD)**: Pipeline will enforce these standards automatically
+- **Team Onboarding**: Future developers have clear guidelines
+- **Code Quality**: Consistent codebase across all three applications
+
+#### **📈 After DEV-001-T2 Completion**
+1. ✅ Mark DEV-001-T2 complete
+2. ✅ Update sprint progress to 20% complete
+3. 🔄 Begin DEV-002-T1 (Supabase setup) or DEV-004-T1 (App projects)
+4. 📝 Document any tool configuration issues encountered
+5. 📊 Prepare for parallel development workflow
