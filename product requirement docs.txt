@@ -1,0 +1,95 @@
+Architectural components
+A robust online grocery system is composed of four main layers that separate user interfaces, business logic, and data storage. 
+1. Presentation layer
+This is the front end that customers and staff interact with. All interfaces are mobile applications targeting Android deployment via Google Play Store. All the mobile apps use kotlin for app development.
+Customer-facing app: A native Android mobile app for browsing products, managing carts, and placing orders.
+Admin mobile app: A native Android mobile app for managing products, viewing order histories, and monitoring sales and performance analytics.
+Shopper/driver app: A native Android mobile app for staff to receive, accept, and track delivery or pickup orders.
+2. Application layer (microservices)
+This layer contains the business logic, with each component functioning as an independent microservice. 
+User service: Manages user authentication, account details, and profile information.
+Product catalog service: Controls the product listings, categories, images, and descriptions.
+Shopping cart service: Manages items added to a user's cart. This service needs to be fast and may involve caching for a responsive user experience.
+Inventory service: Tracks stock levels and availability in real-time, sending automated low-stock alerts. For large systems, this may integrate with a warehouse management system (WMS).
+Order service: Manages the entire order lifecycle, from placement and payment processing to fulfillment and history.
+Payment service: Processes secure transactions by integrating with external payment gateways like Stripe or PayPal.
+Notification service: Sends communications to users via email and push notifications for events like order confirmation, shipment updates, and delivery status.
+Delivery/Logistics service: Assigns delivery staff, manages routes, and provides real-time tracking via an integrated third-party mapping API, such as Google Maps. 
+3. Data layer
+This layer stores all the information required by the application services using Supabase as the primary backend.
+Supabase Database: PostgreSQL database provided by Supabase for managing structured data for users, orders, and products with built-in real-time capabilities.
+Supabase Storage: File storage for product images, user avatars, and other media assets.
+Supabase Auth: Built-in authentication system for secure user management across all mobile apps.
+Supabase Real-time: Live data synchronization for order tracking, inventory updates, and notifications.
+Caching: Supabase Edge Functions and built-in caching mechanisms for frequently accessed data to improve response times.
+4. Infrastructure and security layer
+This layer provides the fundamental infrastructure and security measures to run the system. 
+Vercel Deployment: Vercel platform for deploying and hosting API endpoints, serverless functions, and static assets with automatic scaling.
+Supabase Infrastructure: Managed cloud infrastructure with built-in security, automatic backups, and global edge locations.
+Content Delivery Network (CDN): Vercel's global CDN for fast delivery of static assets and Supabase CDN for media files.
+Security protocols: Supabase Row Level Security (RLS), SSL encryption, OAuth authentication, and mobile app security best practices for Google Play Store compliance.
+Google Play Store Requirements: Compliance with Google Play policies, app signing, and security standards for Android app distribution.
+Core functionalities
+The design of an online grocery system must incorporate several core features to provide a seamless user experience. 
+For the customer
+User authentication: Allow customers to sign up and log in securely.
+Product browsing and search: Enable searching for products by name, category, or brand with advanced filtering options.
+Personalization: Provide product recommendations based on a user's purchase history and preferences.
+Shopping cart management: Add, delete, and modify items in a persistent cart.
+Flexible checkout: Offer multiple payment options, including digital wallets, and allow for a streamlined, one-page checkout process.
+Delivery options: Allow customers to choose between delivery time slots or in-store pickup.
+Order tracking: Provide real-time order status and delivery updates.
+Ratings and reviews: Allow customers to rate and review products. 
+For the admin and staff
+Order management: Track order statuses, update fulfillment details, and manage cancellations and returns.
+Inventory control: Manage stock levels, add new products, and track perishable items by expiration date.
+Real-time reporting: Generate sales reports, analyze customer behavior, and get insights on operational efficiency.
+Multi-store management: A centralized dashboard to control inventory, sales, and customer data across multiple locations.
+Promotions and offers: Manage coupons, discounts, and membership programs. 
+
+==========
+
+Components of a mobile-first app structure
+1. Customer mobile app
+Purpose: The primary interface for users to browse and purchase groceries.
+Platform: Native Android app distributed via Google Play Store.
+Technology Stack: kotlin for cross-platform development, with Vercel API backend and Supabase integration.
+Core features:
+Browse and search products with real-time inventory
+Add items to cart with offline capability
+Secure checkout with multiple payment options (Google Pay integration)
+Schedule deliveries or pickups with calendar integration
+Real-time order tracking with push notifications
+View order history and past purchases
+Receive personalized product recommendations using Supabase analytics
+Customer support and in-app messaging
+Offline mode for browsing previously viewed products
+2. Admin mobile app
+Purpose: The central control hub for managing the entire operation on mobile devices.
+Platform: Native Android app distributed via Google Play Store (internal testing/closed track for staff only).
+Technology Stack: kotlin with Vercel API backend and Supabase real-time dashboard.
+Core features:
+Manage product catalog, inventory, and pricing with bulk upload capabilities
+Oversee and process all orders with real-time notifications
+Monitor delivery logistics and assign orders to drivers
+View sales reports, analytics, and business insights with interactive charts
+Manage user accounts, promotions, and refunds
+Content Management System (CMS) for managing promotions and app content
+Multi-role access control (Manager, Staff, Supervisor)
+Offline capabilities for critical operations
+3. Delivery personnel mobile app
+Purpose: A mobile app to facilitate the delivery of orders efficiently.
+Platform: Native Android app distributed via Google Play Store (internal testing/closed track for delivery staff).
+Technology Stack: kotlin with Google Maps integration, Vercel API backend, and Supabase real-time updates.
+Core features:
+Accept or decline delivery requests with push notifications
+View detailed order and customer information offline-capable
+Use in-app Google Maps integration for optimized routes to the store and customer
+Update delivery status and capture proof of delivery with camera integration
+Communicate with customers and support staff via in-app messaging
+Track earnings and job history with detailed analytics
+Battery optimization for long delivery shifts
+Offline mode for areas with poor connectivity
+Google Play Store compliance for delivery/logistics apps
+
+
