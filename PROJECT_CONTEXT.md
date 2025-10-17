@@ -2,7 +2,7 @@
 
 **Last Updated**: October 17, 2025, 05:20 UTC  
 **Project Status**: Planning Phase - Sprint 1 Ready  
-**Repository**: https://github.com/fiwidi7861djkux/kotlin-project
+**Repository**: https://github.com/johnthesaviour1234/kotlin-project
 
 ---
 
@@ -53,7 +53,7 @@ E:\warp projects\kotlin mobile application\
 
 #### **2. Version Control Setup (100% Complete)**
 - [x] **Git Repository Initialized**: Local git repository configured
-- [x] **GitHub Remote Connected**: Repository linked to `https://github.com/fiwidi7861djkux/kotlin-project`
+- [x] **GitHub Remote Connected**: Repository linked to `https://github.com/johnthesaviour1234/kotlin-project`
 - [x] **Initial Commits**: All documentation committed and pushed to remote
 - [x] **Git Configuration**: Basic user settings configured for commits
 
@@ -227,7 +227,7 @@ E:\warp projects\kotlin mobile application\
 
 ### **Repository Information**
 - **Current Branch**: `main`
-- **Remote Repository**: `https://github.com/fiwidi7861djkux/kotlin-project`
+- **Remote Repository**: `https://github.com/johnthesaviour1234/kotlin-project`
 - **Last Commit**: `3cb94f8 - Add detailed task breakdown for Sprint 1 user stories`
 - **Working Tree**: Clean (no uncommitted changes)
 

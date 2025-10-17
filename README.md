@@ -153,8 +153,8 @@
 
 ## 📞 Repository Information
 
-**GitHub Repository:** https://github.com/fiwidi7861djkux/kotlin-project  
-**Clone Command:** `git clone https://github.com/fiwidi7861djkux/kotlin-project.git`  
+**GitHub Repository:** https://github.com/johnthesaviour1234/kotlin-project  
+**Clone Command:** `git clone https://github.com/johnthesaviour1234/kotlin-project.git`  
 **Main Branch:** `main`  
 **Total Commits:** 4 (all documentation and planning)
 
