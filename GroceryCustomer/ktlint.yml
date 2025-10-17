@@ -1,0 +1,100 @@
+# Ktlint configuration for Online Grocery System
+# This file will be used by all Android projects (Customer, Admin, Delivery)
+
+# Enable specific rule sets
+ruleset:
+  # Standard ktlint rules
+  standard: true
+  # Experimental rules (be cautious with these)
+  experimental: false
+
+# Disabled rules (if any specific rule causes issues)
+disabled_rules:
+  # Uncomment if you want to disable specific rules
+  # - "import-ordering"  # We use our own import ordering
+  # - "no-wildcard-imports"  # Allow wildcard imports in specific cases
+
+# Custom configuration for specific rules
+rules:
+  # Import ordering rule configuration
+  import-ordering:
+    # Define import layout
+    layout: "*,java.**,javax.**,kotlin.**,^"
+    
+  # Maximum line length (should match .editorconfig)
+  max-line-length:
+    length: 120
+    ignore-back-ticked-identifier: false
+    
+  # Indentation rules
+  indent:
+    size: 4
+    continuation-size: 8
+    
+  # No consecutive blank lines
+  no-consecutive-blank-lines:
+    max: 2
+    
+  # Chain wrapping - how to wrap chained calls
+  chain-wrapping:
+    # Allow chaining on same line for short chains
+    max-line-length: 120
+    
+  # Parameter list wrapping
+  parameter-list-wrapping:
+    # Wrap parameters when line is too long
+    max-line-length: 120
+    indent-size: 8
+    
+  # String template rules
+  string-template:
+    # Require curly braces for complex expressions
+    require-curly-braces: true
+    
+  # Trailing comma rules
+  trailing-comma-on-call-site:
+    # Allow trailing commas for better diffs
+    enabled: true
+    
+  trailing-comma-on-declaration-site:
+    # Allow trailing commas in declarations
+    enabled: true
+    
+  # Multiline if-else formatting
+  multiline-if-else:
+    # Require braces for multiline if-else
+    require-braces: true
+    
+  # Class signature formatting
+  class-signature:
+    # Force multiline when class signature is long
+    max-line-length: 120
+    
+  # Function signature formatting  
+  function-signature:
+    # Control function signature wrapping
+    max-line-length: 120
+    force-multiline-when-parameter-count-greater-or-equal-than: 4
+
+# Files to include/exclude
+include:
+  - "**/*.kt"
+  - "**/*.kts"
+  
+exclude:
+  - "**/build/**"
+  - "**/.*"
+  - "**/.idea/**"
+  - "**/generated/**"
+
+# Baseline file (will be created to ignore existing violations)
+baseline: "ktlint-baseline.xml"
+
+# Output format options
+output:
+  # Format for console output
+  format: "plain"
+  # Color output in terminal
+  color: true
+  # Relative paths in output
+  relative: true

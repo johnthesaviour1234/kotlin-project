@@ -1,0 +1,42 @@
+<resources>
+    <!-- Application name -->
+    <string name="app_name">Grocery Customer</string>
+    
+    <!-- Common UI strings -->
+    <string name="loading">Loading…</string>
+    <string name="error_generic">Something went wrong. Please try again.</string>
+    <string name="error_network">Network error. Please check your connection.</string>
+    <string name="retry">Retry</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_categories">Categories</string>
+    <string name="nav_cart">Cart</string>
+    <string name="nav_profile">Profile</string>
+    
+    <!-- Authentication -->
+    <string name="login">Login</string>
+    <string name="register">Register</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="full_name">Full Name</string>
+    <string name="phone_number">Phone Number</string>
+    
+    <!-- Shopping -->
+    <string name="add_to_cart">Add to Cart</string>
+    <string name="remove_from_cart">Remove from Cart</string>
+    <string name="checkout">Checkout</string>
+    <string name="total">Total</string>
+    <string name="quantity">Quantity</string>
+    <string name="price">Price</string>
+    
+    <!-- Content descriptions for accessibility -->
+    <string name="cd_product_image">Product image</string>
+    <string name="cd_user_avatar">User avatar</string>
+    <string name="cd_menu">Menu</string>
+    <string name="cd_search">Search</string>
+    <string name="cd_cart">Shopping cart</string>
+</resources>
