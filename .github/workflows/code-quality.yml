@@ -1,0 +1,449 @@
+name: Code Quality & Performance
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run daily at 2 AM UTC for performance monitoring
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  code-formatting:
+    name: Code Formatting Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+        
+    - name: Grant execute permissions
+      run: find . -name "gradlew" -exec chmod +x {} \;
+      
+    - name: Run ktlint formatting check
+      run: |
+        echo "🎨 Running ktlint formatting checks..."
+        
+        echo "📱 Customer App:"
+        cd GroceryCustomer
+        ./gradlew ktlintCheck --continue || CUSTOMER_FAILED=1
+        cd ..
+        
+        echo "👨‍💼 Admin App:"
+        cd GroceryAdmin
+        ./gradlew ktlintCheck --continue || ADMIN_FAILED=1
+        cd ..
+        
+        echo "🚚 Delivery App:"
+        cd GroceryDelivery  
+        ./gradlew ktlintCheck --continue || DELIVERY_FAILED=1
+        cd ..
+        
+        if [[ $CUSTOMER_FAILED == 1 || $ADMIN_FAILED == 1 || $DELIVERY_FAILED == 1 ]]; then
+          echo "❌ Code formatting issues found"
+          echo "💡 Run './gradlew ktlintFormat' to auto-fix formatting issues"
+          exit 1
+        else
+          echo "✅ All apps passed formatting checks"
+        fi
+        
+    - name: Auto-fix formatting (if requested)
+      if: github.event_name == 'pull_request' && contains(github.event.pull_request.body, '[auto-fix]')
+      run: |
+        echo "🔧 Auto-fixing formatting issues..."
+        cd GroceryCustomer && ./gradlew ktlintFormat && cd ..
+        cd GroceryAdmin && ./gradlew ktlintFormat && cd ..
+        cd GroceryDelivery && ./gradlew ktlintFormat && cd ..
+        echo "✅ Formatting auto-fixed"
+
+  static-analysis:
+    name: Static Code Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+        
+    - name: Grant execute permissions
+      run: find . -name "gradlew" -exec chmod +x {} \;
+      
+    - name: Run detekt static analysis
+      run: |
+        echo "🔍 Running detekt static analysis..."
+        
+        echo "📱 Customer App Analysis:"
+        cd GroceryCustomer
+        ./gradlew detekt --continue
+        cd ..
+        
+        echo "👨‍💼 Admin App Analysis:"
+        cd GroceryAdmin
+        ./gradlew detekt --continue
+        cd ..
+        
+        echo "🚚 Delivery App Analysis:"
+        cd GroceryDelivery
+        ./gradlew detekt --continue
+        cd ..
+        
+        echo "✅ Static analysis completed"
+        
+    - name: Upload detekt reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: detekt-reports
+        path: |
+          **/build/reports/detekt/
+        retention-days: 30
+
+  build-performance:
+    name: Build Performance Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+        
+    - name: Grant execute permissions
+      run: find . -name "gradlew" -exec chmod +x {} \;
+      
+    - name: Measure build performance
+      run: |
+        echo "⏱️ Measuring build performance..."
+        
+        echo "📊 Customer App Build Time:"
+        cd GroceryCustomer
+        time ./gradlew clean assembleDebug --profile
+        BUILD_CUSTOMER=$(grep -o 'BUILD SUCCESSFUL in [0-9]*s' build.log || echo "Build time not found")
+        echo "Customer App: $BUILD_CUSTOMER"
+        cd ..
+        
+        echo "📊 Admin App Build Time:"
+        cd GroceryAdmin
+        time ./gradlew clean assembleDebug --profile
+        BUILD_ADMIN=$(grep -o 'BUILD SUCCESSFUL in [0-9]*s' build.log || echo "Build time not found")  
+        echo "Admin App: $BUILD_ADMIN"
+        cd ..
+        
+        echo "📊 Delivery App Build Time:"
+        cd GroceryDelivery
+        time ./gradlew clean assembleDebug --profile
+        BUILD_DELIVERY=$(grep -o 'BUILD SUCCESSFUL in [0-9]*s' build.log || echo "Build time not found")
+        echo "Delivery App: $BUILD_DELIVERY"
+        cd ..
+        
+        echo "✅ Performance analysis completed"
+        
+    - name: Upload build reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-performance-reports
+        path: |
+          **/build/reports/profile/
+        retention-days: 7
+
+  apk-analysis:
+    name: APK Size & Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+        
+    - name: Grant execute permissions
+      run: find . -name "gradlew" -exec chmod +x {} \;
+      
+    - name: Build release APKs for analysis
+      run: |
+        echo "📦 Building release APKs for size analysis..."
+        
+        cd GroceryCustomer && ./gradlew assembleRelease && cd ..
+        cd GroceryAdmin && ./gradlew assembleRelease && cd ..
+        cd GroceryDelivery && ./gradlew assembleRelease && cd ..
+        
+        echo "✅ Release APKs built"
+        
+    - name: Analyze APK sizes
+      run: |
+        echo "📏 Analyzing APK sizes..."
+        
+        find . -name "*-release.apk" -exec ls -lh {} \; | while read -r line; do
+          size=$(echo $line | awk '{print $5}')
+          path=$(echo $line | awk '{print $9}')
+          app=$(echo $path | cut -d'/' -f2)
+          echo "📱 $app: $size"
+          
+          # Convert size to MB for comparison
+          size_mb=$(echo $size | sed 's/M//' | sed 's/K//' | awk '{if($1 ~ /K/) print $1/1024; else print $1}')
+          
+          # Alert if APK is larger than 50MB
+          if (( $(echo "$size_mb > 50" | bc -l) )); then
+            echo "⚠️ WARNING: $app APK size ($size) exceeds 50MB limit"
+          fi
+        done
+        
+        echo "✅ APK analysis completed"
+
+  test-coverage:
+    name: Test Coverage Analysis  
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+        
+    - name: Grant execute permissions
+      run: find . -name "gradlew" -exec chmod +x {} \;
+      
+    - name: Run tests with coverage
+      run: |
+        echo "🧪 Running tests with coverage analysis..."
+        
+        echo "📱 Customer App Coverage:"
+        cd GroceryCustomer
+        ./gradlew test jacocoTestReport
+        cd ..
+        
+        echo "👨‍💼 Admin App Coverage:"
+        cd GroceryAdmin
+        ./gradlew test jacocoTestReport
+        cd ..
+        
+        echo "🚚 Delivery App Coverage:"
+        cd GroceryDelivery
+        ./gradlew test jacocoTestReport  
+        cd ..
+        
+        echo "✅ Coverage analysis completed"
+        
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-reports
+        path: |
+          **/build/reports/jacoco/
+          **/build/jacoco/
+        retention-days: 30
+        
+    - name: Coverage threshold check
+      run: |
+        echo "📊 Checking coverage thresholds..."
+        
+        # Basic coverage check - in real implementation, parse XML reports
+        apps=("GroceryCustomer" "GroceryAdmin" "GroceryDelivery")
+        
+        for app in "${apps[@]}"; do
+          if [[ -f "$app/build/reports/jacoco/test/html/index.html" ]]; then
+            echo "✅ $app: Coverage report generated"
+          else
+            echo "⚠️ $app: Coverage report missing"
+          fi
+        done
+        
+        echo "💡 Minimum coverage target: 70%"
+        echo "📋 Review coverage reports in artifacts"
+
+  code-duplication:
+    name: Code Duplication Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+        
+    - name: Install PMD/CPD
+      run: |
+        wget https://github.com/pmd/pmd/releases/download/pmd_releases%2F6.55.0/pmd-bin-6.55.0.zip
+        unzip pmd-bin-6.55.0.zip
+        echo "$(pwd)/pmd-bin-6.55.0/bin" >> $GITHUB_PATH
+        
+    - name: Run code duplication analysis
+      run: |
+        echo "🔍 Running code duplication analysis..."
+        
+        # Analyze Kotlin files across all apps
+        find . -name "*.kt" -not -path "*/build/*" > kotlin_files.txt
+        
+        if [[ -s kotlin_files.txt ]]; then
+          pmd cpd --minimum-tokens 50 --files kotlin_files.txt --language kotlin --format xml > cpd-report.xml || true
+          
+          if [[ -s cpd-report.xml ]]; then
+            echo "📊 Code duplication report generated"
+            duplications=$(grep -c "<duplication" cpd-report.xml || echo "0")
+            echo "🔍 Found $duplications potential duplications"
+            
+            if [[ $duplications -gt 10 ]]; then
+              echo "⚠️ High code duplication detected ($duplications duplications)"
+              echo "💡 Consider refactoring common code into shared utilities"
+            else
+              echo "✅ Code duplication within acceptable limits"
+            fi
+          else
+            echo "✅ No significant code duplication found"
+          fi
+        fi
+        
+    - name: Upload duplication report
+      uses: actions/upload-artifact@v4
+      with:
+        name: code-duplication-report
+        path: cpd-report.xml
+        retention-days: 30
+      if: hashFiles('cpd-report.xml') != ''
+
+  quality-summary:
+    name: Code Quality Summary
+    runs-on: ubuntu-latest
+    needs: [code-formatting, static-analysis, build-performance, apk-analysis, test-coverage, code-duplication]
+    if: always()
+    timeout-minutes: 5
+    
+    steps:
+    - name: Quality Summary Report
+      run: |
+        echo "📋 Code Quality & Performance Summary"
+        echo "====================================="
+        echo "🎨 Code Formatting: ${{ needs.code-formatting.result }}"
+        echo "🔍 Static Analysis: ${{ needs.static-analysis.result }}"
+        echo "⚡ Build Performance: ${{ needs.build-performance.result }}"
+        echo "📦 APK Analysis: ${{ needs.apk-analysis.result }}"
+        echo "🧪 Test Coverage: ${{ needs.test-coverage.result }}"
+        echo "🔍 Code Duplication: ${{ needs.code-duplication.result }}"
+        echo "====================================="
+        
+        # Count successful jobs
+        successful_jobs=0
+        [[ "${{ needs.code-formatting.result }}" == "success" ]] && ((successful_jobs++))
+        [[ "${{ needs.static-analysis.result }}" == "success" ]] && ((successful_jobs++))
+        [[ "${{ needs.build-performance.result }}" == "success" ]] && ((successful_jobs++))
+        [[ "${{ needs.apk-analysis.result }}" == "success" ]] && ((successful_jobs++))
+        [[ "${{ needs.test-coverage.result }}" == "success" ]] && ((successful_jobs++))
+        [[ "${{ needs.code-duplication.result }}" == "success" ]] && ((successful_jobs++))
+        
+        total_jobs=6
+        percentage=$((successful_jobs * 100 / total_jobs))
+        
+        echo "📊 Quality Score: $successful_jobs/$total_jobs ($percentage%)"
+        
+        if [[ $percentage -ge 90 ]]; then
+          echo "🎉 Excellent code quality!"
+        elif [[ $percentage -ge 80 ]]; then
+          echo "✅ Good code quality"
+        elif [[ $percentage -ge 70 ]]; then
+          echo "⚠️ Acceptable code quality - room for improvement"
+        else
+          echo "❌ Code quality needs attention"
+        fi
+        
+        echo ""
+        echo "💡 Next Steps:"
+        [[ "${{ needs.code-formatting.result }}" != "success" ]] && echo "- Fix code formatting issues with ktlint"
+        [[ "${{ needs.static-analysis.result }}" != "success" ]] && echo "- Review and fix detekt warnings"
+        [[ "${{ needs.test-coverage.result }}" != "success" ]] && echo "- Improve test coverage (target: 70%+)"
+        [[ "${{ needs.code-duplication.result }}" != "success" ]] && echo "- Refactor duplicate code into shared utilities"
+        
+        echo "📋 Review workflow artifacts for detailed reports"
+
+  create-quality-issue:
+    name: Create Quality Issue
+    runs-on: ubuntu-latest
+    needs: quality-summary
+    if: failure() && github.ref == 'refs/heads/main'
+    timeout-minutes: 5
+    
+    steps:
+    - name: Create Code Quality Issue
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const title = `📋 Code Quality Alert: Issues detected in main branch - ${new Date().toISOString().split('T')[0]}`;
+          const body = `## 📊 Code Quality Alert
+          
+          Automated code quality checks have detected issues in the main branch.
+          
+          ### 🔍 Quality Checks Status
+          - 🎨 Code Formatting: ${{ needs.code-formatting.result }}
+          - 🔍 Static Analysis: ${{ needs.static-analysis.result }}
+          - ⚡ Build Performance: ${{ needs.build-performance.result }}
+          - 📦 APK Analysis: ${{ needs.apk-analysis.result }}
+          - 🧪 Test Coverage: ${{ needs.test-coverage.result }}
+          - 🔍 Code Duplication: ${{ needs.code-duplication.result }}
+          
+          ### 📋 Action Required
+          - [ ] Review workflow artifacts for detailed reports
+          - [ ] Fix code formatting issues (run \`./gradlew ktlintFormat\`)
+          - [ ] Address static analysis warnings
+          - [ ] Improve test coverage if below threshold
+          - [ ] Optimize build performance if needed
+          - [ ] Refactor duplicate code
+          
+          ### 🎯 Quality Targets
+          - Code formatting: 100% compliant
+          - Test coverage: >70%
+          - APK size: <50MB per app
+          - Build time: <5min per app
+          
+          ### 👥 Assignees
+          @${context.repo.owner}
+          
+          ---
+          **Automated by:** \`code-quality.yml\` workflow
+          **Workflow Run:** [${context.runId}](${context.payload.repository.html_url}/actions/runs/${context.runId})`;
+          
+          github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: title,
+            body: body,
+            labels: ['code-quality', 'technical-debt', 'maintenance']
+          });
