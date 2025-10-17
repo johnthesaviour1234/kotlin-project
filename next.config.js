@@ -25,13 +25,8 @@ const nextConfig = {
     ];
   },
   
-  // API configuration
-  api: {
-    bodyParser: {
-      sizeLimit: '1mb',
-    },
-    responseLimit: '8mb',
-  }
+  // Optimize for API-only deployment
+  output: 'standalone'
 };
 
 module.exports = nextConfig;
