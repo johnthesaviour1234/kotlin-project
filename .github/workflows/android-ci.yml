@@ -11,9 +11,66 @@ env:
   GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError"
 
 jobs:
+  check-projects:
+    name: Check Android Projects
+    runs-on: ubuntu-latest
+    outputs:
+      customer_exists: ${{ steps.check.outputs.customer_exists }}
+      admin_exists: ${{ steps.check.outputs.admin_exists }}
+      delivery_exists: ${{ steps.check.outputs.delivery_exists }}
+      any_project_exists: ${{ steps.check.outputs.any_project_exists }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Check for Android project directories
+      id: check
+      run: |
+        customer_exists="false"
+        admin_exists="false"
+        delivery_exists="false"
+        any_project_exists="false"
+        
+        if [ -d "GroceryCustomer" ] && [ -f "GroceryCustomer/gradlew" ]; then
+          customer_exists="true"
+          any_project_exists="true"
+          echo "✅ Customer App project found"
+        else
+          echo "ℹ️ Customer App project not found (expected during setup phase)"
+        fi
+        
+        if [ -d "GroceryAdmin" ] && [ -f "GroceryAdmin/gradlew" ]; then
+          admin_exists="true"
+          any_project_exists="true"
+          echo "✅ Admin App project found"
+        else
+          echo "ℹ️ Admin App project not found (expected during setup phase)"
+        fi
+        
+        if [ -d "GroceryDelivery" ] && [ -f "GroceryDelivery/gradlew" ]; then
+          delivery_exists="true"
+          any_project_exists="true"
+          echo "✅ Delivery App project found"
+        else
+          echo "ℹ️ Delivery App project not found (expected during setup phase)"
+        fi
+        
+        echo "customer_exists=$customer_exists" >> $GITHUB_OUTPUT
+        echo "admin_exists=$admin_exists" >> $GITHUB_OUTPUT
+        echo "delivery_exists=$delivery_exists" >> $GITHUB_OUTPUT
+        echo "any_project_exists=$any_project_exists" >> $GITHUB_OUTPUT
+        
+        if [ "$any_project_exists" == "false" ]; then
+          echo "ℹ️ No Android projects found - this is expected during initial setup."
+          echo "The CI/CD pipeline will skip build steps until Android projects are created."
+        fi
+
   code-quality:
     name: Code Quality Checks
     runs-on: ubuntu-latest
+    needs: check-projects
+    if: needs.check-projects.outputs.any_project_exists == 'true'
     timeout-minutes: 15
     
     steps:
@@ -35,23 +92,36 @@ jobs:
     - name: Run ktlint (Code Formatting)
       run: |
         echo "🔍 Running ktlint formatting checks..."
-        cd GroceryCustomer && ./gradlew ktlintCheck && cd ..
-        cd GroceryAdmin && ./gradlew ktlintCheck && cd ..
-        cd GroceryDelivery && ./gradlew ktlintCheck && cd ..
-        echo "✅ All apps passed ktlint formatting checks"
+        if [ "${{ needs.check-projects.outputs.customer_exists }}" == "true" ]; then
+          cd GroceryCustomer && ./gradlew ktlintCheck && cd ..
+        fi
+        if [ "${{ needs.check-projects.outputs.admin_exists }}" == "true" ]; then
+          cd GroceryAdmin && ./gradlew ktlintCheck && cd ..
+        fi
+        if [ "${{ needs.check-projects.outputs.delivery_exists }}" == "true" ]; then
+          cd GroceryDelivery && ./gradlew ktlintCheck && cd ..
+        fi
+        echo "✅ All available apps passed ktlint formatting checks"
     
     - name: Run detekt (Static Analysis)
       run: |
         echo "🔍 Running detekt static analysis..."
-        cd GroceryCustomer && ./gradlew detekt && cd ..
-        cd GroceryAdmin && ./gradlew detekt && cd ..
-        cd GroceryDelivery && ./gradlew detekt && cd ..
-        echo "✅ All apps passed detekt static analysis"
+        if [ "${{ needs.check-projects.outputs.customer_exists }}" == "true" ]; then
+          cd GroceryCustomer && ./gradlew detekt && cd ..
+        fi
+        if [ "${{ needs.check-projects.outputs.admin_exists }}" == "true" ]; then
+          cd GroceryAdmin && ./gradlew detekt && cd ..
+        fi
+        if [ "${{ needs.check-projects.outputs.delivery_exists }}" == "true" ]; then
+          cd GroceryDelivery && ./gradlew detekt && cd ..
+        fi
+        echo "✅ All available apps passed detekt static analysis"
 
   build-customer-app:
     name: Build Customer App
     runs-on: ubuntu-latest
-    needs: code-quality
+    needs: [check-projects, code-quality]
+    if: needs.check-projects.outputs.customer_exists == 'true'
     timeout-minutes: 20
     
     steps:
@@ -101,7 +171,8 @@ jobs:
   build-admin-app:
     name: Build Admin App  
     runs-on: ubuntu-latest
-    needs: code-quality
+    needs: [check-projects, code-quality]
+    if: needs.check-projects.outputs.admin_exists == 'true'
     timeout-minutes: 20
     
     steps:
@@ -151,7 +222,8 @@ jobs:
   build-delivery-app:
     name: Build Delivery App
     runs-on: ubuntu-latest  
-    needs: code-quality
+    needs: [check-projects, code-quality]
+    if: needs.check-projects.outputs.delivery_exists == 'true'
     timeout-minutes: 20
     
     steps:
@@ -201,7 +273,8 @@ jobs:
   security-scan:
     name: Security & Dependency Scan
     runs-on: ubuntu-latest
-    needs: code-quality
+    needs: [check-projects, code-quality]
+    if: needs.check-projects.outputs.any_project_exists == 'true'
     timeout-minutes: 10
     
     steps:
@@ -215,18 +288,28 @@ jobs:
         distribution: 'temurin'
         cache: gradle
     
+    - name: Grant execute permission for gradlew
+      run: find . -name "gradlew" -exec chmod +x {} \;
+    
     - name: Run Dependency Vulnerability Scan
       run: |
         echo "🔒 Running dependency vulnerability scan..."
-        cd GroceryCustomer && ./gradlew dependencyCheckAnalyze || echo "⚠️ Customer app vulnerabilities found" && cd ..
-        cd GroceryAdmin && ./gradlew dependencyCheckAnalyze || echo "⚠️ Admin app vulnerabilities found" && cd ..
-        cd GroceryDelivery && ./gradlew dependencyCheckAnalyze || echo "⚠️ Delivery app vulnerabilities found" && cd ..
+        if [ "${{ needs.check-projects.outputs.customer_exists }}" == "true" ]; then
+          cd GroceryCustomer && ./gradlew dependencyCheckAnalyze || echo "⚠️ Customer app vulnerabilities found" && cd ..
+        fi
+        if [ "${{ needs.check-projects.outputs.admin_exists }}" == "true" ]; then
+          cd GroceryAdmin && ./gradlew dependencyCheckAnalyze || echo "⚠️ Admin app vulnerabilities found" && cd ..
+        fi
+        if [ "${{ needs.check-projects.outputs.delivery_exists }}" == "true" ]; then
+          cd GroceryDelivery && ./gradlew dependencyCheckAnalyze || echo "⚠️ Delivery app vulnerabilities found" && cd ..
+        fi
         echo "✅ Security scan completed"
 
   test-coverage:
     name: Test Coverage Report
     runs-on: ubuntu-latest
-    needs: [build-customer-app, build-admin-app, build-delivery-app]
+    needs: [check-projects, build-customer-app, build-admin-app, build-delivery-app]
+    if: always() && needs.check-projects.outputs.any_project_exists == 'true'
     timeout-minutes: 15
     
     steps:
@@ -240,12 +323,21 @@ jobs:
         distribution: 'temurin'
         cache: gradle
     
+    - name: Grant execute permission for gradlew
+      run: find . -name "gradlew" -exec chmod +x {} \;
+    
     - name: Generate Coverage Reports
       run: |
         echo "📊 Generating test coverage reports..."
-        cd GroceryCustomer && ./gradlew jacocoTestReport && cd ..
-        cd GroceryAdmin && ./gradlew jacocoTestReport && cd ..
-        cd GroceryDelivery && ./gradlew jacocoTestReport && cd ..
+        if [ "${{ needs.check-projects.outputs.customer_exists }}" == "true" ] && [ "${{ needs.build-customer-app.result }}" == "success" ]; then
+          cd GroceryCustomer && ./gradlew jacocoTestReport && cd ..
+        fi
+        if [ "${{ needs.check-projects.outputs.admin_exists }}" == "true" ] && [ "${{ needs.build-admin-app.result }}" == "success" ]; then
+          cd GroceryAdmin && ./gradlew jacocoTestReport && cd ..
+        fi
+        if [ "${{ needs.check-projects.outputs.delivery_exists }}" == "true" ] && [ "${{ needs.build-delivery-app.result }}" == "success" ]; then
+          cd GroceryDelivery && ./gradlew jacocoTestReport && cd ..
+        fi
         echo "✅ Coverage reports generated"
         
     - name: Upload Coverage Reports
@@ -260,7 +352,7 @@ jobs:
   build-summary:
     name: Build Summary
     runs-on: ubuntu-latest
-    needs: [build-customer-app, build-admin-app, build-delivery-app, security-scan, test-coverage]
+    needs: [check-projects, code-quality, build-customer-app, build-admin-app, build-delivery-app, security-scan, test-coverage]
     if: always()
     timeout-minutes: 5
     
@@ -269,29 +361,67 @@ jobs:
       run: |
         echo "📋 CI/CD Pipeline Summary"
         echo "========================="
-        echo "✅ Code Quality: ${{ needs.code-quality.result }}"
-        echo "📱 Customer App: ${{ needs.build-customer-app.result }}"
-        echo "👨‍💼 Admin App: ${{ needs.build-admin-app.result }}"
-        echo "🚚 Delivery App: ${{ needs.build-delivery-app.result }}"
-        echo "🔒 Security Scan: ${{ needs.security-scan.result }}"
-        echo "📊 Test Coverage: ${{ needs.test-coverage.result }}"
-        echo "========================="
+        echo "📦 Project Check: ${{ needs.check-projects.result }}"
         
-        if [[ "${{ needs.build-customer-app.result }}" == "success" && 
-              "${{ needs.build-admin-app.result }}" == "success" && 
-              "${{ needs.build-delivery-app.result }}" == "success" ]]; then
-          echo "🎉 All mobile apps built successfully!"
-          exit 0
+        if [ "${{ needs.check-projects.outputs.any_project_exists }}" == "true" ]; then
+          echo "✅ Code Quality: ${{ needs.code-quality.result }}"
+          
+          if [ "${{ needs.check-projects.outputs.customer_exists }}" == "true" ]; then
+            echo "📱 Customer App: ${{ needs.build-customer-app.result }}"
+          else
+            echo "📱 Customer App: skipped (not found)"
+          fi
+          
+          if [ "${{ needs.check-projects.outputs.admin_exists }}" == "true" ]; then
+            echo "👨‍💼 Admin App: ${{ needs.build-admin-app.result }}"
+          else
+            echo "👨‍💼 Admin App: skipped (not found)"
+          fi
+          
+          if [ "${{ needs.check-projects.outputs.delivery_exists }}" == "true" ]; then
+            echo "🚚 Delivery App: ${{ needs.build-delivery-app.result }}"
+          else
+            echo "🚚 Delivery App: skipped (not found)"
+          fi
+          
+          echo "🔒 Security Scan: ${{ needs.security-scan.result }}"
+          echo "📊 Test Coverage: ${{ needs.test-coverage.result }}"
+          echo "========================="
+          
+          # Check if all available builds succeeded
+          customer_success="true"
+          admin_success="true"
+          delivery_success="true"
+          
+          if [ "${{ needs.check-projects.outputs.customer_exists }}" == "true" ] && [ "${{ needs.build-customer-app.result }}" != "success" ]; then
+            customer_success="false"
+          fi
+          if [ "${{ needs.check-projects.outputs.admin_exists }}" == "true" ] && [ "${{ needs.build-admin-app.result }}" != "success" ]; then
+            admin_success="false"
+          fi
+          if [ "${{ needs.check-projects.outputs.delivery_exists }}" == "true" ] && [ "${{ needs.build-delivery-app.result }}" != "success" ]; then
+            delivery_success="false"
+          fi
+          
+          if [[ "$customer_success" == "true" && "$admin_success" == "true" && "$delivery_success" == "true" ]]; then
+            echo "🎉 All available mobile apps built successfully!"
+            exit 0
+          else
+            echo "❌ One or more available builds failed"
+            exit 1
+          fi
         else
-          echo "❌ One or more builds failed"
-          exit 1
+          echo "ℹ️ No Android projects found - CI/CD pipeline completed setup validation"
+          echo "This is expected during initial project setup phase."
+          echo "The pipeline will build and test apps once Android projects are added."
+          exit 0
         fi
 
   deploy-staging:
     name: Deploy to Staging
     runs-on: ubuntu-latest
-    needs: build-summary
-    if: success() && github.ref == 'refs/heads/develop'
+    needs: [check-projects, build-summary]
+    if: success() && github.ref == 'refs/heads/develop' && needs.check-projects.outputs.any_project_exists == 'true'
     timeout-minutes: 10
     environment: staging
     
@@ -312,8 +442,8 @@ jobs:
   deploy-production:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    needs: build-summary
-    if: success() && github.ref == 'refs/heads/main'
+    needs: [check-projects, build-summary]
+    if: success() && github.ref == 'refs/heads/main' && needs.check-projects.outputs.any_project_exists == 'true'
     timeout-minutes: 15
     environment: production
     
