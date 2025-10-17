@@ -651,3 +651,143 @@ E:\warp projects\kotlin mobile application\
 
 **Sprint 1 Timeline**: 4 days remaining for 54.5 hours of work
 **Recommended**: Continue parallel development approach
+
+---
+
+### **UPDATE: October 17, 2025, 06:45 UTC - DEV-002-T1 Planning**
+
+#### **🎯 NEXT ACTIVE TASK: DEV-002-T1**
+**Task**: Supabase Project Setup  
+**Estimated Duration**: 2 hours  
+**Ready to Start**: October 17, 2025, 06:45 UTC  
+**Expected Completion**: October 17, 2025, 08:45 UTC  
+**Dependencies**: None (can start immediately)  
+**Status**: Planning complete, ready to execute
+
+#### **📋 DEV-002-T1 Execution Breakdown**
+
+**Phase 1: Supabase Account & Project Creation (30 minutes)**
+- [ ] Navigate to supabase.com and create account
+- [ ] Create new project: "GroceryDeliverySystem"
+- [ ] Select optimal region for target users
+- [ ] Generate secure database password
+- [ ] Wait for project initialization (2-3 minutes)
+- [ ] Document project details
+
+**Phase 2: Project Configuration & Credentials (20 minutes)**
+- [ ] Navigate to Project Settings → API
+- [ ] Securely document Project URL and API keys:
+  - Project URL (e.g., https://xyz.supabase.co)
+  - Anon Key (public, for client-side)
+  - Service Role Key (secret, for server-side)
+- [ ] Configure project name and description
+- [ ] Review billing and usage limits
+
+**Phase 3: Database Access & Security Setup (40 minutes)**
+- [ ] Enable Row Level Security (RLS) globally
+- [ ] Configure user-based access patterns
+- [ ] Set up role-based permissions
+- [ ] Enable email confirmations
+- [ ] Configure password requirements
+- [ ] Set up rate limiting
+- [ ] Test authentication flows
+
+**Phase 4: Initial Database Schema Design (30 minutes)**
+- [ ] Create user_profiles table (extends auth.users)
+- [ ] Create product_categories table
+- [ ] Create basic products table
+- [ ] Set up table relationships and constraints
+- [ ] Apply appropriate indexes
+- [ ] Test table creation and basic queries
+
+**Phase 5: Authentication Configuration (20 minutes)**
+- [ ] Enable email/password authentication
+- [ ] Configure Google OAuth for future use
+- [ ] Customize email templates (confirmation, reset)
+- [ ] Set up RLS policies for user_profiles table
+- [ ] Test complete authentication flow
+- [ ] Verify security policies are working
+
+#### **📊 Expected Database Schema**
+```sql
+-- User profiles extending Supabase auth
+CREATE TABLE public.user_profiles (
+  id UUID REFERENCES auth.users(id) PRIMARY KEY,
+  email VARCHAR UNIQUE NOT NULL,
+  full_name VARCHAR(100),
+  phone_number VARCHAR(20),
+  user_type VARCHAR(20) CHECK (user_type IN ('customer', 'admin', 'delivery_person')),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  is_active BOOLEAN DEFAULT TRUE
+);
+
+-- Product categories with hierarchy support
+CREATE TABLE public.product_categories (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  description TEXT,
+  parent_category_id UUID REFERENCES product_categories(id),
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Basic products table
+CREATE TABLE public.products (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name VARCHAR(200) NOT NULL,
+  category_id UUID REFERENCES product_categories(id),
+  price DECIMAL(10,2) NOT NULL,
+  description TEXT,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+#### **🔒 Security Configuration**
+```sql
+-- Enable RLS globally
+ALTER DEFAULT PRIVILEGES REVOKE ALL ON TABLES FROM public;
+ALTER DEFAULT PRIVILEGES GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO authenticated;
+
+-- User profile policies
+CREATE POLICY "Users can view own profile" ON user_profiles
+  FOR SELECT USING (auth.uid() = id);
+
+CREATE POLICY "Users can update own profile" ON user_profiles
+  FOR UPDATE USING (auth.uid() = id);
+```
+
+#### **✅ Success Criteria for DEV-002-T1**
+- Supabase project created and accessible
+- Database schema deployed with 3 core tables
+- Authentication flow tested (sign up/login works)
+- Row Level Security policies active and verified
+- Project credentials documented securely
+- Ready for DEV-003 (Vercel API integration)
+
+#### **🔗 Integration Impact**
+- **DEV-003 (Vercel API)**: Will use Supabase client library and credentials
+- **DEV-004 (Mobile Apps)**: Will integrate Supabase Android SDK
+- **Authentication**: Foundation for all three mobile applications
+- **Database**: Core data layer for entire grocery system
+
+#### **📈 After DEV-002-T1 Completion**
+1. ✅ Mark DEV-002-T1 complete in Sprint tracking
+2. 📊 Update Sprint 1 progress to 36.6% complete
+3. 🔄 **Next Priority Options**:
+   - DEV-002-T2: Initial Database Schema Design (4 hours) - expand schema
+   - DEV-003-T1: Vercel Account and Project Setup (1.5 hours) - start API
+   - DEV-004-T1: Customer App Project Creation (3 hours) - parallel development
+4. 📝 Document any configuration issues or learnings
+5. 🔐 Securely store all Supabase credentials for team access
+
+#### **⚠️ Risk Mitigation**
+- **Account Creation Issues**: Have backup email ready
+- **Region Selection**: Choose closest to majority user base
+- **Free Tier Limits**: Monitor usage during development
+- **Security Policies**: Test thoroughly before production use
+- **Credential Management**: Use environment variables, never commit keys
+
+**Sprint 1 Status After DEV-002-T1**: 36.6% complete, backend foundation established, ready for API and mobile development phases.
