@@ -937,3 +937,123 @@ CREATE POLICY "Users can update own profile" ON user_profiles
 
 **Sprint Timeline Remaining**: 3.5 days for 51 hours of remaining work
 **Confidence Level**: HIGH - Backend foundation solid, team can accelerate development
+
+---
+
+### **UPDATE: October 17, 2025, 07:09 UTC - DEV-003-T1 Planning**
+
+#### **🎯 NEXT ACTIVE TASK: DEV-003-T1**
+**Task**: Vercel Account and Project Setup  
+**Estimated Duration**: 1.5 hours  
+**Ready to Start**: October 17, 2025, 07:09 UTC  
+**Expected Completion**: October 17, 2025, 08:39 UTC  
+**Dependencies**: DEV-002-T1 ✅ (Supabase backend ready)  
+**Status**: Planning complete, ready to execute
+
+#### **📋 DEV-003-T1 Execution Breakdown**
+
+**Phase 1: Vercel Account Setup & GitHub Integration (20 minutes)**
+- [ ] Navigate to vercel.com and create/access account
+- [ ] Sign up/login with GitHub account for seamless integration
+- [ ] Connect to GitHub repository: fiwidi7861djkux/kotlin-project
+- [ ] Grant necessary repository permissions for deployments
+- [ ] Verify GitHub integration is working
+- [ ] Set up team/organization if needed
+
+**Phase 2: Vercel Project Creation (15 minutes)**
+- [ ] Create new project from connected GitHub repository
+- [ ] Project Name: "grocery-delivery-api"
+- [ ] Framework: Next.js (for API routes)
+- [ ] Configure root directory for API structure
+- [ ] Set up build settings for serverless functions
+- [ ] Configure production/preview environments
+
+**Phase 3: Basic API Structure Setup (35 minutes)**
+- [ ] Create foundational API endpoint structure:
+  - /api/auth/ (login, register, verify)
+  - /api/products/ (categories, list, search)
+  - /api/users/ (profile, preferences)
+  - /api/health (health check endpoint)
+- [ ] Implement basic health check endpoint
+- [ ] Set up middleware for CORS configuration
+- [ ] Create authentication middleware template
+- [ ] Implement basic error handling structure
+- [ ] Test basic endpoint functionality
+
+**Phase 4: Supabase Integration Configuration (15 minutes)**
+- [ ] Configure Supabase connection in Vercel environment variables:
+  - SUPABASE_URL=https://sjujrmvfzzzfskknvgjx.supabase.co
+  - SUPABASE_ANON_KEY=[anon key]
+  - SUPABASE_SERVICE_ROLE_KEY=[service role key]
+- [ ] Install Supabase JavaScript client
+- [ ] Create connection helper functions
+- [ ] Configure authentication middleware
+- [ ] Test database connectivity from API
+
+**Phase 5: Deployment Testing & Validation (5 minutes)**
+- [ ] Commit API structure to GitHub
+- [ ] Trigger automatic Vercel deployment
+- [ ] Test health check endpoint: https://grocery-delivery-api.vercel.app/api/health
+- [ ] Verify environment variables are properly configured
+- [ ] Test Supabase connection from deployed API
+- [ ] Document deployment URLs and access patterns
+
+#### **🔗 Integration Architecture**
+```
+MOBILE APPS (Kotlin) ←→ VERCEL API (Next.js) ←→ SUPABASE (PostgreSQL)
+     ↓                        ↓                      ↓
+- Customer App          - /api/auth/*          - user_profiles
+- Admin App             - /api/products/*      - product_categories
+- Delivery App          - /api/users/*         - products
+                        - /api/health          - Authentication
+```
+
+#### **📊 Expected API Endpoints**
+```
+/api/
+├── health.js               # System health check
+├── auth/
+│   ├── login.js           # User authentication
+│   ├── register.js        # User registration  
+│   └── verify.js          # Email verification
+├── products/
+│   ├── categories.js      # Get product categories
+│   ├── list.js           # Get products list
+│   └── search.js         # Product search
+└── users/
+    ├── profile.js        # User profile management
+    └── preferences.js    # User preferences
+```
+
+#### **✅ Success Criteria for DEV-003-T1**
+- Vercel account created and GitHub repository connected
+- Project "grocery-delivery-api" deployed with basic API structure
+- Health check endpoint responding: GET /api/health
+- Supabase integration working from deployed API
+- Environment variables configured securely in Vercel
+- Automatic deployments functional from GitHub main branch
+- Ready for DEV-004 (mobile app integration)
+
+#### **🔗 Integration Impact**
+- **DEV-004 (Mobile Apps)**: API endpoints ready for mobile consumption
+- **DEV-002 (Supabase)**: Database accessible via secure API layer
+- **Authentication**: Centralized auth handling for all mobile apps
+- **Real-time**: Foundation for live updates and notifications
+
+#### **📈 After DEV-003-T1 Completion**
+1. ✅ Mark DEV-003-T1 complete in Sprint tracking
+2. 📊 Update Sprint 1 progress to 46.0% complete
+3. 🔄 **Next Priority Options**:
+   - DEV-003-T2: API Structure Planning (2 hours) - Design comprehensive endpoints
+   - DEV-004-T1: Customer App Project Creation (3 hours) - Start mobile development
+   - DEV-003-T3: Basic API Framework Setup (4 hours) - Implement full API structure
+4. 📝 Document API endpoints and deployment URLs
+5. 🔐 Ensure all environment variables are securely configured
+
+#### **⚠️ Prerequisites & Security**
+- **Required Access**: GitHub account, Vercel account (free tier)
+- **Supabase Credentials**: All keys available and documented
+- **Security**: Environment variables stored securely in Vercel
+- **Testing**: Health check and database connectivity verified
+
+**Sprint 1 Status After DEV-003-T1**: 46.0% complete, full-stack architecture established, mobile development ready to begin.

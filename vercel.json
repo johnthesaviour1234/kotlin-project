@@ -1,0 +1,27 @@
+{
+  "name": "grocery-delivery-api",
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/pages/**/*.js",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/pages/api/$1"
+    }
+  ],
+  "env": {
+    "SUPABASE_URL": "@supabase-url",
+    "SUPABASE_ANON_KEY": "@supabase-anon-key", 
+    "SUPABASE_SERVICE_ROLE_KEY": "@supabase-service-key"
+  },
+  "regions": ["sin1"],
+  "functions": {
+    "api/pages/**/*.js": {
+      "maxDuration": 10
+    }
+  }
+}
