@@ -107,24 +107,56 @@ export default async function handler(req, res) {
             const foundUser = userByEmail.users.find(user => user.email === validation.data.email)
             
             if (foundUser) {
-              // Create mock session data for development
-              const mockSession = {
-                access_token: 'dev-token-' + Date.now(),
-                refresh_token: 'dev-refresh-' + Date.now(),
-                expires_at: Math.floor(Date.now() / 1000) + 3600, // 1 hour from now
-                expires_in: 3600,
-                token_type: 'bearer'
+              // In development, use service role to get user profile directly
+              const { data: profile, error: profileError } = await supabase
+                .from('user_profiles')
+                .select('*')
+                .eq('id', foundUser.id)
+                .single()
+              
+              let userProfile = profile
+              if (profileError && profileError.code === 'PGRST116') {
+                // Create profile if it doesn't exist
+                const { data: newProfile, error: createError } = await supabase
+                  .from('user_profiles')
+                  .insert({
+                    id: foundUser.id,
+                    email: foundUser.email,
+                    full_name: foundUser.user_metadata?.full_name || null,
+                    user_type: 'customer',
+                    created_at: new Date().toISOString()
+                  })
+                  .select()
+                  .single()
+                
+                userProfile = createError ? {
+                  id: foundUser.id,
+                  email: foundUser.email,
+                  full_name: null,
+                  user_type: 'customer'
+                } : newProfile
               }
               
-              // Use the found user data
-              const devAuthData = {
-                user: foundUser,
-                session: mockSession
-              }
-              
-              console.log('Development bypass successful for user:', foundUser.email)
-              // Continue with normal flow using devAuthData instead of authData
-              return await handleSuccessfulAuth(res, devAuthData)
+              // Return success response directly for development
+              return res.status(200).json(formatSuccessResponse({
+                user: {
+                  id: foundUser.id,
+                  email: foundUser.email,
+                  email_confirmed: !!foundUser.email_confirmed_at,
+                  profile: sanitizeUser(userProfile)
+                },
+                tokens: {
+                  access_token: 'dev-token-' + Date.now(),
+                  refresh_token: 'dev-refresh-' + Date.now(),
+                  expires_at: Math.floor(Date.now() / 1000) + 3600,
+                  expires_in: 3600
+                },
+                session: {
+                  provider_token: null,
+                  provider_refresh_token: null,
+                  token_type: 'bearer'
+                }
+              }, 'Login successful (development bypass)'))
             }
           } catch (devError) {
             console.error('Development bypass failed:', devError)
