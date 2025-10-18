@@ -1,0 +1,38 @@
+{
+  "name": "grocery-delivery-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build --turbopack",
+    "start": "next start",
+    "lint": "eslint",
+    "test:auth": "node tests/run-auth-tests.js",
+    "test:auth:normal": "node tests/auth/login-normal.test.js",
+    "test:auth:bypass": "node tests/auth/login-bypass.test.js",
+    "test:auth:errors": "node tests/auth/login-errors.test.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.75.1",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "joi": "^18.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "next": "15.5.6",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.19",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.6",
+    "typescript": "^5"
+  }
+}
