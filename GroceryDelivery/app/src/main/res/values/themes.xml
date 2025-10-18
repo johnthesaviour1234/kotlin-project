@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme -->
-    <style name="Theme.GroceryCustomer" parent="Theme.Material3.DayNight">
+    <style name="Theme.GroceryDelivery" parent="Theme.Material3.DayNight">
         <!-- Primary brand color -->
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryVariant">@color/primary_variant</item>
@@ -26,13 +26,5 @@
         
         <!-- Window background -->
         <item name="android:windowBackground">@color/background</item>
-    </style>
-    
-    <!-- Splash screen theme -->
-    <style name="Theme.GroceryCustomer.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/primary</item>
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
-        <item name="windowSplashScreenAnimationDuration">300</item>
-        <item name="postSplashScreenTheme">@style/Theme.GroceryCustomer</item>
     </style>
 </resources>

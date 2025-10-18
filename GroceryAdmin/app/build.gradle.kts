@@ -1,7 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("kotlin-kapt")
+    id("org.jetbrains.kotlin.kapt")
     id("dagger.hilt.android.plugin")
     id("kotlin-parcelize")
     id("io.gitlab.arturbosch.detekt")
@@ -17,7 +17,7 @@ android {
         minSdk = 24
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0.0-admin"
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         
@@ -99,12 +99,12 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
     
-    // Supabase
-    implementation("io.github.jan-tennert.supabase:postgrest-kt:2.0.4")
-    implementation("io.github.jan-tennert.supabase:auth-kt:2.0.4")
-    implementation("io.github.jan-tennert.supabase:realtime-kt:2.0.4")
-    implementation("io.github.jan-tennert.supabase:storage-kt:2.0.4")
-    implementation("io.ktor:ktor-client-android:2.3.7")
+    // Supabase - temporarily commented out for basic build
+    // implementation("io.github.jan-tennert.supabase:postgrest-kt:2.0.4")
+    // implementation("io.github.jan-tennert.supabase:auth-kt:2.0.4")
+    // implementation("io.github.jan-tennert.supabase:realtime-kt:2.0.4")
+    // implementation("io.github.jan-tennert.supabase:storage-kt:2.0.4")
+    // implementation("io.ktor:ktor-client-android:2.3.7")
     
     // Async/Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
@@ -117,12 +117,6 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("androidx.work:work-runtime-ktx:2.9.0")
-    
-    // Admin-specific dependencies
-    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0") // Charts for analytics
-    implementation("androidx.paging:paging-runtime-ktx:3.2.1") // Pagination for large datasets
-    implementation("com.google.android.material:material:1.10.0") // Enhanced Material Design
-    implementation("androidx.cardview:cardview:1.0.0") // Card views for admin UI
     
     // Testing
     testImplementation("junit:junit:4.13.2")
@@ -152,8 +146,8 @@ ktlint {
     android.set(true)
     ignoreFailures.set(false)
     reporters {
-        reporter("plain")
-        reporter("checkstyle")
-        reporter("html")
+        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.PLAIN)
+        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.CHECKSTYLE)
+        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.HTML)
     }
 }

@@ -27,12 +27,4 @@
         <!-- Window background -->
         <item name="android:windowBackground">@color/background</item>
     </style>
-    
-    <!-- Splash screen theme -->
-    <style name="Theme.GroceryCustomer.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/primary</item>
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
-        <item name="windowSplashScreenAnimationDuration">300</item>
-        <item name="postSplashScreenTheme">@style/Theme.GroceryCustomer</item>
-    </style>
 </resources>
