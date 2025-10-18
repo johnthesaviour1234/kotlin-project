@@ -1,7 +1,7 @@
 import { supabaseClient, supabase, getAuthenticatedClient } from '../../../lib/supabase'
 import { validateLoginRequest, formatSuccessResponse, formatErrorResponse, sanitizeUser } from '../../../lib/validation'
 
-// Helper function to handle successful authentication
+// Helper function to handle successful authentication (deployed 2025-10-18)
 async function handleSuccessfulAuth(res, authData) {
   // Get user profile from user_profiles table using authenticated client
   const authenticatedClient = getAuthenticatedClient(authData.session.access_token)
