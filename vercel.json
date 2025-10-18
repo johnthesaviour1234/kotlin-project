@@ -1,9 +1,5 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "grocery-delivery-api/package.json",
-      "use": "@vercel/next"
-    }
-  ]
+  "buildCommand": "cd grocery-delivery-api && npm run build",
+  "outputDirectory": "grocery-delivery-api/.next",
+  "installCommand": "cd grocery-delivery-api && npm install"
 }
