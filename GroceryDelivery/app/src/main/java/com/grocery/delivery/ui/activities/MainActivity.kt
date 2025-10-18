@@ -5,8 +5,8 @@ import com.grocery.delivery.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
- * Main Activity - Entry point of the Delivery app.
- * This activity will handle navigation between delivery screens and map integration.
+ * Main Activity - Entry point of the Customer app.
+ * This activity will handle navigation between different screens.
  */
 @AndroidEntryPoint
 class MainActivity : BaseActivity<ActivityMainBinding>() {

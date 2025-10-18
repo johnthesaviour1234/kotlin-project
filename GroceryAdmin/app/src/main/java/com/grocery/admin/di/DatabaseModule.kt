@@ -2,9 +2,10 @@ package com.grocery.admin.di
 
 import android.content.Context
 import androidx.room.Room
-import com.grocery.admin.data.local.AppDatabase
-import com.grocery.admin.data.local.dao.ProductDao
-import com.grocery.admin.data.local.dao.UserProfileDao
+// Temporarily commented out until classes are created
+// import com.grocery.admin.data.local.AppDatabase
+// import com.grocery.admin.data.local.dao.ProductDao
+// import com.grocery.admin.data.local.dao.UserProfileDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,6 +17,8 @@ import javax.inject.Singleton
  * Hilt module for providing database-related dependencies.
  * Configures Room database and DAOs.
  */
+// Temporarily disabled until entities and DAOs are created
+/*
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
@@ -38,7 +41,6 @@ object DatabaseModule {
     }
 
     @Provides
-    fun provideProductDao(database: AppDatabase): ProductDao {
-        return database.productDao()
-    }
+    fun provideProductDao(database: AppDatabase): ProductDao = database.productDao()
 }
+*/

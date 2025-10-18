@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <!-- 
+    Data extraction rules for the Grocery Admin app (Android 12+).
+    Controls what data can be extracted during device transfer.
+    -->
+    
+    <cloud-backup>
+        <!-- Exclude sensitive authentication data from cloud backup -->
+        <exclude domain="sharedpref" path="auth_prefs.xml" />
+        <exclude domain="sharedpref" path="secure_prefs.xml" />
+        <!-- Exclude temporary and cache files -->
+        <exclude domain="file" path="temp/" />
+        <exclude domain="cache" />
+    </cloud-backup>
+    
+    <device-transfer>
+        <!-- Exclude sensitive data from device transfer -->
+        <exclude domain="sharedpref" path="auth_prefs.xml" />
+        <exclude domain="sharedpref" path="secure_prefs.xml" />
+        <!-- Exclude temporary and cache files -->
+        <exclude domain="file" path="temp/" />
+        <exclude domain="cache" />
+    </device-transfer>
+</data-extraction-rules>

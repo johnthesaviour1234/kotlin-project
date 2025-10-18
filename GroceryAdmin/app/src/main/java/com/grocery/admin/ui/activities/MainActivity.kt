@@ -5,8 +5,8 @@ import com.grocery.admin.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
- * Main Activity - Entry point of the Admin app.
- * This activity will handle navigation between different admin screens.
+ * Main Activity - Entry point of the Customer app.
+ * This activity will handle navigation between different screens.
  */
 @AndroidEntryPoint
 class MainActivity : BaseActivity<ActivityMainBinding>() {
@@ -30,6 +30,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     private fun setupWelcomeMessage() {
         // For now, just show a welcome message
         // This will be replaced with proper navigation setup
-        binding.textViewWelcome.text = "Welcome to Grocery Admin Dashboard!"
+        binding.textViewWelcome.text = "Welcome to Grocery Admin App!"
     }
 }
