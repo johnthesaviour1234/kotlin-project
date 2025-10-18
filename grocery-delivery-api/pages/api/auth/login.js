@@ -1,10 +1,11 @@
-import { supabaseClient, supabase } from '../../../lib/supabase'
+import { supabaseClient, supabase, getAuthenticatedClient } from '../../../lib/supabase'
 import { validateLoginRequest, formatSuccessResponse, formatErrorResponse, sanitizeUser } from '../../../lib/validation'
 
 // Helper function to handle successful authentication
 async function handleSuccessfulAuth(res, authData) {
-  // Get user profile from user_profiles table
-  const { data: profile, error: profileError } = await supabaseClient
+  // Get user profile from user_profiles table using authenticated client
+  const authenticatedClient = getAuthenticatedClient(authData.session.access_token)
+  const { data: profile, error: profileError } = await authenticatedClient
     .from('user_profiles')
     .select('*')
     .eq('id', authData.user.id)
@@ -13,7 +14,7 @@ async function handleSuccessfulAuth(res, authData) {
   // If profile doesn't exist, create a basic one
   let userProfile = profile
   if (profileError && profileError.code === 'PGRST116') { // Row not found
-    const { data: newProfile, error: createError } = await supabaseClient
+    const { data: newProfile, error: createError } = await authenticatedClient
       .from('user_profiles')
       .insert({
         id: authData.user.id,
