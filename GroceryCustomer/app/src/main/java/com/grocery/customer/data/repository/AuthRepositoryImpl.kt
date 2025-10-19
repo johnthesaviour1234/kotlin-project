@@ -68,7 +68,10 @@ class AuthRepositoryImpl @Inject constructor(
                 val body = response.body()
                 if (body?.success == true && body.data != null) {
                     // Save tokens if present
-                    body.data.tokens?.let { tokenStore.saveTokens(it.accessToken, it.refreshToken, it.expiresAt) }
+                    val tokens = body.data.tokens
+                    if (tokens != null) {
+                        tokenStore.saveTokens(tokens.accessToken, tokens.refreshToken, tokens.expiresAt)
+                    }
                     Result.success(body.data)
                 } else {
                     Result.failure(Exception(body?.error ?: body?.message ?: "Registration failed"))

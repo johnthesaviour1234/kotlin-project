@@ -22,10 +22,10 @@ interface ApiService {
 
     // Authentication endpoints
     @POST("auth/login")
-    suspend fun login(@Body request: LoginRequest): Response<ApiResponse<LoginData>>
+    suspend fun login(@Body request: LoginRequest): Response<ApiResponse<LoginResponse>>
 
     @POST("auth/register")
-    suspend fun register(@Body request: RegisterRequest): Response<ApiResponse<RegisterData>>
+    suspend fun register(@Body request: RegisterRequest): Response<ApiResponse<RegisterResponse>>
 
     @POST("auth/verify")
     suspend fun verifyEmail(@Body request: VerifyEmailRequest): Response<ApiResponse<VerifyEmailResponse>>

@@ -7,8 +7,8 @@ import com.grocery.customer.data.remote.dto.RegisterResponse
 import com.grocery.customer.domain.usecase.LoginUseCase
 import com.grocery.customer.domain.usecase.LogoutUseCase
 import com.grocery.customer.domain.usecase.RegisterUseCase
-import com.grocery.customer.domain.usecase.LogoutUseCase
 import com.grocery.customer.domain.usecase.ResendVerificationUseCase
+import com.grocery.customer.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
@@ -36,8 +36,8 @@ class AuthViewModel @Inject constructor(
     private val _navigateTo = MutableStateFlow<Destination?>(null)
     val navigateTo: StateFlow<Destination?> = _navigateTo.asStateFlow()
 
-    private val _resendState = MutableStateFlow<Resource<Unit>?>(null)
-    val resendState: StateFlow<Resource<Unit>?> = _resendState.asStateFlow()
+    private val _resendState = MutableStateFlow<Resource<Unit>>(Resource.Success(Unit))
+    val resendState: StateFlow<Resource<Unit>> = _resendState.asStateFlow()
 
     fun checkAuth() {
         viewModelScope.launch(Dispatchers.IO) {
