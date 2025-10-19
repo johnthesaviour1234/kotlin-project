@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- 
+    Backup rules for the Grocery Admin app.
+    By default, all app data is backed up except for sensitive data.
+    -->
+    
+    <!-- Exclude sensitive authentication data -->
+    <exclude domain="sharedpref" path="auth_prefs.xml" />
+    <exclude domain="sharedpref" path="secure_prefs.xml" />
+    
+    <!-- Exclude temporary files -->
+    <exclude domain="file" path="temp/" />
+    <exclude domain="cache" />
+</full-backup-content>

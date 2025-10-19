@@ -1,7 +1,7 @@
 # Git Workflow - Grocery Delivery System
 
-**Document Version**: 1.0  
-**Last Updated**: October 17, 2025, 12:28 UTC  
+**Document Version**: 2.0  
+**Last Updated**: October 18, 2025, 12:45 UTC  
 **Author**: Development Team  
 **Repository**: https://github.com/johnthesaviour1234/kotlin-project
 
@@ -9,7 +9,7 @@
 
 ## 🌟 Overview
 
-This document outlines the Git workflow and branching strategy for the Grocery Delivery System project with three mobile applications (Customer, Admin, Delivery) and supporting infrastructure.
+This document outlines the complete Git workflow and branching strategy for the Grocery Delivery System project. Our GitFlow implementation integrates seamlessly with Vercel deployments and supports professional team development across three mobile applications (Customer, Admin, Delivery) and supporting backend infrastructure.
 
 ## 🌿 GitFlow Branching Strategy
 
@@ -57,15 +57,36 @@ This document outlines the Git workflow and branching strategy for the Grocery D
 - **Purpose**: Release preparation and final testing
 - **Content**: Version bumps, documentation, final bug fixes
 
+### **🚀 VERCEL DEPLOYMENT INTEGRATION**
+
+**Automatic Deployment Strategy:**
+Our GitFlow branches are directly integrated with Vercel for automatic deployments:
+
+- **`main` Branch**: → **Production Environment** (Live production URL)
+- **`develop` Branch**: → **Staging Environment** (Staging URL for integration testing)
+- **`feature/*` Branches**: → **Preview Deployments** (Unique URLs for feature testing)
+- **`release/*` Branches**: → **Release Preview** (Pre-production testing)
+- **`hotfix/*` Branches**: → **Hotfix Preview** (Emergency fix testing)
+
 ### **Multi-App Workflow Considerations**
 
-Since we have three mobile applications, feature branches should indicate the target app:
+Since we have three mobile applications plus backend services, feature branches should indicate the target component:
 
+**Backend/API Features:**
+- `feature/backend/api-deployment`
+- `feature/backend/api-health`
+- `feature/backend/authentication`
+- `feature/backend/product-catalog`
+
+**Mobile App Features:**
 - `feature/customer-app/authentication`
 - `feature/admin-app/product-management`
 - `feature/delivery-app/gps-navigation`
-- `feature/backend/api-enhancement`
+
+**Shared/Infrastructure Features:**
 - `feature/shared/documentation-update`
+- `feature/infrastructure/ci-cd-setup`
+- `feature/infrastructure/monitoring`
 
 ---
 
@@ -199,6 +220,185 @@ update
 # 1. Switch to develop and pull latest changes
 git checkout develop
 git pull origin develop
+
+# 2. Create feature branch with descriptive name
+git checkout -b feature/[category]/[description]
+# Examples:
+# git checkout -b feature/backend/api-health
+# git checkout -b feature/customer-app/authentication
+
+# 3. Work on feature with regular commits
+git add .
+git commit -m "feat(category): implement feature description"
+
+# 4. Push feature branch to remote
+git push -u origin feature/[category]/[description]
+
+# 5. Create Pull Request on GitHub
+# - Target: develop branch
+# - Fill out PR template
+# - Request reviewers
+# - Wait for approval and checks to pass
+
+# 6. After merge, cleanup
+git checkout develop
+git pull origin develop
+git branch -d feature/[category]/[description]
+```
+
+### **Release Preparation**
+
+```bash
+# 1. Create release branch from develop
+git checkout develop
+git pull origin develop
+git checkout -b release/v1.0.0
+
+# 2. Update version numbers and documentation
+# 3. Final testing and bug fixes
+# 4. Create PR to main for production
+# 5. After production deployment, merge back to develop
+```
+
+### **Hotfix Process**
+
+```bash
+# 1. Create hotfix branch from main
+git checkout main
+git pull origin main
+git checkout -b hotfix/critical-issue-description
+
+# 2. Implement minimal fix
+# 3. Create PR to main for immediate deployment
+# 4. Merge fix back to develop to prevent regression
+git checkout develop
+git pull origin develop
+git merge hotfix/critical-issue-description
+git push origin develop
+```
+
+---
+
+## 📊 CURRENT PROJECT STATUS & ACTIVE BRANCHES
+
+### **🌿 Live Branch Structure**
+
+**As of October 18, 2025:**
+
+**Main Branches:**
+- **`main`**: Production environment, protected, healthy deployments
+- **`develop`**: Staging environment, integration testing branch
+
+**Active Feature Branches:**
+- **`feature/backend/api-deployment`**: API infrastructure and deployment configuration
+- **`feature/backend/api-health`**: Health endpoint enhancements and monitoring
+- **`feature/customer-app-foundation`**: Customer mobile app foundation
+- **`feature/vercel-account-setup`**: Vercel deployment pipeline setup
+
+**Release & Maintenance Branches:**
+- **`release/v1.0.0`**: Release preparation branch for version 1.0
+- **`hotfix/critical-fix`**: Hotfix procedures and emergency fix template
+
+### **🚀 Deployment Status**
+
+**Vercel Integration Active:**
+- **Production**: `main` branch → Live production URL
+- **Staging**: `develop` branch → Staging environment
+- **Preview**: All feature branches → Individual preview URLs
+- **Health Check**: ✅ API endpoints responding correctly
+- **Environment Variables**: ✅ Configured and secured
+
+### **📋 Branch Targeting Rules**
+
+**✅ CORRECT Pull Request Targeting:**
+```
+feature/backend/api-health     → develop   (✓)
+feature/customer-app/*         → develop   (✓)
+release/v1.0.0                → main      (✓)
+hotfix/critical-fix           → main      (✓)
+```
+
+**❌ INCORRECT Targeting (Avoid):**
+```
+feature/* → main              (✗ Never merge features directly to main)
+hotfix/*  → develop only      (✗ Must merge to main first for immediate fix)
+release/* → develop only      (✗ Must merge to main for production)
+```
+
+---
+
+## 🛡️ BRANCH PROTECTION & SECURITY
+
+### **Production Protection (`main` branch)**
+- ✅ Require pull request reviews (minimum 2 reviewers)
+- ✅ Dismiss stale reviews when new commits pushed
+- ✅ Require status checks before merging
+- ✅ Require branches to be up to date
+- ✅ Include administrators in protection rules
+- ❌ No force pushes allowed
+- ❌ No branch deletion allowed
+
+### **Integration Protection (`develop` branch)**
+- ✅ Require pull request reviews (minimum 1 reviewer)
+- ✅ Require status checks before merging
+- ✅ Require branches to be up to date
+- ❌ No force pushes allowed
+
+### **Required Status Checks**
+- Build success (compilation passes)
+- Code quality (ktlint, detekt)
+- Security scanning
+- Integration tests
+- Vercel deployment success
+
+---
+
+## 🔄 TEAM WORKFLOW EXAMPLES
+
+### **Example 1: Adding API Health Monitoring**
+```bash
+# 1. Start from develop
+git checkout develop
+git pull origin develop
+
+# 2. Create feature branch
+git checkout -b feature/backend/api-health-monitoring
+
+# 3. Implement feature
+# ... code changes ...
+git add .
+git commit -m "feat(backend): add comprehensive health monitoring with system metrics"
+
+# 4. Push and create PR
+git push -u origin feature/backend/api-health-monitoring
+# Create PR on GitHub targeting 'develop'
+
+# 5. After review and approval, PR merged to develop
+# 6. develop branch automatically deploys to staging
+# 7. Feature branch automatically deleted
+```
+
+### **Example 2: Preparing Production Release**
+```bash
+# 1. Create release branch from develop
+git checkout develop
+git pull origin develop
+git checkout -b release/v1.1.0
+
+# 2. Version updates and final testing
+# ... update version numbers, documentation ...
+git add .
+git commit -m "chore(release): bump version to 1.1.0"
+
+# 3. Create PR to main for production
+git push -u origin release/v1.1.0
+# Create PR on GitHub targeting 'main'
+
+# 4. After production deployment, merge back to develop
+git checkout develop
+git pull origin develop
+git merge release/v1.1.0
+git push origin develop
 
 # 2. Create feature branch
 git checkout -b feature/customer-app/shopping-cart

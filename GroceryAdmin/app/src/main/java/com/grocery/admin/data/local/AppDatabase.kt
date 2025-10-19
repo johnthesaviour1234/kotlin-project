@@ -2,15 +2,18 @@ package com.grocery.admin.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.grocery.admin.data.local.dao.ProductDao
-import com.grocery.admin.data.local.dao.UserProfileDao
-import com.grocery.admin.data.local.entity.ProductEntity
-import com.grocery.admin.data.local.entity.UserProfileEntity
+// Temporarily commented out until DAOs and entities are created
+// import com.grocery.admin.data.local.dao.ProductDao
+// import com.grocery.admin.data.local.dao.UserProfileDao
+// import com.grocery.admin.data.local.entity.ProductEntity
+// import com.grocery.admin.data.local.entity.UserProfileEntity
 
 /**
  * Room database for local data storage.
  * Provides offline-first functionality with automatic synchronization.
  */
+// Temporarily commented out until entities and DAOs are created
+/*
 @Database(
     entities = [
         UserProfileEntity::class,
@@ -25,3 +28,4 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun productDao(): ProductDao
 }
+*/

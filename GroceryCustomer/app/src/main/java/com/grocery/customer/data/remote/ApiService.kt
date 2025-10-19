@@ -12,7 +12,7 @@ import retrofit2.http.Query
 
 /**
  * Retrofit API service interface for communicating with the Vercel backend.
- * Defines all API endpoints used by the Customer app.
+ * Defines all authentication API endpoints used by the Customer app.
  */
 interface ApiService {
 
@@ -26,6 +26,21 @@ interface ApiService {
 
     @POST("auth/register")
     suspend fun register(@Body request: RegisterRequest): Response<ApiResponse<RegisterData>>
+
+    @POST("auth/verify")
+    suspend fun verifyEmail(@Body request: VerifyEmailRequest): Response<ApiResponse<VerifyEmailResponse>>
+
+    @POST("auth/forgot-password")
+    suspend fun forgotPassword(@Body request: ForgotPasswordRequest): Response<ApiResponse<Unit>>
+
+    @POST("auth/reset-password")
+    suspend fun resetPassword(@Body request: ResetPasswordRequest): Response<ApiResponse<Unit>>
+
+    @PUT("auth/change-password")
+    suspend fun changePassword(@Body request: ChangePasswordRequest): Response<ApiResponse<Unit>>
+
+    @POST("auth/resend-verification")
+    suspend fun resendVerification(@Body request: ResendVerificationRequest): Response<ApiResponse<Unit>>
 
     // Product endpoints
     @GET("products/categories")

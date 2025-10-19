@@ -1,9 +1,10 @@
 # Team Development Guidelines - Online Grocery System
 
-**Version**: 1.0  
-**Created**: October 17, 2025  
+**Version**: 2.0  
+**Last Updated**: October 18, 2025, 12:45 UTC  
 **Team Size**: 6-8 developers  
-**Project**: Three Android mobile applications (Customer, Admin, Delivery)
+**Project**: Three Android mobile applications (Customer, Admin, Delivery)  
+**Deployment**: Vercel API + Supabase Backend with GitFlow Integration
 
 ---
 
@@ -15,46 +16,53 @@ This document establishes team workflows, development practices, and collaborati
 
 ## 🌿 **Git Workflow & Version Control**
 
-### **Branching Strategy (GitFlow)**
+### **GitFlow Branching Strategy (Integrated with Vercel Deployments)**
 
 ```
-main
-├── develop
-│   ├── feature/customer-product-catalog
-│   ├── feature/admin-dashboard  
-│   ├── feature/delivery-tracking
-│   └── feature/payment-integration
-├── release/v1.0.0
-│   └── bugfix/payment-error-handling
-└── hotfix/critical-auth-fix
+main (Production)              ← Vercel Production Deployment
+├── develop (Staging)          ← Vercel Staging Deployment  
+│   ├── feature/backend/api-health     ← Vercel Preview URL
+│   ├── feature/customer-app/*         ← Vercel Preview URL
+│   ├── feature/admin-app/*            ← Vercel Preview URL
+│   └── feature/delivery-app/*         ← Vercel Preview URL
+├── release/v1.0.0             ← Vercel Release Preview
+└── hotfix/critical-fix        ← Vercel Hotfix Preview
 ```
 
-#### **Branch Types:**
-- **`main`**: Production-ready code, protected branch
-- **`develop`**: Integration branch for ongoing development  
-- **`feature/*`**: New features and enhancements
-- **`release/*`**: Release preparation and stabilization
-- **`hotfix/*`**: Critical fixes for production issues
-- **`bugfix/*`**: Non-critical bug fixes
+#### **Branch Types & Deployment Integration:**
+- **`main`**: Production-ready code, protected branch → **Live Production URL**
+- **`develop`**: Integration branch for ongoing development → **Staging Environment**  
+- **`feature/*`**: New features and enhancements → **Preview Deployments**
+- **`release/*`**: Release preparation and stabilization → **Release Preview**
+- **`hotfix/*`**: Critical fixes for production issues → **Emergency Preview**
 
-#### **Branch Naming Convention:**
+#### **Branch Naming Convention (Established & Active):**
 ```bash
-# Features
-feature/customer-login-screen
-feature/admin-inventory-management  
-feature/delivery-route-optimization
+# Backend/API Features
+feature/backend/api-deployment
+feature/backend/api-health
+feature/backend/authentication
+feature/backend/product-catalog
 
-# Bug fixes
-bugfix/cart-total-calculation
-bugfix/notification-delivery-issue
+# Mobile App Features  
+feature/customer-app/authentication
+feature/customer-app/product-catalog
+feature/admin-app/dashboard
+feature/admin-app/inventory-management
+feature/delivery-app/gps-tracking
+feature/delivery-app/route-optimization
 
-# Hotfixes  
-hotfix/security-vulnerability-fix
-hotfix/payment-gateway-timeout
+# Infrastructure Features
+feature/infrastructure/ci-cd-setup
+feature/shared/documentation-update
 
-# Releases
+# Release Branches
 release/v1.0.0
-release/v1.1.0-beta
+release/v1.1.0
+
+# Hotfix Branches
+hotfix/critical-auth-fix
+hotfix/api-timeout-fix
 ```
 
 ### **Commit Message Standards**
@@ -142,11 +150,14 @@ Include screenshots for UI changes.
 Closes #(issue number)
 ```
 
-#### **Review Requirements:**
-- **Minimum reviewers**: 2 team members
-- **Required approvals**: 1 from senior developer or team lead
-- **Automated checks must pass**: Ktlint, Detekt, unit tests
-- **No merge without approval**: Enforced by branch protection
+#### **Review Requirements (Branch Protection Enforced):**
+- **For `develop` merges**: Minimum 1 reviewer required
+- **For `main` merges**: Minimum 2 reviewers required (production safety)
+- **Required approvals**: 1 from senior developer or team lead  
+- **Automated checks must pass**: Ktlint, Detekt, unit tests, Vercel deployment
+- **Status checks required**: Build success, code quality, security scan
+- **No merge without approval**: Enforced by GitHub branch protection rules
+- **Automatic branch deletion**: Feature branches deleted after successful merge
 
 #### **Review Checklist:**
 - [ ] Code follows established patterns and standards

@@ -16,6 +16,8 @@ import javax.inject.Singleton
  * Hilt module for providing database-related dependencies.
  * Configures Room database and DAOs.
  */
+// Temporarily disabled until entities and DAOs are created
+/*
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
@@ -44,3 +46,4 @@ object DatabaseModule {
     //     return database.productDao()
     // }
 }
+*/
