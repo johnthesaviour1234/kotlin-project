@@ -24,7 +24,7 @@
         tools:targetApi="31">
 
         <activity
-            android:name=".ui.activities.MainActivity"
+            android:name=".ui.activities.SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.GroceryCustomer">
             <intent-filter>
@@ -32,6 +32,26 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".ui.activities.LoginActivity"
+            android:exported="false"
+            android:theme="@style/Theme.GroceryCustomer" />
+
+        <activity
+            android:name=".ui.activities.RegisterActivity"
+            android:exported="false"
+            android:theme="@style/Theme.GroceryCustomer" />
+
+        <activity
+            android:name=".ui.activities.ForgotPasswordActivity"
+            android:exported="false"
+            android:theme="@style/Theme.GroceryCustomer" />
+
+        <activity
+            android:name=".ui.activities.MainActivity"
+            android:exported="false"
+            android:theme="@style/Theme.GroceryCustomer" />
 
     </application>
 
