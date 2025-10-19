@@ -1,12 +1,15 @@
 package com.grocery.customer.ui.activities
 
 import android.os.Bundle
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupWithNavController
+import com.grocery.customer.R
 import com.grocery.customer.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
  * Main Activity - Entry point of the Customer app.
- * This activity will handle navigation between different screens.
+ * Handles navigation between Home, Categories, Cart, and Profile screens.
  */
 @AndroidEntryPoint
 class MainActivity : BaseActivity<ActivityMainBinding>() {
@@ -16,20 +19,20 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     }
 
     override fun setupUI() {
-        // Set up navigation, toolbar, bottom navigation, etc.
-        // This will be expanded when we add navigation components
-        
-        setupWelcomeMessage()
+        setupNavigation()
     }
 
     override fun setupObservers() {
-        // Set up observers for ViewModels
-        // This will be expanded when we add ViewModels
+        // TODO: Set up observers for ViewModels when needed
     }
 
-    private fun setupWelcomeMessage() {
-        // For now, just show a welcome message
-        // This will be replaced with proper navigation setup
-        binding.textViewWelcome.text = "Welcome to Grocery Customer App!"
+    private fun setupNavigation() {
+        // Get the NavHostFragment and NavController
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        val navController = navHostFragment.navController
+        
+        // Setup bottom navigation with NavController
+        binding.bottomNavigation.setupWithNavController(navController)
     }
 }

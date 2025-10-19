@@ -1,16 +1,14 @@
 package com.grocery.customer.data.remote
 
-import com.grocery.customer.data.remote.dto.HealthCheckResponse
-import com.grocery.customer.data.remote.dto.LoginRequest
-import com.grocery.customer.data.remote.dto.LoginResponse
-import com.grocery.customer.data.remote.dto.ProductCategoryResponse
-import com.grocery.customer.data.remote.dto.ProductResponse
-import com.grocery.customer.data.remote.dto.RegisterRequest
-import com.grocery.customer.data.remote.dto.RegisterResponse
+import com.grocery.customer.data.remote.dto.*
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.PUT
+import retrofit2.http.Path
+import retrofit2.http.Query
 
 /**
  * Retrofit API service interface for communicating with the Vercel backend.
@@ -20,23 +18,38 @@ interface ApiService {
 
     // Health check endpoint
     @GET("health")
-    suspend fun getHealthCheck(): Response<HealthCheckResponse>
+    suspend fun getHealthCheck(): Response<ApiResponse<HealthData>>
 
     // Authentication endpoints
     @POST("auth/login")
-    suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
+    suspend fun login(@Body request: LoginRequest): Response<ApiResponse<LoginData>>
 
     @POST("auth/register")
-    suspend fun register(@Body request: RegisterRequest): Response<RegisterResponse>
+    suspend fun register(@Body request: RegisterRequest): Response<ApiResponse<RegisterData>>
 
     // Product endpoints
     @GET("products/categories")
-    suspend fun getProductCategories(): Response<List<ProductCategoryResponse>>
+    suspend fun getProductCategories(): Response<ApiResponse<CategoriesPayload>>
 
     @GET("products/list")
-    suspend fun getProducts(): Response<List<ProductResponse>>
+    suspend fun getProducts(
+        @Query("featured") featured: Boolean? = null,
+        @Query("category") category: String? = null,
+        @Query("q") query: String? = null,
+        @Query("page") page: Int? = null,
+        @Query("limit") limit: Int? = null
+    ): Response<ApiResponse<ProductsListPayload>>
 
-    // User endpoints (future implementation)
-    // @GET("users/profile")
-    // suspend fun getUserProfile(): Response<UserProfileResponse>
+    @GET("products/{id}")
+    suspend fun getProductDetail(@Path("id") id: String): Response<ApiResponse<ProductDetail>>
+
+    // User endpoints
+    @GET("users/profile")
+    suspend fun getUserProfile(@Header("Authorization") bearerToken: String): Response<ApiResponse<UserProfile>>
+
+    @PUT("users/profile")
+    suspend fun updateUserProfile(
+        @Header("Authorization") bearerToken: String,
+        @Body request: ProfileUpdateRequest
+    ): Response<ApiResponse<UserProfile>>
 }

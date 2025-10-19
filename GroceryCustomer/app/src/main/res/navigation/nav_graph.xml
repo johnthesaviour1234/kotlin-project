@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.grocery.customer.ui.fragments.HomeFragment"
+        android:label="Home"
+        tools:layout="@layout/fragment_home" >
+        
+        <action
+            android:id="@+id/action_home_to_product_detail"
+            app:destination="@id/productDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/categoriesFragment"
+        android:name="com.grocery.customer.ui.fragments.CategoriesFragment"
+        android:label="Categories"
+        tools:layout="@layout/fragment_categories" >
+        
+        <action
+            android:id="@+id/action_categories_to_products"
+            app:destination="@id/productListFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/cartFragment"
+        android:name="com.grocery.customer.ui.fragments.CartFragment"
+        android:label="Cart"
+        tools:layout="@layout/fragment_cart" />
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.grocery.customer.ui.fragments.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile" />
+
+    <!-- Additional screens -->
+    <fragment
+        android:id="@+id/productListFragment"
+        android:name="com.grocery.customer.ui.fragments.ProductListFragment"
+        android:label="Products"
+        tools:layout="@layout/fragment_product_list" >
+        
+        <argument
+            android:name="categoryId"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="categoryName"
+            app:argType="string"
+            app:nullable="true" />
+            
+        <action
+            android:id="@+id/action_product_list_to_detail"
+            app:destination="@id/productDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/productDetailFragment"
+        android:name="com.grocery.customer.ui.fragments.ProductDetailFragment"
+        android:label="Product Details"
+        tools:layout="@layout/fragment_product_detail" >
+        
+        <argument
+            android:name="productId"
+            app:argType="string" />
+    </fragment>
+
+</navigation>

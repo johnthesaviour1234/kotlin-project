@@ -33,6 +33,13 @@
     <string name="quantity">Quantity</string>
     <string name="price">Price</string>
     
+    <!-- Home screen -->
+    <string name="home_title">Fresh Groceries</string>
+    <string name="welcome_message">Welcome to your grocery store</string>
+    <string name="browse_fresh_products">Browse fresh products</string>
+    <string name="featured_products">Featured Products</string>
+    <string name="no_products_found">No products found</string>
+    
     <!-- Content descriptions for accessibility -->
     <string name="cd_product_image">Product image</string>
     <string name="cd_user_avatar">User avatar</string>
