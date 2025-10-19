@@ -6539,3 +6539,172 @@ BUILD PIPELINE STATUS
 **Strategic Impact**: Complete grocery delivery ecosystem development maximizing business value and competitive advantage
 
 ---
+
+---
+
+## ? Authentication System Fix - October 18, 2025 (Summary)
+
+- Root cause: Supabase RLS policy caused infinite recursion on table public.user_profiles (error 42P17).
+- Fix applied: Dropped recursive admin policy and added safe policy:
+
+`sql
+DROP POLICY IF EXISTS "Admins can view all profiles" ON public.user_profiles;
+CREATE POLICY "Users can view own profile only" ON public.user_profiles
+  FOR SELECT TO authenticated
+  USING (auth.uid() = id);
+`
+
+- Backend: Login endpoint updated to use authenticated Supabase client for profile queries, avoiding RLS blocks.
+- Result: Login and profile fetch working end-to-end; mobile app shows "Login Successful".
+- Verified with test user: testuser.1760826150808@grocery.com (status 200; profile returned; tokens issued).
+- Impact: Unblocks Customer/Admin/Delivery app development; secure and performant RLS configuration in place.
+
+### Next actions
+- Implement role-based admin access via secure mechanism (e.g., dedicated role table or JWT claim) without self-joins on user_profiles.
+- Expand API endpoints (products, orders) and keep RLS simple and non-recursive.
+
+---
+
+## 🔐 Authentication Implementation Plan — GroceryCustomer App
+
+### Current State Analysis
+- ✅ Backend Infrastructure: Authentication APIs are live at https://kotlin-project.vercel.app/api/
+- ✅ Mobile Foundation: GroceryCustomer app with Clean Architecture, Hilt DI, Retrofit setup
+- ✅ Database Fix: RLS infinite recursion resolved, login endpoint working
+- ⚠️ Missing Components: No authentication UI, DTOs, repositories, or ViewModels yet
+
+### Implementation Strategy
+
+#### Phase 1: Data Transfer Objects (DTOs) - 30 minutes
+Create complete request/response models for all auth endpoints.
+
+Auth DTOs to Create:
+- Request DTOs:
+  - LoginRequest (email, password)
+  - RegisterRequest (email, password, full_name, phone, user_type)
+  - ForgotPasswordRequest (email)
+  - ResetPasswordRequest (token, new_password)
+  - ChangePasswordRequest (current_password, new_password)
+- Response DTOs:
+  - LoginResponse (user, tokens, session)
+  - RegisterResponse (user, registration status)
+  - UserProfile (id, email, full_name, user_type, etc.)
+  - AuthTokens (access_token, refresh_token, expires_at, expires_in)
+
+#### Phase 2: Repository & Use Cases - 45 minutes
+Implement Clean Architecture data layer.
+
+AuthRepository Interface:
+- login(email, password): Result<LoginResponse>
+- register(userData): Result<RegisterResponse>
+- logout(): Result<Unit>
+- refreshToken(): Result<AuthTokens>
+- getCurrentUser(): Result<UserProfile>
+
+Use Cases:
+- LoginUseCase
+- RegisterUseCase
+- LogoutUseCase
+- GetCurrentUserUseCase
+
+#### Phase 3: Authentication UI Screens - 60 minutes
+Create complete authentication flow.
+
+Screens to Build:
+1. SplashActivity - Check auth state, route to login or main
+2. LoginActivity - Email/password login form
+3. RegisterActivity - User registration form
+4. ForgotPasswordActivity - Password reset flow
+
+Key Features:
+- Input validation with real-time feedback
+- Loading states with progress indicators
+- Error handling with user-friendly messages
+- Success states with smooth navigation
+- Auto-login on successful registration
+
+#### Phase 4: State Management & Navigation - 30 minutes
+Implement authentication state management.
+
+AuthViewModel:
+- Login state management
+- User session handling
+- Token refresh logic
+- Navigation events
+
+Shared Preferences/DataStore:
+- Store auth tokens securely
+- Remember login state
+- User preferences
+
+#### Phase 5: Integration & Testing - 15 minutes
+Connect everything together.
+
+- Update ApiService with all auth endpoints
+- Test complete auth flow end-to-end
+- Verify token refresh mechanism
+- Test error scenarios
+
+### Backend API Endpoints We'll Integrate
+Based on the PROJECT_CONTEXT.md, we have these auth endpoints available:
+
+- POST /api/auth/register          - User registration
+- POST /api/auth/verify-email      - Email verification
+- POST /api/auth/login             - User login ✅ (already working)
+- POST /api/auth/refresh           - Token refresh
+- POST /api/auth/logout            - User logout
+- POST /api/auth/forgot-password   - Password reset request
+- POST /api/auth/reset-password    - Password reset confirmation
+- PUT  /api/auth/change-password   - Change password
+
+### Success Criteria
+- ✅ User can register new account
+- ✅ User can login with email/password
+- ✅ User stays logged in between app launches
+- ✅ Secure token storage and refresh
+- ✅ Proper error handling and user feedback
+- ✅ Smooth navigation flow
+- ✅ Production-ready UI/UX
+
+### Technical Approach
+- Architecture: Clean Architecture with MVVM pattern
+- DI: Hilt for dependency injection
+- Networking: Retrofit with our existing Vercel API
+- UI: ViewBinding with Material Design components
+- Storage: DataStore for secure token storage
+- Navigation: Activity-based navigation initially
+
+---
+
+### UPDATE: October 19, 2025, 07:24 UTC — Auth Implementation & E2E Verification
+
+#### What we implemented (Customer app)
+- Data layer: Auth DTOs, ApiService auth endpoints, TokenStore (DataStore), AuthInterceptor.
+- Domain: AuthRepository + Login/Register/Logout/GetCurrentUser use cases.
+- Presentation: AuthViewModel; Splash, Login, Register, Forgot Password screens with ViewBinding.
+- UX: Password strength validation (8+ with upper/lower/number); improved API error parsing/messages.
+- Dev helper: Splash clears cached tokens in DEBUG to always show Login.
+
+#### Backend/API updates
+- Added endpoint: POST /api/auth/resend-verification (Next.js) and client hook from Login screen.
+- Vercel deployments READY; routes compiled: /api/auth/login, /api/auth/register, /api/auth/verify, /api/auth/resend-verification, /api/health.
+- Fixed base URL in app to https://kotlin-project.vercel.app/api/.
+
+#### Supabase configuration & email flow
+- Observed mail.send events in Auth logs; added client-side "Resend verification".
+- For testing: Email provider ON, Confirm email OFF → immediate session after signup; app auto-login works.
+
+#### Result
+- Registration and Login successful on emulator (Pixel_9a). End-to-end auth verified against production API.
+
+#### Operations performed
+- Built app (:app:assembleDebug), installed via ADB, and launched Splash.
+- Validated Vercel deployment status and build logs via MCP; latest prod deployment READY.
+
+#### Next actions
+- Implement forgot/reset/change password flows in client and API.
+- Add GetCurrentUser endpoint + profile screen; token refresh handling.
+- Re-enable email confirmation in staging and verify delivery; keep resend flow.
+- Add unit tests for repository/use cases and basic UI tests for auth screens.
+- Telemetry/logging for auth errors and success funnels.
+

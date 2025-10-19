@@ -26,7 +26,7 @@ android {
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNqdWpybXZmenpxZnNra252Z2p4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyMTgzOTAsImV4cCI6MjA0NDc5NDM5MH0.gHOxJOB-DfJBY4nPWGWLQzf1Vbj0F6tTa_pqSkl1234\"")
         
         // API configuration
-        buildConfigField("String", "API_BASE_URL", "\"https://kotlin-project-31l3qkwl4-project3-f5839d18.vercel.app/api/\"")
+        buildConfigField("String", "API_BASE_URL", "\"https://kotlin-project.vercel.app/api/\"")
     }
 
     buildTypes {
@@ -69,6 +69,9 @@ android {
 dependencies {
     // Core Android
     implementation("androidx.core:core-ktx:1.12.0")
+    
+    // DataStore for secure token storage
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.10.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
