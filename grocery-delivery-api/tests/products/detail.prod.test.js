@@ -3,7 +3,7 @@
 import HttpClient from '../utils/http-client.js'
 import { TestAssertion, logTestStart, logTestComplete } from '../utils/test-helpers.js'
 
-const BASE_URL = process.env.TEST_BASE_URL || 'https://kotlin-project.vercel.app'
+const BASE_URL = process.env.TEST_BASE_URL || 'https://andoid-app-kotlin.vercel.app'
 
 async function testProductDetailProd() {
   const testName = 'Products: Detail (prod)'

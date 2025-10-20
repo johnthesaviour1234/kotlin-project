@@ -27,7 +27,7 @@ android {
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNqdWpybXZmenpxZnNra252Z2p4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyMTgzOTAsImV4cCI6MjA0NDc5NDM5MH0.gHOxJOB-DfJBY4nPWGWLQzf1Vbj0F6tTa_pqSkl1234\"")
         
         // API configuration
-        buildConfigField("String", "API_BASE_URL", "\"https://kotlin-project.vercel.app/api/\"")
+        buildConfigField("String", "API_BASE_URL", "\"https://andoid-app-kotlin.vercel.app/api/\"")
     }
 
     buildTypes {

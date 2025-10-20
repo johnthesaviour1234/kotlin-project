@@ -6,7 +6,7 @@
 
 import HttpClient from './tests/utils/http-client.js'
 
-const TEST_BASE_URL = 'https://kotlin-project.vercel.app'
+const TEST_BASE_URL = 'https://andoid-app-kotlin.vercel.app'
 const client = new HttpClient(TEST_BASE_URL)
 
 async function testMobileUserLogin() {

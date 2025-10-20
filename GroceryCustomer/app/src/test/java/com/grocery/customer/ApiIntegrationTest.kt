@@ -20,7 +20,7 @@ class ApiIntegrationTest {
     fun setup() {
         // Create a Retrofit instance with the same configuration as the app
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://kotlin-project.vercel.app/api/")
+            .baseUrl("https://andoid-app-kotlin.vercel.app/api/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
