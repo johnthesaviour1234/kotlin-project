@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.grocery.customer.databinding.FragmentCartBinding
 import com.grocery.customer.ui.adapters.CartAdapter
@@ -63,7 +64,24 @@ class CartFragment : Fragment() {
 
     private fun setupCheckoutButton() {
         binding.buttonCheckout.setOnClickListener {
-            Toast.makeText(context, "Checkout functionality coming soon!", Toast.LENGTH_SHORT).show()
+            val cart = viewModel.cart.value
+            if (cart != null && !cart.isEmpty()) {
+                // Navigate to checkout with cart data
+                // TODO: Pass cart items as navigation arguments using Safe Args
+                navigateToCheckout()
+            } else {
+                Toast.makeText(context, "Your cart is empty", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    
+    private fun navigateToCheckout() {
+        try {
+            // For now, navigate without arguments. 
+            // TODO: Implement Safe Args to pass cart data
+            findNavController().navigate(com.grocery.customer.R.id.action_cartFragment_to_checkoutFragment)
+        } catch (e: Exception) {
+            Toast.makeText(context, "Navigation error: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 

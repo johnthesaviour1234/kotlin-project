@@ -2,9 +2,11 @@ package com.grocery.customer.di
 
 import com.grocery.customer.data.repository.AuthRepositoryImpl
 import com.grocery.customer.data.repository.CartRepositoryImpl
+import com.grocery.customer.data.repository.OrderRepositoryImpl
 import com.grocery.customer.data.repository.ProductRepositoryImpl
 import com.grocery.customer.domain.repository.AuthRepository
 import com.grocery.customer.domain.repository.CartRepository
+import com.grocery.customer.domain.repository.OrderRepository
 import com.grocery.customer.domain.repository.ProductRepository
 import dagger.Binds
 import dagger.Module
@@ -38,6 +40,12 @@ abstract class RepositoryModule {
     abstract fun bindCartRepository(
         cartRepositoryImpl: CartRepositoryImpl
     ): CartRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindOrderRepository(
+        orderRepositoryImpl: OrderRepositoryImpl
+    ): OrderRepository
 
     // TODO: Add other repository bindings when implementations are ready
     // @Binds

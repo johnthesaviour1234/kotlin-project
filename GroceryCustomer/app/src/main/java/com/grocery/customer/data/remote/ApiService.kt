@@ -67,4 +67,25 @@ interface ApiService {
         @Header("Authorization") bearerToken: String,
         @Body request: ProfileUpdateRequest
     ): Response<ApiResponse<UserProfile>>
+
+    // Order endpoints
+    @POST("orders/create")
+    suspend fun createOrder(
+        @Header("Authorization") bearerToken: String,
+        @Body request: CreateOrderRequest
+    ): Response<CreateOrderResponse>
+
+    @GET("orders/{id}")
+    suspend fun getOrder(
+        @Header("Authorization") bearerToken: String,
+        @Path("id") orderId: String
+    ): Response<OrderResponse>
+
+    @GET("orders/history")
+    suspend fun getOrderHistory(
+        @Header("Authorization") bearerToken: String,
+        @Query("page") page: Int = 1,
+        @Query("limit") limit: Int = 10,
+        @Query("status") status: String? = null
+    ): Response<OrderHistoryResponse>
 }

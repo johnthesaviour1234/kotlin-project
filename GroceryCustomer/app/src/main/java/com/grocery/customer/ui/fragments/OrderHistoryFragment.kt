@@ -1,0 +1,216 @@
+package com.grocery.customer.ui.fragments
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.*
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.grocery.customer.R
+import com.grocery.customer.ui.adapters.OrderHistoryAdapter
+import com.grocery.customer.ui.viewmodels.OrderHistoryViewModel
+import com.grocery.customer.ui.viewmodels.OrderHistoryUiState
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+
+/**
+ * Fragment for displaying user's order history.
+ * Shows list of past orders with filtering and pagination support.
+ */
+@AndroidEntryPoint
+class OrderHistoryFragment : Fragment() {
+
+    private val viewModel: OrderHistoryViewModel by viewModels()
+    
+    // Views
+    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
+    private lateinit var recyclerViewOrders: RecyclerView
+    private lateinit var spinnerStatusFilter: Spinner
+    private lateinit var textViewEmptyState: TextView
+    private lateinit var progressBarLoading: ProgressBar
+    private lateinit var layoutError: LinearLayout
+    private lateinit var textViewErrorMessage: TextView
+    private lateinit var buttonRetry: Button
+    
+    private lateinit var orderHistoryAdapter: OrderHistoryAdapter
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_order_history, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        
+        initializeViews(view)
+        setupRecyclerView()
+        setupStatusFilter()
+        setupObservers()
+        setupClickListeners()
+    }
+
+    private fun initializeViews(view: View) {
+        swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout)
+        recyclerViewOrders = view.findViewById(R.id.recyclerViewOrders)
+        spinnerStatusFilter = view.findViewById(R.id.spinnerStatusFilter)
+        textViewEmptyState = view.findViewById(R.id.textViewEmptyState)
+        progressBarLoading = view.findViewById(R.id.progressBarLoading)
+        layoutError = view.findViewById(R.id.layoutError)
+        textViewErrorMessage = view.findViewById(R.id.textViewErrorMessage)
+        buttonRetry = view.findViewById(R.id.buttonRetry)
+    }
+
+    private fun setupRecyclerView() {
+        orderHistoryAdapter = OrderHistoryAdapter { orderId ->
+            // Handle order item click - show order details
+            viewModel.getOrderDetails(orderId)
+        }
+        
+        recyclerViewOrders.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = orderHistoryAdapter
+            
+            // Add scroll listener for pagination
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    
+                    val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                    val visibleItemCount = layoutManager.childCount
+                    val totalItemCount = layoutManager.itemCount
+                    val pastVisibleItems = layoutManager.findFirstVisibleItemPosition()
+                    
+                    // Load more when close to end
+                    if (visibleItemCount + pastVisibleItems >= totalItemCount - 3) {
+                        viewModel.loadMoreOrders()
+                    }
+                }
+            })
+        }
+    }
+
+    private fun setupStatusFilter() {
+        val statusOptions = arrayOf("All", "Pending", "Confirmed", "Preparing", "Ready", "Delivered", "Cancelled")
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, statusOptions)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        
+        spinnerStatusFilter.adapter = adapter
+        spinnerStatusFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val selectedStatus = when (position) {
+                    0 -> "all"
+                    1 -> "pending"
+                    2 -> "confirmed"
+                    3 -> "preparing"
+                    4 -> "ready"
+                    5 -> "delivered"
+                    6 -> "cancelled"
+                    else -> "all"
+                }
+                viewModel.filterByStatus(selectedStatus)
+            }
+            
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+    }
+
+    private fun setupObservers() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // Observe UI state
+                launch {
+                    viewModel.uiState.collect { state ->
+                        updateUI(state)
+                    }
+                }
+                
+                // Observe selected order state
+                launch {
+                    viewModel.selectedOrderState.collect { state ->
+                        // Handle order details state if needed
+                        // For now, you could show a bottom sheet or navigate to details screen
+                    }
+                }
+            }
+        }
+    }
+
+    private fun setupClickListeners() {
+        swipeRefreshLayout.setOnRefreshListener {
+            viewModel.loadOrders(refresh = true)
+        }
+        
+        buttonRetry.setOnClickListener {
+            viewModel.retryLoadOrders()
+        }
+    }
+
+    private fun updateUI(state: OrderHistoryUiState) {
+        // Update loading states
+        swipeRefreshLayout.isRefreshing = false
+        progressBarLoading.visibility = if (state.isLoading && state.orders.isEmpty()) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+        
+        // Handle error state
+        if (state.error != null) {
+            layoutError.visibility = View.VISIBLE
+            textViewErrorMessage.text = state.error
+            recyclerViewOrders.visibility = View.GONE
+            textViewEmptyState.visibility = View.GONE
+        } else {
+            layoutError.visibility = View.GONE
+            
+            // Handle empty state
+            if (state.orders.isEmpty() && !state.isLoading) {
+                textViewEmptyState.visibility = View.VISIBLE
+                recyclerViewOrders.visibility = View.GONE
+                
+                // Update empty message based on filter
+                textViewEmptyState.text = if (state.selectedStatusFilter == "all") {
+                    "No orders found.\nPlace your first order to see it here!"
+                } else {
+                    "No ${state.selectedStatusFilter} orders found."
+                }
+            } else {
+                textViewEmptyState.visibility = View.GONE
+                recyclerViewOrders.visibility = View.VISIBLE
+                
+                // Update orders list
+                orderHistoryAdapter.submitList(state.orders)
+            }
+        }
+        
+        // Update status filter selection if needed
+        updateStatusFilterSelection(state.selectedStatusFilter)
+    }
+
+    private fun updateStatusFilterSelection(selectedStatus: String) {
+        val position = when (selectedStatus) {
+            "all" -> 0
+            "pending" -> 1
+            "confirmed" -> 2
+            "preparing" -> 3
+            "ready" -> 4
+            "delivered" -> 5
+            "cancelled" -> 6
+            else -> 0
+        }
+        
+        if (spinnerStatusFilter.selectedItemPosition != position) {
+            spinnerStatusFilter.setSelection(position)
+        }
+    }
+}

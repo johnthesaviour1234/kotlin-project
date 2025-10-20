@@ -49,10 +49,64 @@
     <string name="navigate_to_category">Navigate to category</string>
     <string name="no_categories_found">No categories found</string>
     
+    <!-- Order Management -->
+    <string name="checkout_title">Checkout</string>
+    <string name="order_history_title">Order History</string>
+    <string name="order_summary">Order Summary</string>
+    <string name="delivery_address">Delivery Address</string>
+    <string name="payment_method">Payment Method</string>
+    <string name="order_notes">Order Notes</string>
+    <string name="place_order">Place Order</string>
+    <string name="order_placed_successfully">Order placed successfully!</string>
+    <string name="subtotal">Subtotal</string>
+    <string name="tax">Tax</string>
+    <string name="delivery_fee">Delivery Fee</string>
+    <string name="free_delivery">Free</string>
+    <string name="cash_on_delivery">Cash on Delivery</string>
+    <string name="debit_credit_card">Debit/Credit Card</string>
+    <string name="upi_payment">UPI Payment</string>
+    <string name="special_instructions">Add special instructions (optional)</string>
+    <string name="street_address_required">Street Address *</string>
+    <string name="apartment_optional">Apartment, Suite, etc. (optional)</string>
+    <string name="city_required">City *</string>
+    <string name="state_required">State *</string>
+    <string name="postal_code_required">Postal Code *</string>
+    <string name="landmark_optional">Landmark (optional)</string>
+    <string name="filter_by_status">Filter by status:</string>
+    <string name="no_orders_found">No orders found</string>
+    <string name="place_first_order">Place your first order to see it here!</string>
+    <string name="unable_to_load_orders">Unable to load orders</string>
+    <string name="network_error_occurred">Network error occurred</string>
+    <string name="your_cart_is_empty">Your cart is empty</string>
+    <string name="navigation_error">Navigation error: %1$s</string>
+    
+    <!-- Order Status -->
+    <string name="status_pending">Pending</string>
+    <string name="status_confirmed">Confirmed</string>
+    <string name="status_preparing">Preparing</string>
+    <string name="status_ready">Ready</string>
+    <string name="status_delivered">Delivered</string>
+    <string name="status_cancelled">Cancelled</string>
+    <string name="status_all">All</string>
+    
+    <!-- Format Strings -->
+    <string name="price_format">₹%.2f</string>
+    <string name="quantity_format">Qty: %d</string>
+    <string name="order_number_format">Order #%1$s</string>
+    <string name="unit_price_format">₹%.2f each</string>
+    
+    <!-- Plurals -->
+    <plurals name="item_count">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
+    
     <!-- Content descriptions for accessibility -->
     <string name="cd_product_image">Product image</string>
     <string name="cd_user_avatar">User avatar</string>
     <string name="cd_menu">Menu</string>
     <string name="cd_search">Search</string>
     <string name="cd_cart">Shopping cart</string>
+    <string name="cd_view_order_details">View order details</string>
+    <string name="cd_order_status">Order status</string>
 </resources>
