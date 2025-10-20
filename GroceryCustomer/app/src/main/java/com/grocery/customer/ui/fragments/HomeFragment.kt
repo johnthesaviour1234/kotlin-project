@@ -1,15 +1,23 @@
 package com.grocery.customer.ui.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import com.grocery.customer.R
 import com.grocery.customer.databinding.FragmentHomeBinding
 import com.grocery.customer.ui.adapters.ProductsAdapter
 import com.grocery.customer.ui.viewmodels.HomeViewModel
+import com.grocery.customer.util.Resource
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -25,6 +33,10 @@ class HomeFragment : Fragment() {
     private val viewModel: HomeViewModel by viewModels()
     private lateinit var productsAdapter: ProductsAdapter
 
+    companion object {
+        private const val TAG = "HomeFragment"
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -36,6 +48,7 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setHasOptionsMenu(true)
         setupUI()
         setupObservers()
         loadData()
@@ -48,10 +61,14 @@ class HomeFragment : Fragment() {
 
     private fun setupRecyclerView() {
         productsAdapter = ProductsAdapter { product ->
-            // TODO: Navigate to product details
-            // findNavController().navigate(
-            //     HomeFragmentDirections.actionHomeToProductDetail(product.id)
-            // )
+            Log.d(TAG, "Product clicked: ${product.name} (ID: ${product.id})")
+            try {
+                findNavController().navigate(
+                    HomeFragmentDirections.actionHomeToProductDetail(product.id)
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "Navigation error: ${e.message}", e)
+            }
         }
 
         binding.recyclerViewFeaturedProducts.apply {
@@ -67,41 +84,67 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupObservers() {
-        // TODO: Observe ViewModel data when implemented
-        /*
         viewModel.featuredProducts.observe(viewLifecycleOwner) { resource ->
+            Log.d(TAG, "Featured products resource state: ${resource::class.simpleName}")
             when (resource) {
                 is Resource.Loading -> {
+                    Log.d(TAG, "Loading featured products...")
                     binding.swipeRefresh.isRefreshing = true
                     binding.progressBar.visibility = View.VISIBLE
+                    binding.textViewEmptyState.visibility = View.GONE
                 }
                 is Resource.Success -> {
+                    Log.d(TAG, "Successfully loaded ${resource.data?.size ?: 0} featured products")
                     binding.swipeRefresh.isRefreshing = false
                     binding.progressBar.visibility = View.GONE
                     productsAdapter.submitList(resource.data)
                     
                     // Show empty state if no products
                     binding.textViewEmptyState.visibility = 
-                        if (resource.data.isEmpty()) View.VISIBLE else View.GONE
+                        if (resource.data?.isEmpty() == true) View.VISIBLE else View.GONE
                 }
                 is Resource.Error -> {
+                    Log.e(TAG, "Error loading featured products: ${resource.message}")
                     binding.swipeRefresh.isRefreshing = false
                     binding.progressBar.visibility = View.GONE
-                    // TODO: Show error state
+                    binding.textViewEmptyState.visibility = View.VISIBLE
+                    // TODO: Show error message to user
                 }
             }
         }
-        */
     }
 
     private fun loadData() {
-        // TODO: Load featured products from ViewModel
-        // viewModel.loadFeaturedProducts()
+        Log.d(TAG, "Loading home screen data...")
+        viewModel.loadFeaturedProducts()
+        viewModel.loadCategories()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_home, menu)
         
-        // For now, hide loading state
-        binding.swipeRefresh.isRefreshing = false
-        binding.progressBar.visibility = View.GONE
-        binding.textViewEmptyState.visibility = View.VISIBLE
+        val searchItem = menu.findItem(R.id.action_search)
+        val searchView = searchItem.actionView as SearchView
+        
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                query?.let { searchProducts(it) }
+                return true
+            }
+            
+            override fun onQueryTextChange(newText: String?): Boolean {
+                if (newText.isNullOrEmpty()) {
+                    // Reset to featured products when search is cleared
+                    viewModel.loadFeaturedProducts()
+                }
+                return true
+            }
+        })
+    }
+    
+    private fun searchProducts(query: String) {
+        Log.d(TAG, "Searching for products: $query")
+        viewModel.searchProducts(query)
     }
 
     override fun onDestroyView() {

@@ -40,6 +40,12 @@
     <string name="featured_products">Featured Products</string>
     <string name="no_products_found">No products found</string>
     
+    <!-- Categories screen -->
+    <string name="categories_title">Categories</string>
+    <string name="category_image">Category image</string>
+    <string name="navigate_to_category">Navigate to category</string>
+    <string name="no_categories_found">No categories found</string>
+    
     <!-- Content descriptions for accessibility -->
     <string name="cd_product_image">Product image</string>
     <string name="cd_user_avatar">User avatar</string>

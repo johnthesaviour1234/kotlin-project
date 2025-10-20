@@ -1,7 +1,9 @@
 package com.grocery.customer.di
 
 import com.grocery.customer.data.repository.AuthRepositoryImpl
+import com.grocery.customer.data.repository.ProductRepositoryImpl
 import com.grocery.customer.domain.repository.AuthRepository
+import com.grocery.customer.domain.repository.ProductRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -23,16 +25,16 @@ abstract class RepositoryModule {
         authRepositoryImpl: AuthRepositoryImpl
     ): AuthRepository
 
+    @Binds
+    @Singleton
+    abstract fun bindProductRepository(
+        productRepositoryImpl: ProductRepositoryImpl
+    ): ProductRepository
+
     // TODO: Add other repository bindings when implementations are ready
     // @Binds
     // @Singleton
     // abstract fun bindUserRepository(
     //     userRepositoryImpl: UserRepositoryImpl
     // ): UserRepository
-    //
-    // @Binds
-    // @Singleton
-    // abstract fun bindProductRepository(
-    //     productRepositoryImpl: ProductRepositoryImpl
-    // ): ProductRepository
 }

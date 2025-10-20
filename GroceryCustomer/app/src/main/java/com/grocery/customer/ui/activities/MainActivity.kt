@@ -1,11 +1,17 @@
 package com.grocery.customer.ui.activities
 
 import android.os.Bundle
+import android.util.Log
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.grocery.customer.R
 import com.grocery.customer.databinding.ActivityMainBinding
+import com.grocery.customer.BuildConfig
+import com.grocery.customer.data.remote.ApiService
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * Main Activity - Entry point of the Customer app.
@@ -14,12 +20,50 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : BaseActivity<ActivityMainBinding>() {
 
+    @Inject
+    lateinit var apiService: ApiService
+
+    companion object {
+        private const val TAG = "MainActivity"
+    }
+
     override fun inflateViewBinding(): ActivityMainBinding {
         return ActivityMainBinding.inflate(layoutInflater)
     }
 
     override fun setupUI() {
+        Log.d(TAG, "MainActivity started")
+        Log.d(TAG, "API Base URL: ${BuildConfig.API_BASE_URL}")
         setupNavigation()
+        testApiConnection()
+    }
+    
+    private fun testApiConnection() {
+        lifecycleScope.launch {
+            try {
+                Log.d(TAG, "Testing API connection...")
+                val response = apiService.getHealthCheck()
+                Log.d(TAG, "Health check response code: ${response.code()}")
+                if (response.isSuccessful) {
+                    Log.d(TAG, "Health check successful: ${response.body()}")
+                } else {
+                    Log.e(TAG, "Health check failed: ${response.errorBody()?.string()}")
+                }
+                
+                // Test products API
+                Log.d(TAG, "Testing products API...")
+                val productsResponse = apiService.getProducts(featured = true, limit = 5)
+                Log.d(TAG, "Products response code: ${productsResponse.code()}")
+                if (productsResponse.isSuccessful) {
+                    val body = productsResponse.body()
+                    Log.d(TAG, "Products API success: ${body?.success}, count: ${body?.data?.items?.size}")
+                } else {
+                    Log.e(TAG, "Products API failed: ${productsResponse.errorBody()?.string()}")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "API test failed: ${e.message}", e)
+            }
+        }
     }
 
     override fun setupObservers() {

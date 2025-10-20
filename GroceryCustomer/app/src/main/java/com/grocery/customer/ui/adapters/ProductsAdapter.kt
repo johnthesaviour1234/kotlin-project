@@ -5,6 +5,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.grocery.customer.R
 import com.grocery.customer.data.remote.dto.Product
 import com.grocery.customer.databinding.ItemProductBinding
 
@@ -37,14 +39,15 @@ class ProductsAdapter(
             binding.apply {
                 textViewProductName.text = product.name
                 textViewProductPrice.text = "$${product.price}"
-                textViewProductDescription.text = product.category_id ?: ""
+                textViewProductDescription.text = "Fresh and delicious" // Simple description
                 
-                // TODO: Load image using Glide when image loading is implemented
-                // Glide.with(imageViewProduct.context)
-                //     .load(product.imageUrl)
-                //     .placeholder(R.drawable.placeholder_product)
-                //     .error(R.drawable.error_product)
-                //     .into(imageViewProduct)
+                // Load product image using Glide
+                Glide.with(imageViewProduct.context)
+                    .load(product.image_url)
+                    .placeholder(android.R.drawable.ic_menu_gallery)
+                    .error(android.R.drawable.ic_menu_report_image)
+                    .centerCrop()
+                    .into(imageViewProduct)
 
                 root.setOnClickListener {
                     onProductClick(product)

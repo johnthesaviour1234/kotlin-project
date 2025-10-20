@@ -20,11 +20,16 @@ class SplashActivity : BaseActivity<ActivitySplashBinding>() {
     override fun inflateViewBinding(): ActivitySplashBinding = ActivitySplashBinding.inflate(layoutInflater)
 
     override fun setupUI() {
-        // In debug builds, always clear tokens so we start at Login
+        // In debug builds, skip authentication for testing
         if (BuildConfig.DEBUG) {
-            viewModel.clearTokensForDebug()
+            // Skip token clearing and go directly to MainActivity for testing
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+            return
         }
-        // Trigger auth check
+        
+        // In release builds, use proper authentication
+        viewModel.clearTokensForDebug()
         viewModel.checkAuth()
     }
 
