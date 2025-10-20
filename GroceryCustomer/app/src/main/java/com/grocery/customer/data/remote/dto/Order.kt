@@ -52,13 +52,13 @@ data class DeliveryAddressDTO(
 data class CreateOrderRequest(
     val items: List<CreateOrderItemRequest>,
     val subtotal: Double,
-    val tax_amount: Double = 0.0,
-    val delivery_fee: Double = 0.0,
-    val total_amount: Double,
-    val delivery_address: DeliveryAddressDTO,
-    val payment_method: String = "cash",
+    val taxAmount: Double = 0.0,
+    val deliveryFee: Double = 0.0,
+    val totalAmount: Double,
+    val deliveryAddress: DeliveryAddressDTO,
+    val paymentMethod: String = "cash",
     val notes: String = "",
-    val estimated_delivery_time: String? = null
+    val estimatedDeliveryTime: String? = null
 )
 
 data class CreateOrderItemRequest(

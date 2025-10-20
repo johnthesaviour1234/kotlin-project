@@ -51,11 +51,11 @@ class CreateOrderUseCase @Inject constructor(
         val createOrderRequest = CreateOrderRequest(
             items = items,
             subtotal = subtotal,
-            tax_amount = taxAmount,
-            delivery_fee = deliveryFee,
-            total_amount = totalAmount,
-            delivery_address = deliveryAddress,
-            payment_method = paymentMethod,
+            taxAmount = taxAmount,
+            deliveryFee = deliveryFee,
+            totalAmount = totalAmount,
+            deliveryAddress = deliveryAddress,
+            paymentMethod = paymentMethod,
             notes = notes
         )
         
