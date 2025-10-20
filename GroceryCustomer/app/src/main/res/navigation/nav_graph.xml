@@ -92,6 +92,22 @@
         android:id="@+id/orderHistoryFragment"
         android:name="com.grocery.customer.ui.fragments.OrderHistoryFragment"
         android:label="Order History"
-        tools:layout="@layout/fragment_order_history" />
+        tools:layout="@layout/fragment_order_history" >
+        
+        <action
+            android:id="@+id/action_orderHistory_to_orderDetail"
+            app:destination="@id/orderDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/orderDetailFragment"
+        android:name="com.grocery.customer.ui.fragments.OrderDetailFragment"
+        android:label="Order Details"
+        tools:layout="@layout/fragment_order_detail" >
+        
+        <argument
+            android:name="orderId"
+            app:argType="string" />
+    </fragment>
 
 </navigation>

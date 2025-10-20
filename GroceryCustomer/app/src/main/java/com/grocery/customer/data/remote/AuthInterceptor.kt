@@ -1,5 +1,6 @@
 package com.grocery.customer.data.remote
 
+import android.util.Log
 import com.grocery.customer.data.local.TokenStore
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
@@ -9,16 +10,31 @@ import javax.inject.Inject
 class AuthInterceptor @Inject constructor(
     private val tokenStore: TokenStore
 ) : Interceptor {
+    
+    companion object {
+        private const val TAG = "AuthInterceptor"
+    }
+    
     override fun intercept(chain: Interceptor.Chain): Response {
         val original = chain.request()
-        val token = runBlocking { tokenStore.getAccessToken() }
-
-        return if (!token.isNullOrBlank()) {
-            val newRequest = original.newBuilder()
-                .addHeader("Authorization", "Bearer $token")
-                .build()
-            chain.proceed(newRequest)
-        } else {
+        
+        return try {
+            val token = runBlocking { tokenStore.getAccessToken() }
+            Log.d(TAG, "Token retrieved: ${if (token?.isNotBlank() == true) "Present (${token.length} chars)" else "Missing/Empty"}")
+            Log.d(TAG, "Request URL: ${original.url}")
+            
+            if (!token.isNullOrBlank()) {
+                val newRequest = original.newBuilder()
+                    .addHeader("Authorization", "Bearer $token")
+                    .build()
+                Log.d(TAG, "Added Authorization header to request")
+                chain.proceed(newRequest)
+            } else {
+                Log.w(TAG, "No token available, proceeding without Authorization header")
+                chain.proceed(original)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error in AuthInterceptor: ${e.message}", e)
             chain.proceed(original)
         }
     }

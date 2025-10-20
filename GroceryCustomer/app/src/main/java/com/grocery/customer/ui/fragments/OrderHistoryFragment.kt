@@ -10,6 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -33,7 +34,7 @@ class OrderHistoryFragment : Fragment() {
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var recyclerViewOrders: RecyclerView
     private lateinit var spinnerStatusFilter: Spinner
-    private lateinit var textViewEmptyState: TextView
+    private lateinit var layoutEmptyState: LinearLayout
     private lateinit var progressBarLoading: ProgressBar
     private lateinit var layoutError: LinearLayout
     private lateinit var textViewErrorMessage: TextView
@@ -63,7 +64,7 @@ class OrderHistoryFragment : Fragment() {
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout)
         recyclerViewOrders = view.findViewById(R.id.recyclerViewOrders)
         spinnerStatusFilter = view.findViewById(R.id.spinnerStatusFilter)
-        textViewEmptyState = view.findViewById(R.id.textViewEmptyState)
+        layoutEmptyState = view.findViewById(R.id.textViewEmptyState)
         progressBarLoading = view.findViewById(R.id.progressBarLoading)
         layoutError = view.findViewById(R.id.layoutError)
         textViewErrorMessage = view.findViewById(R.id.textViewErrorMessage)
@@ -72,8 +73,9 @@ class OrderHistoryFragment : Fragment() {
 
     private fun setupRecyclerView() {
         orderHistoryAdapter = OrderHistoryAdapter { orderId ->
-            // Handle order item click - show order details
-            viewModel.getOrderDetails(orderId)
+            // Navigate to order details screen
+            val action = OrderHistoryFragmentDirections.actionOrderHistoryToOrderDetail(orderId)
+            findNavController().navigate(action)
         }
         
         recyclerViewOrders.apply {
@@ -169,23 +171,16 @@ class OrderHistoryFragment : Fragment() {
             layoutError.visibility = View.VISIBLE
             textViewErrorMessage.text = state.error
             recyclerViewOrders.visibility = View.GONE
-            textViewEmptyState.visibility = View.GONE
+            layoutEmptyState.visibility = View.GONE
         } else {
             layoutError.visibility = View.GONE
             
             // Handle empty state
             if (state.orders.isEmpty() && !state.isLoading) {
-                textViewEmptyState.visibility = View.VISIBLE
+                layoutEmptyState.visibility = View.VISIBLE
                 recyclerViewOrders.visibility = View.GONE
-                
-                // Update empty message based on filter
-                textViewEmptyState.text = if (state.selectedStatusFilter == "all") {
-                    "No orders found.\nPlace your first order to see it here!"
-                } else {
-                    "No ${state.selectedStatusFilter} orders found."
-                }
             } else {
-                textViewEmptyState.visibility = View.GONE
+                layoutEmptyState.visibility = View.GONE
                 recyclerViewOrders.visibility = View.VISIBLE
                 
                 // Update orders list

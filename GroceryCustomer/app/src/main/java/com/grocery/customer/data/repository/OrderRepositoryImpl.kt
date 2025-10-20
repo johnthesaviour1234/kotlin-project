@@ -1,6 +1,5 @@
 package com.grocery.customer.data.repository
 
-import com.grocery.customer.data.local.TokenStore
 import com.grocery.customer.data.remote.ApiService
 import com.grocery.customer.data.remote.dto.*
 import com.grocery.customer.domain.repository.OrderRepository
@@ -13,19 +12,12 @@ import javax.inject.Singleton
  */
 @Singleton
 class OrderRepositoryImpl @Inject constructor(
-    private val apiService: ApiService,
-    private val tokenStore: TokenStore
+    private val apiService: ApiService
 ) : OrderRepository {
     
     override suspend fun createOrder(createOrderRequest: CreateOrderRequest): Result<OrderDTO> {
         return try {
-            val token = tokenStore.getAccessToken()
-            if (token.isNullOrBlank()) {
-                return Result.failure(Exception("Authentication token not found"))
-            }
-            
             val response = apiService.createOrder(
-                bearerToken = "Bearer $token",
                 request = createOrderRequest
             )
             
@@ -52,13 +44,7 @@ class OrderRepositoryImpl @Inject constructor(
     
     override suspend fun getOrder(orderId: String): Result<OrderDTO> {
         return try {
-            val token = tokenStore.getAccessToken()
-            if (token.isNullOrBlank()) {
-                return Result.failure(Exception("Authentication token not found"))
-            }
-            
             val response = apiService.getOrder(
-                bearerToken = "Bearer $token",
                 orderId = orderId
             )
             
@@ -90,13 +76,7 @@ class OrderRepositoryImpl @Inject constructor(
         status: String?
     ): Result<OrderHistoryResponse> {
         return try {
-            val token = tokenStore.getAccessToken()
-            if (token.isNullOrBlank()) {
-                return Result.failure(Exception("Authentication token not found"))
-            }
-            
             val response = apiService.getOrderHistory(
-                bearerToken = "Bearer $token",
                 page = page,
                 limit = limit,
                 status = status

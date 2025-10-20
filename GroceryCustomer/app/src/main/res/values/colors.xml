@@ -28,6 +28,7 @@
     <color name="text_secondary">#757575</color>
     <color name="text_disabled">#BDBDBD</color>
     <color name="divider">#E0E0E0</color>
+    <color name="divider_light">#F5F5F5</color>
     <color name="card_background">#FAFAFA</color>
     
     <!-- Order Status colors -->
