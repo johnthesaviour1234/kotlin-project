@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.grocery.customer.data.remote.dto.*
 import com.grocery.customer.domain.usecase.CreateOrderUseCase
+import com.grocery.customer.domain.usecase.GetCurrentUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +18,8 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class CheckoutViewModel @Inject constructor(
-    private val createOrderUseCase: CreateOrderUseCase
+    private val createOrderUseCase: CreateOrderUseCase,
+    private val getCurrentUserUseCase: GetCurrentUserUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CheckoutUiState())
@@ -87,17 +89,34 @@ class CheckoutViewModel @Inject constructor(
             try {
                 val orderItems = currentState.cartItems.map { cartItem ->
                     CreateOrderItemRequest(
-                        productId = cartItem.product.id,
+                        product_id = cartItem.product.id,
                         quantity = cartItem.quantity,
-                        unitPrice = cartItem.price,
-                        totalPrice = cartItem.totalPrice,
-                        productName = cartItem.product.name,
-                        productImageUrl = cartItem.product.image_url
+                        unit_price = cartItem.price,
+                        total_price = cartItem.totalPrice,
+                        product_name = cartItem.product.name,
+                        product_image_url = cartItem.product.image_url
                     )
                 }
 
+                // Get customer info from user profile
+                val customerInfoResult = getCurrentUserUseCase()
+                if (customerInfoResult.isFailure) {
+                    _orderPlacementState.value = OrderPlacementState.Error(
+                        "Failed to get user information: ${customerInfoResult.exceptionOrNull()?.message}"
+                    )
+                    return@launch
+                }
+                
+                val userProfile = customerInfoResult.getOrNull()!!
+                val customerInfo = CustomerInfoDTO(
+                    name = userProfile.fullName ?: "Unknown",
+                    email = userProfile.email,
+                    phone = userProfile.phone ?: ""
+                )
+                
                 val result = createOrderUseCase(
                     items = orderItems,
+                    customerInfo = customerInfo,
                     deliveryAddress = currentState.deliveryAddress!!,
                     paymentMethod = currentState.selectedPaymentMethod,
                     notes = currentState.orderNotes

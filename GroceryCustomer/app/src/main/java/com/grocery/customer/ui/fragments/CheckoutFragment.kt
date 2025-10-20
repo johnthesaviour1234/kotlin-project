@@ -20,7 +20,6 @@ import com.grocery.customer.domain.repository.CartRepository
 import com.grocery.customer.ui.adapters.CheckoutItemAdapter
 import com.grocery.customer.ui.viewmodels.CheckoutViewModel
 import com.grocery.customer.ui.viewmodels.OrderPlacementState
-import com.grocery.customer.util.DebugAuthHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -38,8 +37,6 @@ class CheckoutFragment : Fragment() {
     @Inject
     lateinit var cartRepository: CartRepository
     
-    @Inject
-    lateinit var debugAuthHelper: DebugAuthHelper
     
     // Views
     private lateinit var recyclerViewItems: RecyclerView
@@ -82,7 +79,7 @@ class CheckoutFragment : Fragment() {
         setupTextWatchers()
         
         // Set up authentication and load cart data
-        setupAuthAndLoadData()
+        setupAndLoadData()
     }
 
     private fun initializeViews(view: View) {
@@ -244,26 +241,11 @@ class CheckoutFragment : Fragment() {
     }
 
     /**
-     * Set up authentication and load cart data
+     * Load cart data directly
      */
-    private fun setupAuthAndLoadData() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                // Ensure we have an auth token for API calls
-                if (!debugAuthHelper.hasAuthToken()) {
-                    debugAuthHelper.setMockAuthToken()
-                }
-                
-                // Load cart data
-                loadCartData()
-            } catch (e: Exception) {
-                Toast.makeText(
-                    context,
-                    "Error setting up checkout: ${e.message}",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
+    private fun setupAndLoadData() {
+        // Load cart data directly - authentication is handled by the repository layer
+        loadCartData()
     }
     
     /**

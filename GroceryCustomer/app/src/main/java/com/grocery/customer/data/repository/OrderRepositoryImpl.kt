@@ -25,7 +25,6 @@ class OrderRepositoryImpl @Inject constructor(
             }
             
             val response = apiService.createOrder(
-                bearerToken = "Bearer $token",
                 request = createOrderRequest
             )
             
@@ -58,7 +57,6 @@ class OrderRepositoryImpl @Inject constructor(
             }
             
             val response = apiService.getOrder(
-                bearerToken = "Bearer $token",
                 orderId = orderId
             )
             
@@ -96,7 +94,6 @@ class OrderRepositoryImpl @Inject constructor(
             }
             
             val response = apiService.getOrderHistory(
-                bearerToken = "Bearer $token",
                 page = page,
                 limit = limit,
                 status = status

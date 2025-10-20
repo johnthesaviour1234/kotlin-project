@@ -99,8 +99,37 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getCurrentUser(): Result<UserProfileDto> {
-        // Placeholder - would call a /users/profile endpoint when available
-        return Result.failure(UnsupportedOperationException("Get current user not implemented"))
+        return try {
+            val token = tokenStore.getAccessToken()
+            if (token.isNullOrBlank()) {
+                return Result.failure(Exception("No authentication token found"))
+            }
+            
+            // AuthInterceptor automatically adds the Bearer token
+            val response = api.getUserProfile()
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body?.success == true && body.data != null) {
+                    val profile = body.data
+                    // Convert UserProfile to UserProfileDto
+                    val userProfileDto = UserProfileDto(
+                        id = profile.id,
+                        email = profile.email ?: "",
+                        fullName = profile.full_name,
+                        phone = profile.phone,
+                        userType = profile.user_type,
+                        avatarUrl = profile.avatar_url
+                    )
+                    Result.success(userProfileDto)
+                } else {
+                    Result.failure(Exception(body?.error ?: body?.message ?: "Failed to get user profile"))
+                }
+            } else {
+                Result.failure(Exception(parseApiError(response.errorBody())))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     override suspend fun resendVerification(email: String): Result<Unit> {

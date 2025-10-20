@@ -82,12 +82,6 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    // Debug helper: clear any cached tokens to ensure fresh auth flow
-    fun clearTokensForDebug() {
-        viewModelScope.launch(Dispatchers.IO) {
-            tokenStore.clear()
-        }
-    }
 }
 
 enum class Destination { Login, Main }

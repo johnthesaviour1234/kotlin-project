@@ -16,6 +16,7 @@ class CreateOrderUseCase @Inject constructor(
      * Creates a new order with the provided details.
      * 
      * @param items List of cart items to be converted to order items
+     * @param customerInfo Customer information (name, email, phone)
      * @param deliveryAddress Customer's delivery address
      * @param paymentMethod Payment method selected by customer (default: "cash")
      * @param notes Optional notes for the order
@@ -23,6 +24,7 @@ class CreateOrderUseCase @Inject constructor(
      */
     suspend operator fun invoke(
         items: List<CreateOrderItemRequest>,
+        customerInfo: CustomerInfoDTO,
         deliveryAddress: DeliveryAddressDTO,
         paymentMethod: String = "cash",
         notes: String = ""
@@ -38,7 +40,7 @@ class CreateOrderUseCase @Inject constructor(
         }
         
         // Calculate totals
-        val subtotal = items.sumOf { it.totalPrice }
+        val subtotal = items.sumOf { it.total_price }
         val taxAmount = calculateTax(subtotal)
         val deliveryFee = calculateDeliveryFee(subtotal)
         val totalAmount = subtotal + taxAmount + deliveryFee
@@ -51,11 +53,12 @@ class CreateOrderUseCase @Inject constructor(
         val createOrderRequest = CreateOrderRequest(
             items = items,
             subtotal = subtotal,
-            taxAmount = taxAmount,
-            deliveryFee = deliveryFee,
-            totalAmount = totalAmount,
-            deliveryAddress = deliveryAddress,
-            paymentMethod = paymentMethod,
+            tax_amount = taxAmount,
+            delivery_fee = deliveryFee,
+            total_amount = totalAmount,
+            customer_info = customerInfo,
+            delivery_address = deliveryAddress,
+            payment_method = paymentMethod,
             notes = notes
         )
         
