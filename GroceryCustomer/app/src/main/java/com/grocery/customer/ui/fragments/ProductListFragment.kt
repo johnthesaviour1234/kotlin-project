@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.grocery.customer.databinding.FragmentProductListBinding
 import com.grocery.customer.ui.adapters.ProductsAdapter
@@ -49,10 +50,11 @@ class ProductListFragment : Fragment() {
 
     private fun setupRecyclerView() {
         productsAdapter = ProductsAdapter { product ->
-            // TODO: Navigate to product detail
-            // findNavController().navigate(
-            //     ProductListFragmentDirections.actionProductListToDetail(product.id)
-            // )
+            // Navigate to product detail
+            val action = ProductListFragmentDirections.actionProductListToDetail(
+                productId = product.id
+            )
+            findNavController().navigate(action)
         }
 
         binding.recyclerViewProducts.apply {

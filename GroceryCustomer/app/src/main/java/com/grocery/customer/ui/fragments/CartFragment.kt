@@ -4,8 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.grocery.customer.databinding.FragmentCartBinding
+import com.grocery.customer.ui.adapters.CartAdapter
+import com.grocery.customer.ui.viewmodels.CartViewModel
+import com.grocery.customer.util.Resource
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -16,6 +22,8 @@ class CartFragment : Fragment() {
 
     private var _binding: FragmentCartBinding? = null
     private val binding get() = _binding!!
+    private val viewModel: CartViewModel by viewModels()
+    private lateinit var cartAdapter: CartAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -29,11 +37,107 @@ class CartFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupUI()
+        setupObservers()
     }
 
     private fun setupUI() {
-        // TODO: Implement cart functionality
-        binding.textViewEmptyCart.visibility = View.VISIBLE
+        setupRecyclerView()
+        setupCheckoutButton()
+    }
+
+    private fun setupRecyclerView() {
+        cartAdapter = CartAdapter(
+            onQuantityChanged = { cartItemId, quantity ->
+                viewModel.updateCartItemQuantity(cartItemId, quantity)
+            },
+            onRemoveItem = { cartItemId ->
+                viewModel.removeCartItem(cartItemId)
+            }
+        )
+        
+        binding.recyclerViewCart.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = cartAdapter
+        }
+    }
+
+    private fun setupCheckoutButton() {
+        binding.buttonCheckout.setOnClickListener {
+            Toast.makeText(context, "Checkout functionality coming soon!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun setupObservers() {
+        // Observe cart data
+        viewModel.cart.observe(viewLifecycleOwner) { cart ->
+            if (cart.isEmpty()) {
+                showEmptyCart()
+            } else {
+                showCartItems(cart)
+            }
+        }
+
+        // Observe cart update operations
+        viewModel.updateCartState.observe(viewLifecycleOwner) { resource ->
+            when (resource) {
+                is Resource.Loading -> {
+                    // Show loading if needed
+                }
+                is Resource.Success -> {
+                    viewModel.resetUpdateCartState()
+                }
+                is Resource.Error -> {
+                    Toast.makeText(context, "Error: ${resource.message}", Toast.LENGTH_SHORT).show()
+                    viewModel.resetUpdateCartState()
+                }
+                null -> {
+                    // Reset state
+                }
+            }
+        }
+
+        // Observe remove item operations
+        viewModel.removeItemState.observe(viewLifecycleOwner) { resource ->
+            when (resource) {
+                is Resource.Loading -> {
+                    // Show loading if needed
+                }
+                is Resource.Success -> {
+                    Toast.makeText(context, "Item removed from cart", Toast.LENGTH_SHORT).show()
+                    viewModel.resetRemoveItemState()
+                }
+                is Resource.Error -> {
+                    Toast.makeText(context, "Error: ${resource.message}", Toast.LENGTH_SHORT).show()
+                    viewModel.resetRemoveItemState()
+                }
+                null -> {
+                    // Reset state
+                }
+            }
+        }
+    }
+
+    private fun showEmptyCart() {
+        binding.apply {
+            textViewEmptyCart.visibility = View.VISIBLE
+            recyclerViewCart.visibility = View.GONE
+            cardViewCheckout.visibility = View.GONE
+        }
+    }
+
+    private fun showCartItems(cart: com.grocery.customer.data.remote.dto.Cart) {
+        binding.apply {
+            textViewEmptyCart.visibility = View.GONE
+            recyclerViewCart.visibility = View.VISIBLE
+            cardViewCheckout.visibility = View.VISIBLE
+            
+            // Update cart summary
+            textViewTotalItems.text = "${cart.totalItems} items"
+            textViewTotalPrice.text = "$${String.format("%.2f", cart.totalPrice)}"
+        }
+        
+        // Update adapter
+        cartAdapter.submitList(cart.items)
     }
 
     override fun onDestroyView() {

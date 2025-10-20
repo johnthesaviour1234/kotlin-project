@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.grocery.customer.data.remote.dto.ProductDetail
+import com.grocery.customer.domain.repository.CartRepository
 import com.grocery.customer.domain.repository.ProductRepository
 import com.grocery.customer.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,6 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ProductDetailViewModel @Inject constructor(
     private val productRepository: ProductRepository,
+    private val cartRepository: CartRepository,
     private val savedStateHandle: SavedStateHandle
 ) : BaseViewModel() {
 
@@ -27,8 +29,8 @@ class ProductDetailViewModel @Inject constructor(
     private val _quantity = MutableLiveData<Int>(1)
     val quantity: LiveData<Int> = _quantity
 
-    private val _addToCartState = MutableLiveData<Resource<Unit>>()
-    val addToCartState: LiveData<Resource<Unit>> = _addToCartState
+    private val _addToCartState = MutableLiveData<Resource<Unit>?>()
+    val addToCartState: LiveData<Resource<Unit>?> = _addToCartState
 
     fun loadProductDetail(productId: String) {
         viewModelScope.launch {
@@ -84,19 +86,15 @@ class ProductDetailViewModel @Inject constructor(
                 val qty = _quantity.value ?: 1
                 
                 if (product != null) {
-                    // TODO: Implement cart repository when available
-                    // val result = cartRepository.addToCart(product.id, qty)
-                    // result.fold(
-                    //     onSuccess = { _addToCartState.value = Resource.Success(Unit) },
-                    //     onFailure = { exception ->
-                    //         _addToCartState.value = Resource.Error(
-                    //             exception.message ?: "Failed to add to cart"
-                    //         )
-                    //     }
-                    // )
-                    
-                    // For now, simulate success
-                    _addToCartState.value = Resource.Success(Unit)
+                    val result = cartRepository.addToCart(product.id, qty)
+                    result.fold(
+                        onSuccess = { _addToCartState.value = Resource.Success(Unit) },
+                        onFailure = { exception ->
+                            _addToCartState.value = Resource.Error(
+                                exception.message ?: "Failed to add to cart"
+                            )
+                        }
+                    )
                 } else {
                     _addToCartState.value = Resource.Error("Product not loaded")
                 }

@@ -32,6 +32,9 @@
     <string name="total">Total</string>
     <string name="quantity">Quantity</string>
     <string name="price">Price</string>
+    <string name="increase_quantity">Increase quantity</string>
+    <string name="decrease_quantity">Decrease quantity</string>
+    <string name="product_image">Product image</string>
     
     <!-- Home screen -->
     <string name="home_title">Fresh Groceries</string>

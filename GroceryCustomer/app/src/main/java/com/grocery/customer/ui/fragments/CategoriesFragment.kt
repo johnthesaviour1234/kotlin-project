@@ -50,10 +50,12 @@ class CategoriesFragment : Fragment() {
 
     private fun setupRecyclerView() {
         categoriesAdapter = CategoriesAdapter { category ->
-            // TODO: Navigate to products in this category
-            // findNavController().navigate(
-            //     CategoriesFragmentDirections.actionCategoriesToProductList(category.id, category.name)
-            // )
+            // Navigate to products in this category
+            val action = CategoriesFragmentDirections.actionCategoriesToProducts(
+                categoryId = category.id,
+                categoryName = category.name
+            )
+            findNavController().navigate(action)
         }
 
         binding.recyclerViewCategories.apply {
