@@ -28,14 +28,14 @@ class ProfileViewModel @Inject constructor(
     private val _userAddresses = MutableLiveData<Resource<List<UserAddress>>>(Resource.Loading())
     val userAddresses: LiveData<Resource<List<UserAddress>>> = _userAddresses
 
-    private val _profileUpdateResult = MutableLiveData<Resource<UserProfile>>()
-    val profileUpdateResult: LiveData<Resource<UserProfile>> = _profileUpdateResult
+    private val _profileUpdateResult = MutableLiveData<Resource<UserProfile>?>()
+    val profileUpdateResult: LiveData<Resource<UserProfile>?> = _profileUpdateResult
 
-    private val _passwordChangeResult = MutableLiveData<Resource<String>>()
-    val passwordChangeResult: LiveData<Resource<String>> = _passwordChangeResult
+    private val _passwordChangeResult = MutableLiveData<Resource<String>?>()
+    val passwordChangeResult: LiveData<Resource<String>?> = _passwordChangeResult
 
-    private val _addressOperationResult = MutableLiveData<Resource<UserAddress>>()
-    val addressOperationResult: LiveData<Resource<UserAddress>> = _addressOperationResult
+    private val _addressOperationResult = MutableLiveData<Resource<UserAddress>?>()
+    val addressOperationResult: LiveData<Resource<UserAddress>?> = _addressOperationResult
 
     companion object {
         private const val TAG = "ProfileViewModel"

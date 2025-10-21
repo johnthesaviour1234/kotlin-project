@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="false">
+        <!-- Allow HTTPS only for all domains -->
+        <domain includeSubdomains="true">vercel.app</domain>
+        <domain includeSubdomains="true">supabase.co</domain>
+    </domain-config>
+    
+    <!-- Default configuration for all other domains -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <!-- Trust system certificates -->
+            <certificates src="system"/>
+        </trust-anchors>
+    </base-config>
+</network-security-config>
