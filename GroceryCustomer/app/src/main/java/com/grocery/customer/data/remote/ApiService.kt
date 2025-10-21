@@ -91,6 +91,29 @@ interface ApiService {
         @Body request: ChangePasswordRequest
     ): Response<ApiResponse<Map<String, String>>>
 
+    // Cart endpoints
+    @GET("cart")
+    suspend fun getCart(): Response<ApiResponse<CartApiResponse>>
+    
+    @POST("cart")
+    suspend fun addToCart(
+        @Body request: AddToCartApiRequest
+    ): Response<ApiResponse<CartItemApi>>
+    
+    @PUT("cart/{productId}")
+    suspend fun updateCartQuantity(
+        @Path("productId") productId: String,
+        @Body request: UpdateCartQuantityRequest
+    ): Response<ApiResponse<CartItemApi>>
+    
+    @DELETE("cart/{productId}")
+    suspend fun removeFromCart(
+        @Path("productId") productId: String
+    ): Response<ApiResponse<Map<String, Any>>>
+    
+    @DELETE("cart")
+    suspend fun clearCart(): Response<ApiResponse<Map<String, Any>>>
+
     // Order endpoints
     @POST("orders/create")
     suspend fun createOrder(

@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.grocery.customer.R
 import com.grocery.customer.data.remote.dto.*
 import com.grocery.customer.domain.repository.CartRepository
+import com.grocery.customer.domain.repository.UserRepository
 import com.grocery.customer.ui.adapters.CheckoutItemAdapter
 import com.grocery.customer.ui.viewmodels.CheckoutViewModel
 import com.grocery.customer.ui.viewmodels.OrderPlacementState
@@ -37,6 +38,8 @@ class CheckoutFragment : Fragment() {
     @Inject
     lateinit var cartRepository: CartRepository
     
+    @Inject
+    lateinit var userRepository: UserRepository
     
     // Views
     private lateinit var recyclerViewItems: RecyclerView
@@ -44,6 +47,10 @@ class CheckoutFragment : Fragment() {
     private lateinit var textTax: TextView
     private lateinit var textDeliveryFee: TextView
     private lateinit var textTotal: TextView
+    
+    // Address selection views
+    private lateinit var buttonSelectSavedAddress: Button
+    private lateinit var spinnerSavedAddresses: Spinner
     
     // Address form views
     private lateinit var editTextStreet: EditText
@@ -89,6 +96,9 @@ class CheckoutFragment : Fragment() {
         textDeliveryFee = view.findViewById(R.id.textDeliveryFee)
         textTotal = view.findViewById(R.id.textTotal)
         
+        buttonSelectSavedAddress = view.findViewById(R.id.buttonSelectSavedAddress)
+        spinnerSavedAddresses = view.findViewById(R.id.spinnerSavedAddresses)
+        
         editTextStreet = view.findViewById(R.id.editTextStreet)
         editTextApartment = view.findViewById(R.id.editTextApartment)
         editTextCity = view.findViewById(R.id.editTextCity)
@@ -133,6 +143,20 @@ class CheckoutFragment : Fragment() {
     private fun setupClickListeners() {
         buttonPlaceOrder.setOnClickListener {
             viewModel.placeOrder()
+        }
+        
+        buttonSelectSavedAddress.setOnClickListener {
+            toggleSavedAddressSelection()
+        }
+        
+        spinnerSavedAddresses.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                if (position > 0) { // Position 0 is "Select an address"
+                    loadSavedAddresses() // We'll load the addresses and handle selection
+                }
+            }
+            
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
         
         radioGroupPayment.setOnCheckedChangeListener { _, checkedId ->
@@ -213,6 +237,16 @@ class CheckoutFragment : Fragment() {
                 progressBarOrder.visibility = View.GONE
                 buttonPlaceOrder.isEnabled = true
                 
+                // Clear cart after successful order
+                lifecycleScope.launch {
+                    try {
+                        cartRepository.clearCart()
+                    } catch (e: Exception) {
+                        // Log error but don't prevent navigation
+                        android.util.Log.e("CheckoutFragment", "Failed to clear cart after order: ${e.message}")
+                    }
+                }
+                
                 // Show success message
                 Toast.makeText(
                     context, 
@@ -272,5 +306,95 @@ class CheckoutFragment : Fragment() {
                 findNavController().popBackStack()
             }
         }
+    }
+    
+    private fun toggleSavedAddressSelection() {
+        if (spinnerSavedAddresses.visibility == View.VISIBLE) {
+            // Hide spinner and show manual entry
+            spinnerSavedAddresses.visibility = View.GONE
+            showAddressForm(true)
+            buttonSelectSavedAddress.text = "Use Saved"
+        } else {
+            // Show spinner and hide manual entry
+            loadSavedAddresses()
+        }
+    }
+    
+    private fun showAddressForm(show: Boolean) {
+        val visibility = if (show) View.VISIBLE else View.GONE
+        editTextStreet.visibility = visibility
+        editTextApartment.visibility = visibility
+        editTextCity.visibility = visibility
+        editTextState.visibility = visibility
+        editTextPostalCode.visibility = visibility
+        editTextLandmark.visibility = visibility
+        
+        // Also hide/show the parent TextInputLayouts
+        (editTextStreet.parent as View).visibility = visibility
+        (editTextApartment.parent as View).visibility = visibility
+        (editTextCity.parent.parent as View).visibility = visibility // For the horizontal LinearLayout
+        (editTextPostalCode.parent.parent as View).visibility = visibility // For the horizontal LinearLayout
+    }
+    
+    private fun loadSavedAddresses() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val result = userRepository.getUserAddresses()
+                result.fold(
+                    onSuccess = { addresses ->
+                        if (addresses.isNotEmpty()) {
+                            setupAddressSpinner(addresses)
+                            spinnerSavedAddresses.visibility = View.VISIBLE
+                            showAddressForm(false)
+                            buttonSelectSavedAddress.text = "Manual Entry"
+                        } else {
+                            Toast.makeText(context, "No saved addresses found", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    onFailure = { exception ->
+                        Toast.makeText(context, "Error loading addresses: ${exception.message}", Toast.LENGTH_SHORT).show()
+                    }
+                )
+            } catch (e: Exception) {
+                Toast.makeText(context, "Error loading saved addresses", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    
+    private fun setupAddressSpinner(addresses: List<UserAddress>) {
+        val addressOptions = mutableListOf<String>()
+        addressOptions.add("Select an address")
+        
+        addresses.forEach { address ->
+            val displayAddress = "${address.street_address}, ${address.city}, ${address.state} ${address.postal_code}"
+            addressOptions.add(displayAddress)
+        }
+        
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, addressOptions)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerSavedAddresses.adapter = adapter
+        
+        spinnerSavedAddresses.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                if (position > 0) {
+                    val selectedAddress = addresses[position - 1]
+                    fillAddressForm(selectedAddress)
+                }
+            }
+            
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+    }
+    
+    private fun fillAddressForm(address: UserAddress) {
+        editTextStreet.setText(address.street_address)
+        editTextApartment.setText(address.apartment ?: "")
+        editTextCity.setText(address.city)
+        editTextState.setText(address.state)
+        editTextPostalCode.setText(address.postal_code)
+        editTextLandmark.setText(address.landmark ?: "")
+        
+        // Update the address in view model
+        updateDeliveryAddress()
     }
 }

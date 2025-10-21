@@ -2,14 +2,19 @@ package com.grocery.customer.ui.activities
 
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.badge.BadgeDrawable
 import com.grocery.customer.R
 import com.grocery.customer.databinding.ActivityMainBinding
 import com.grocery.customer.BuildConfig
 import com.grocery.customer.data.remote.ApiService
+import com.grocery.customer.domain.repository.CartRepository
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,6 +27,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     @Inject
     lateinit var apiService: ApiService
+    
+    @Inject
+    lateinit var cartRepository: CartRepository
 
     companion object {
         private const val TAG = "MainActivity"
@@ -35,6 +43,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         Log.d(TAG, "MainActivity started")
         Log.d(TAG, "API Base URL: ${BuildConfig.API_BASE_URL}")
         setupNavigation()
+        setupCartBadge()
         testApiConnection()
     }
     
@@ -78,5 +87,23 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         
         // Setup bottom navigation with NavController
         binding.bottomNavigation.setupWithNavController(navController)
+    }
+    
+    private fun setupCartBadge() {
+        lifecycleScope.launch {
+            cartRepository.getCart().collectLatest { cart ->
+                val cartItemCount = cart.totalItems
+                
+                // Get or create badge for cart menu item
+                val badge = binding.bottomNavigation.getOrCreateBadge(R.id.cartFragment)
+                
+                if (cartItemCount > 0) {
+                    badge.number = cartItemCount
+                    badge.isVisible = true
+                } else {
+                    badge.isVisible = false
+                }
+            }
+        }
     }
 }
