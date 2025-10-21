@@ -88,8 +88,31 @@
         tools:layout="@layout/fragment_checkout" >
         
         <action
+            android:id="@+id/action_checkout_to_orderConfirmation"
+            app:destination="@id/orderConfirmationFragment" />
+        
+        <action
             android:id="@+id/action_checkout_to_orderHistory"
             app:destination="@id/orderHistoryFragment" />
+    </fragment>
+    
+    <fragment
+        android:id="@+id/orderConfirmationFragment"
+        android:name="com.grocery.customer.ui.fragments.OrderConfirmationFragment"
+        android:label="Order Confirmation"
+        tools:layout="@layout/fragment_order_confirmation" >
+        
+        <argument
+            android:name="order"
+            app:argType="com.grocery.customer.data.remote.dto.OrderDTO" />
+        
+        <action
+            android:id="@+id/action_orderConfirmation_to_orderDetail"
+            app:destination="@id/orderDetailFragment" />
+        
+        <action
+            android:id="@+id/action_orderConfirmation_to_home"
+            app:destination="@id/homeFragment" />
     </fragment>
 
     <fragment

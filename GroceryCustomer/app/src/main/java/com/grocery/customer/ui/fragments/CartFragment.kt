@@ -161,7 +161,7 @@ class CartFragment : Fragment() {
             
             // Update cart summary
             textViewTotalItems.text = "${cart.totalItems} items"
-            textViewTotalPrice.text = "$${String.format("%.2f", cart.totalPrice)}"
+            textViewTotalPrice.text = "₹${String.format("%.2f", cart.totalPrice)}"
         }
         
         // Update adapter

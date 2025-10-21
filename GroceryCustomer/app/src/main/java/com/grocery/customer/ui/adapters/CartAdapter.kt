@@ -39,9 +39,9 @@ class CartAdapter(
             binding.apply {
                 // Product details
                 textViewProductName.text = cartItem.product.name
-                textViewProductPrice.text = "$${String.format("%.2f", cartItem.price)} each"
+                textViewProductPrice.text = "₹${String.format("%.2f", cartItem.price)} each"
                 textViewQuantity.text = cartItem.quantity.toString()
-                textViewItemTotal.text = "$${String.format("%.2f", cartItem.totalPrice)}"
+                textViewItemTotal.text = "₹${String.format("%.2f", cartItem.totalPrice)}"
 
                 // Load product image
                 Glide.with(imageViewProduct.context)

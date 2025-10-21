@@ -128,7 +128,7 @@ class ProductDetailFragment : Fragment() {
     private fun displayProductDetails(product: com.grocery.customer.data.remote.dto.ProductDetail) {
         binding.apply {
             textViewProductName.text = product.name
-            textViewProductPrice.text = "$${product.price}"
+            textViewProductPrice.text = "₹${product.price}"
             textViewProductDescription.text = product.description ?: "No description available"
             
             // Display stock information

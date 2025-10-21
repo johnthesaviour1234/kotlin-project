@@ -38,7 +38,7 @@ class ProductsAdapter(
         fun bind(product: Product) {
             binding.apply {
                 textViewProductName.text = product.name
-                textViewProductPrice.text = "$${product.price}"
+                textViewProductPrice.text = "₹${product.price}"
                 textViewProductDescription.text = "Fresh and delicious" // Simple description
                 
                 // Load product image using Glide

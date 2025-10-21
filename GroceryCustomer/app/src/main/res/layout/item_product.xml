@@ -56,7 +56,7 @@
             android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
             android:textColor="@color/design_default_color_primary"
             android:textStyle="bold"
-            tools:text="$2.99" />
+            tools:text="₹2.99" />
 
     </LinearLayout>
 

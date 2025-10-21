@@ -253,8 +253,18 @@ class CheckoutFragment : Fragment() {
                     Toast.LENGTH_LONG
                 ).show()
                 
-                // Navigate to order confirmation or home
-                findNavController().popBackStack()
+                // Navigate to order confirmation screen with order details
+                try {
+                    findNavController().navigate(
+                        CheckoutFragmentDirections.actionCheckoutToOrderConfirmation(
+                            order = state.order
+                        )
+                    )
+                } catch (e: Exception) {
+                    android.util.Log.e("CheckoutFragment", "Navigation error: ${e.message}", e)
+                    // Fallback: pop back to cart
+                    findNavController().popBackStack()
+                }
                 
                 // Reset state for next time
                 viewModel.resetOrderPlacementState()
