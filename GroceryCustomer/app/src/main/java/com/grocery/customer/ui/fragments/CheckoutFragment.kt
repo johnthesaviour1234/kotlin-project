@@ -240,10 +240,23 @@ class CheckoutFragment : Fragment() {
                 // Clear cart after successful order
                 lifecycleScope.launch {
                     try {
-                        cartRepository.clearCart()
+                        val clearResult = cartRepository.clearCart()
+                        clearResult.fold(
+                            onSuccess = { 
+                                android.util.Log.d("CheckoutFragment", "Cart cleared successfully after order")
+                                // Force refresh to ensure UI is updated
+                                cartRepository.refreshCart()
+                            },
+                            onFailure = { exception ->
+                                android.util.Log.e("CheckoutFragment", "Failed to clear cart after order: ${exception.message}")
+                                // Try to force refresh anyway
+                                cartRepository.refreshCart()
+                            }
+                        )
                     } catch (e: Exception) {
-                        // Log error but don't prevent navigation
-                        android.util.Log.e("CheckoutFragment", "Failed to clear cart after order: ${e.message}")
+                        android.util.Log.e("CheckoutFragment", "Exception clearing cart after order: ${e.message}")
+                        // Force refresh as fallback
+                        cartRepository.refreshCart()
                     }
                 }
                 

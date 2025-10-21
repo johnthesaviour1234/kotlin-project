@@ -136,9 +136,21 @@ export default async function handler(req, res) {
       return res.status(500).json({ message: 'Order created but error fetching details' });
     }
 
+    // Clear user's cart after successful order creation
+    const { error: clearCartError } = await supabase
+      .from('cart')
+      .delete()
+      .eq('user_id', user.id);
+
+    if (clearCartError) {
+      console.warn('Cart clearing failed after order creation:', clearCartError);
+      // Log but don't fail the order - cart can be cleared manually
+    }
+
     res.status(201).json({
       message: 'Order created successfully',
-      order: orderWithItems
+      order: orderWithItems,
+      cart_cleared: !clearCartError
     });
 
   } catch (error) {

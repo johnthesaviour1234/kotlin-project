@@ -32,7 +32,16 @@ export default async function handler(req, res) {
           quantity,
           price,
           created_at,
-          updated_at
+          updated_at,
+          products:product_id (
+            id,
+            name,
+            description,
+            image_url,
+            category_id,
+            featured,
+            is_active
+          )
         `)
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
@@ -41,7 +50,25 @@ export default async function handler(req, res) {
         return res.status(500).json(formatErrorResponse('Database error', [{ field: 'database', message: error.message }]))
       }
 
-      return res.status(200).json(formatSuccessResponse({ items: data || [] }))
+      // Transform response to include product details
+      const enrichedItems = data?.map(item => ({
+        id: item.id,
+        product_id: item.product_id,
+        product_name: item.products?.name || 'Unknown Product',
+        product_description: item.products?.description || '',
+        image_url: item.products?.image_url || '',
+        quantity: item.quantity,
+        price: item.price,
+        total_price: item.quantity * item.price,
+        created_at: item.created_at,
+        updated_at: item.updated_at
+      })) || []
+
+      return res.status(200).json(formatSuccessResponse({ 
+        items: enrichedItems,
+        total_items: enrichedItems.reduce((sum, item) => sum + item.quantity, 0),
+        total_price: enrichedItems.reduce((sum, item) => sum + item.total_price, 0)
+      }))
     }
 
     if (req.method === 'POST') {
