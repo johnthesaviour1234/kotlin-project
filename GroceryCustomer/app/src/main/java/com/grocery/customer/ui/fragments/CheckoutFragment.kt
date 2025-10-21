@@ -20,10 +20,13 @@ import com.grocery.customer.domain.repository.CartRepository
 import com.grocery.customer.domain.repository.UserRepository
 import com.grocery.customer.ui.adapters.CheckoutItemAdapter
 import com.grocery.customer.ui.viewmodels.CheckoutViewModel
+import com.grocery.customer.ui.viewmodels.CartViewModel
 import com.grocery.customer.ui.viewmodels.OrderPlacementState
+import com.grocery.customer.util.Resource
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 /**
@@ -34,6 +37,7 @@ import javax.inject.Inject
 class CheckoutFragment : Fragment() {
 
     private val viewModel: CheckoutViewModel by viewModels()
+    private val cartViewModel: CartViewModel by viewModels()
     
     @Inject
     lateinit var cartRepository: CartRepository
@@ -237,28 +241,10 @@ class CheckoutFragment : Fragment() {
                 progressBarOrder.visibility = View.GONE
                 buttonPlaceOrder.isEnabled = true
                 
-                // Clear cart after successful order
-                lifecycleScope.launch {
-                    try {
-                        val clearResult = cartRepository.clearCart()
-                        clearResult.fold(
-                            onSuccess = { 
-                                android.util.Log.d("CheckoutFragment", "Cart cleared successfully after order")
-                                // Force refresh to ensure UI is updated
-                                cartRepository.refreshCart()
-                            },
-                            onFailure = { exception ->
-                                android.util.Log.e("CheckoutFragment", "Failed to clear cart after order: ${exception.message}")
-                                // Try to force refresh anyway
-                                cartRepository.refreshCart()
-                            }
-                        )
-                    } catch (e: Exception) {
-                        android.util.Log.e("CheckoutFragment", "Exception clearing cart after order: ${e.message}")
-                        // Force refresh as fallback
-                        cartRepository.refreshCart()
-                    }
-                }
+                // Force refresh cart using CartViewModel for proper UI coordination
+                android.util.Log.d("CheckoutFragment", "Order placed successfully. Refreshing cart state.")
+                cartViewModel.refreshCart()
+                android.util.Log.d("CheckoutFragment", "Cart refresh triggered after successful order")
                 
                 // Show success message
                 Toast.makeText(

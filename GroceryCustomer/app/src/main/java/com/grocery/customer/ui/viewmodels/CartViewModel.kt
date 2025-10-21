@@ -151,4 +151,18 @@ class CartViewModel @Inject constructor(
     fun isCartEmpty(): Boolean {
         return cart.value?.isEmpty() ?: true
     }
+    
+    /**
+     * Refresh cart from server
+     */
+    fun refreshCart() {
+        viewModelScope.launch {
+            try {
+                cartRepository.refreshCart()
+            } catch (exception: Exception) {
+                // Log error but don't show to user as this is a background operation
+                // The cart LiveData will still reflect the current state
+            }
+        }
+    }
 }

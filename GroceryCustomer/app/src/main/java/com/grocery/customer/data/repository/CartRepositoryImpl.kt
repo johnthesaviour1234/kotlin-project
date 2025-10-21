@@ -38,9 +38,12 @@ class CartRepositoryImpl @Inject constructor(
     
     private suspend fun loadCartFromApi() {
         try {
+            Log.d("CartRepository", "Loading cart from API...")
             val response = apiService.getCart()
             if (response.isSuccessful) {
                 val apiItems = response.body()?.data?.items ?: emptyList()
+                Log.d("CartRepository", "API returned ${apiItems.size} cart items")
+                
                 val cartItems = apiItems.map { apiItem ->
                     // If product name is missing, try to fetch it from product repository
                     val productName = if (apiItem.product_name.isNullOrBlank()) {
@@ -72,11 +75,16 @@ class CartRepositoryImpl @Inject constructor(
                     )
                 }
                 _cartState.value = Cart(cartItems)
+                Log.d("CartRepository", "Cart state updated with ${cartItems.size} items")
             } else {
-                Log.e("CartRepository", "Failed to load cart: ${response.code()}")
+                Log.e("CartRepository", "Failed to load cart: ${response.code()} - ${response.message()}")
+                // Set empty cart on API error to ensure consistency
+                _cartState.value = Cart()
             }
         } catch (e: Exception) {
             Log.e("CartRepository", "Error loading cart", e)
+            // Set empty cart on exception to ensure consistency
+            _cartState.value = Cart()
         }
     }
     
@@ -215,7 +223,14 @@ class CartRepositoryImpl @Inject constructor(
     override suspend fun refreshCart(): Result<Unit> {
         return try {
             Log.d("CartRepository", "Force refreshing cart from backend")
+            
+            // Clear local state first to ensure clean slate
+            _cartState.value = Cart()
+            
+            // Load fresh data from API
             loadCartFromApi()
+            
+            Log.d("CartRepository", "Cart refresh completed. Current items: ${_cartState.value.items.size}")
             Result.success(Unit)
         } catch (e: Exception) {
             Log.e("CartRepository", "Error refreshing cart", e)

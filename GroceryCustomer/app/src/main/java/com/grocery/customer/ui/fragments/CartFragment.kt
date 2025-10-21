@@ -40,6 +40,13 @@ class CartFragment : Fragment() {
         setupUI()
         setupObservers()
     }
+    
+    override fun onResume() {
+        super.onResume()
+        // Refresh cart data when fragment becomes visible
+        // This ensures the cart is up to date if it was cleared from another screen
+        viewModel.refreshCart()
+    }
 
     private fun setupUI() {
         setupRecyclerView()
@@ -88,9 +95,12 @@ class CartFragment : Fragment() {
     private fun setupObservers() {
         // Observe cart data
         viewModel.cart.observe(viewLifecycleOwner) { cart ->
+            android.util.Log.d("CartFragment", "Cart updated: ${cart.totalItems} items, ${cart.items.size} unique items")
             if (cart.isEmpty()) {
+                android.util.Log.d("CartFragment", "Showing empty cart state")
                 showEmptyCart()
             } else {
+                android.util.Log.d("CartFragment", "Showing cart items: ${cart.totalItems} total items")
                 showCartItems(cart)
             }
         }
