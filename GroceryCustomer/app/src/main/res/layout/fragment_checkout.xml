@@ -168,13 +168,40 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Delivery Address"
-                    android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="12dp" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+                    
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Delivery Address"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+                        android:textStyle="bold" />
+                    
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonSelectSavedAddress"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:text="Use Saved"
+                        android:textSize="12sp"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:minWidth="0dp"
+                        android:paddingHorizontal="12dp" />
+                    
+                </LinearLayout>
+                
+                <!-- Saved Address Spinner (initially hidden) -->
+                <Spinner
+                    android:id="@+id/spinnerSavedAddresses"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginBottom="12dp"
+                    android:visibility="gone" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
