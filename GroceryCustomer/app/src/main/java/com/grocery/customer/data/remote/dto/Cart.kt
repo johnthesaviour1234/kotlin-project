@@ -58,7 +58,7 @@ data class CartItemApi(
  * API response wrapper for cart data
  */
 data class CartApiResponse(
-    val data: List<CartItemApi>
+    val items: List<CartItemApi>
 )
 
 /**

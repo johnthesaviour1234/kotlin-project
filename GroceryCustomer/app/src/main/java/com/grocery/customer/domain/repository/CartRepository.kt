@@ -38,4 +38,9 @@ interface CartRepository {
      * Get total items count in cart
      */
     suspend fun getCartItemsCount(): Int
+    
+    /**
+     * Force refresh cart from backend
+     */
+    suspend fun refreshCart(): Result<Unit>
 }

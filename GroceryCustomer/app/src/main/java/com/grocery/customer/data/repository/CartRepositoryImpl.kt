@@ -40,13 +40,26 @@ class CartRepositoryImpl @Inject constructor(
         try {
             val response = apiService.getCart()
             if (response.isSuccessful) {
-                val apiItems = response.body()?.data?.data ?: emptyList()
+                val apiItems = response.body()?.data?.items ?: emptyList()
                 val cartItems = apiItems.map { apiItem ->
+                    // If product name is missing, try to fetch it from product repository
+                    val productName = if (apiItem.product_name.isNullOrBlank()) {
+                        try {
+                            val productResult = productRepository.getProductDetail(apiItem.product_id)
+                            productResult.getOrNull()?.name ?: "Unknown Product"
+                        } catch (e: Exception) {
+                            Log.w("CartRepository", "Failed to fetch product name for ${apiItem.product_id}: ${e.message}")
+                            "Unknown Product"
+                        }
+                    } else {
+                        apiItem.product_name
+                    }
+                    
                     CartItem(
                         id = apiItem.id,
                         product = Product(
                             id = apiItem.product_id,
-                            name = apiItem.product_name ?: "Unknown Product",
+                            name = productName,
                             price = apiItem.price,
                             image_url = apiItem.image_url ?: "",
                             featured = false, // API doesn't provide this
@@ -144,15 +157,30 @@ class CartRepositoryImpl @Inject constructor(
                 return Result.failure(Exception("Cart item not found"))
             }
             
-            // Remove from cart via API
-            val response = apiService.removeFromCart(cartItem.product.id)
-            if (response.isSuccessful) {
+            // Try to remove using the DELETE endpoint first
+            try {
+                val response = apiService.removeFromCart(cartItem.product.id)
+                if (response.isSuccessful) {
+                    // Reload cart from API to get updated state
+                    loadCartFromApi()
+                    return Result.success(Unit)
+                }
+                Log.w("CartRepository", "DELETE endpoint failed with ${response.code()}, trying quantity update to 0")
+            } catch (deleteException: Exception) {
+                Log.w("CartRepository", "DELETE endpoint threw exception: ${deleteException.message}, trying quantity update to 0")
+            }
+            
+            // Workaround: Use update quantity endpoint to set quantity to 0
+            val updateRequest = UpdateCartQuantityRequest(quantity = 0)
+            val updateResponse = apiService.updateCartQuantity(cartItem.product.id, updateRequest)
+            
+            if (updateResponse.isSuccessful) {
                 // Reload cart from API to get updated state
                 loadCartFromApi()
                 Result.success(Unit)
             } else {
-                Log.e("CartRepository", "Failed to remove from cart: ${response.code()}")
-                Result.failure(Exception("Failed to remove from cart: ${response.code()}"))
+                Log.e("CartRepository", "Failed to remove from cart using both methods: DELETE=${updateResponse.code()}")
+                Result.failure(Exception("Failed to remove from cart: ${updateResponse.code()}"))
             }
         } catch (e: Exception) {
             Log.e("CartRepository", "Error removing from cart", e)
@@ -165,8 +193,10 @@ class CartRepositoryImpl @Inject constructor(
             // Clear cart via API
             val response = apiService.clearCart()
             if (response.isSuccessful) {
-                // Update local state
+                // Update local state immediately
                 _cartState.value = Cart()
+                // Force refresh from API to ensure consistency
+                loadCartFromApi()
                 Result.success(Unit)
             } else {
                 Log.e("CartRepository", "Failed to clear cart: ${response.code()}")
@@ -180,5 +210,16 @@ class CartRepositoryImpl @Inject constructor(
     
     override suspend fun getCartItemsCount(): Int {
         return _cartState.value.totalItems
+    }
+    
+    override suspend fun refreshCart(): Result<Unit> {
+        return try {
+            Log.d("CartRepository", "Force refreshing cart from backend")
+            loadCartFromApi()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e("CartRepository", "Error refreshing cart", e)
+            Result.failure(e)
+        }
     }
 }
