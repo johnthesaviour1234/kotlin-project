@@ -3,6 +3,7 @@ package com.grocery.customer.data.remote
 import com.grocery.customer.data.remote.dto.*
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
@@ -36,9 +37,6 @@ interface ApiService {
     @POST("auth/reset-password")
     suspend fun resetPassword(@Body request: ResetPasswordRequest): Response<ApiResponse<Unit>>
 
-    @PUT("auth/change-password")
-    suspend fun changePassword(@Body request: ChangePasswordRequest): Response<ApiResponse<Unit>>
-
     @POST("auth/resend-verification")
     suspend fun resendVerification(@Body request: ResendVerificationRequest): Response<ApiResponse<Unit>>
 
@@ -66,6 +64,32 @@ interface ApiService {
     suspend fun updateUserProfile(
         @Body request: ProfileUpdateRequest
     ): Response<ApiResponse<UserProfile>>
+    
+    // Address endpoints
+    @GET("users/addresses")
+    suspend fun getUserAddresses(): Response<ApiResponse<AddressPayload>>
+    
+    @POST("users/addresses")
+    suspend fun createAddress(
+        @Body request: CreateAddressRequest
+    ): Response<ApiResponse<UserAddress>>
+    
+    @PUT("users/addresses")
+    suspend fun updateAddress(
+        @Query("id") addressId: String,
+        @Body request: UpdateAddressRequest
+    ): Response<ApiResponse<UserAddress>>
+    
+    @DELETE("users/addresses")
+    suspend fun deleteAddress(
+        @Query("id") addressId: String
+    ): Response<ApiResponse<Map<String, Any>>>
+    
+    // Password change endpoint
+    @PUT("auth/change-password")
+    suspend fun changePassword(
+        @Body request: ChangePasswordRequest
+    ): Response<ApiResponse<Map<String, String>>>
 
     // Order endpoints
     @POST("orders/create")

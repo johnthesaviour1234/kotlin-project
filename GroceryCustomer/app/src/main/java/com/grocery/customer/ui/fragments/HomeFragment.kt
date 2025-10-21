@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.grocery.customer.R
 import com.grocery.customer.databinding.FragmentHomeBinding
 import com.grocery.customer.ui.adapters.ProductsAdapter
+import com.grocery.customer.ui.adapters.CategoriesAdapter
 import com.grocery.customer.ui.viewmodels.HomeViewModel
 import com.grocery.customer.util.Resource
 import dagger.hilt.android.AndroidEntryPoint
@@ -32,6 +33,7 @@ class HomeFragment : Fragment() {
 
     private val viewModel: HomeViewModel by viewModels()
     private lateinit var productsAdapter: ProductsAdapter
+    private lateinit var categoriesAdapter: CategoriesAdapter
 
     companion object {
         private const val TAG = "HomeFragment"
@@ -60,6 +62,27 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
+        // Setup Categories RecyclerView
+        categoriesAdapter = CategoriesAdapter { category ->
+            Log.d(TAG, "Category clicked: ${category.name} (ID: ${category.id})")
+            try {
+                findNavController().navigate(
+                    HomeFragmentDirections.actionHomeToProductsByCategory(
+                        categoryId = category.id,
+                        categoryName = category.name
+                    )
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "Navigation error: ${e.message}", e)
+            }
+        }
+
+        binding.recyclerViewCategories.apply {
+            layoutManager = GridLayoutManager(context, 2)
+            adapter = categoriesAdapter
+        }
+
+        // Setup Products RecyclerView
         productsAdapter = ProductsAdapter { product ->
             Log.d(TAG, "Product clicked: ${product.name} (ID: ${product.id})")
             try {
@@ -84,6 +107,26 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupObservers() {
+        // Observe Categories
+        viewModel.categories.observe(viewLifecycleOwner) { resource ->
+            Log.d(TAG, "Categories resource state: ${resource::class.simpleName}")
+            when (resource) {
+                is Resource.Loading -> {
+                    Log.d(TAG, "Loading categories...")
+                    // Categories loading handled by overall progress
+                }
+                is Resource.Success -> {
+                    Log.d(TAG, "Successfully loaded ${resource.data?.size ?: 0} categories")
+                    categoriesAdapter.submitList(resource.data)
+                }
+                is Resource.Error -> {
+                    Log.e(TAG, "Error loading categories: ${resource.message}")
+                    // Show error but don't fail entire page
+                }
+            }
+        }
+
+        // Observe Featured Products
         viewModel.featuredProducts.observe(viewLifecycleOwner) { resource ->
             Log.d(TAG, "Featured products resource state: ${resource::class.simpleName}")
             when (resource) {

@@ -25,7 +25,7 @@ export default async function handler(req, res) {
       const client = getAuthenticatedClient(token)
       const { data, error } = await client
         .from('user_profiles')
-        .select('id,email,full_name,phone,user_type,avatar_url,created_at,updated_at')
+        .select('id,email,full_name,phone,user_type,avatar_url,date_of_birth,address,preferences,created_at,updated_at')
         .eq('id', userId)
         .maybeSingle()
 
@@ -40,14 +40,18 @@ export default async function handler(req, res) {
       const updates = {}
       if (typeof body.full_name === 'string') updates.full_name = body.full_name.trim().slice(0, 120)
       if (typeof body.phone === 'string') updates.phone = body.phone.trim().slice(0, 30)
+      if (typeof body.date_of_birth === 'string') updates.date_of_birth = body.date_of_birth
+      if (typeof body.avatar_url === 'string') updates.avatar_url = body.avatar_url.trim().slice(0, 500)
+      if (typeof body.address === 'object' && body.address !== null) updates.address = body.address
+      if (typeof body.preferences === 'object' && body.preferences !== null) updates.preferences = body.preferences
       if (Object.keys(updates).length === 0) {
-        return res.status(400).json(formatErrorResponse('At least one field (full_name or phone) must be provided'))
+        return res.status(400).json(formatErrorResponse('At least one field must be provided'))
       }
 
       const { data, error } = await supabase
         .from('user_profiles')
         .upsert({ id: userId, ...updates, updated_at: new Date().toISOString() }, { onConflict: 'id' })
-        .select('id,email,full_name,phone,user_type,avatar_url,created_at,updated_at')
+        .select('id,email,full_name,phone,user_type,avatar_url,date_of_birth,address,preferences,created_at,updated_at')
         .maybeSingle()
 
       if (error) {
