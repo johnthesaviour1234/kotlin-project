@@ -1,5 +1,6 @@
 package com.grocery.customer.data.repository
 
+import com.grocery.customer.data.remote.ApiService
 import com.grocery.customer.data.remote.dto.Cart
 import com.grocery.customer.data.remote.dto.CartItem
 import com.grocery.customer.data.remote.dto.Product
@@ -13,12 +14,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Local implementation of CartRepository using in-memory storage
- * TODO: Replace with remote API calls when backend is ready
+ * Implementation of CartRepository using persistent API storage
  */
 @Singleton
 class CartRepositoryImpl @Inject constructor(
-    private val productRepository: ProductRepository
+    private val productRepository: ProductRepository,
+    private val apiService: ApiService
 ) : CartRepository {
     
     private val _cartState = MutableStateFlow(Cart())

@@ -41,14 +41,18 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
         binding.textForgot.setOnClickListener {
             startActivity(Intent(this, ForgotPasswordActivity::class.java))
         }
-        binding.textResend.setOnClickListener {
-            val email = binding.editEmail.text?.toString()?.trim().orEmpty()
-            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                showError("Enter your email above to resend")
-            } else {
-                viewModel.resendVerification(email)
-            }
-        }
+        // Hide resend verification button since email verification is disabled
+        binding.textResend.visibility = View.GONE
+        
+        // Disabled resend functionality
+        // binding.textResend.setOnClickListener {
+        //     val email = binding.editEmail.text?.toString()?.trim().orEmpty()
+        //     if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        //         showError("Enter your email above to resend")
+        //     } else {
+        //         viewModel.resendVerification(email)
+        //     }
+        // }
     }
 
     override fun setupObservers() {
@@ -67,17 +71,18 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                 }
             }
         }
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.resendState.collect { state ->
-                    when (state) {
-                        is Resource.Success -> Toast.makeText(this@LoginActivity, "Verification email sent", Toast.LENGTH_SHORT).show()
-                        is Resource.Error -> state.message?.let { showError(it) }
-                        else -> {}
-                    }
-                }
-            }
-        }
+        // Verification functionality disabled - no need to observe resend state
+        // lifecycleScope.launch {
+        //     repeatOnLifecycle(Lifecycle.State.STARTED) {
+        //         viewModel.resendState.collect { state ->
+        //             when (state) {
+        //                 is Resource.Success -> Toast.makeText(this@LoginActivity, "Verification email sent", Toast.LENGTH_SHORT).show()
+        //                 is Resource.Error -> state.message?.let { showError(it) }
+        //                 else -> {}
+        //             }
+        //         }
+        //     }
+        // }
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.loginState.collect { state ->

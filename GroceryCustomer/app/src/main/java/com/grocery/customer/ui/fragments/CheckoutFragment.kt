@@ -213,6 +213,16 @@ class CheckoutFragment : Fragment() {
                 progressBarOrder.visibility = View.GONE
                 buttonPlaceOrder.isEnabled = true
                 
+                // Clear cart after successful order
+                lifecycleScope.launch {
+                    try {
+                        cartRepository.clearCart()
+                    } catch (e: Exception) {
+                        // Log error but don't prevent navigation
+                        android.util.Log.e("CheckoutFragment", "Failed to clear cart after order: ${e.message}")
+                    }
+                }
+                
                 // Show success message
                 Toast.makeText(
                     context, 
