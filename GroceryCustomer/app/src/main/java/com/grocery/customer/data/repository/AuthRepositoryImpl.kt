@@ -161,4 +161,175 @@ class AuthRepositoryImpl @Inject constructor(
             }
         } catch (e: Exception) { Result.failure(e) }
     }
+
+    // Profile management methods
+    override suspend fun getUserProfile(): Result<UserProfile> {
+        return try {
+            Log.d(TAG, "Getting user profile from API")
+            val response = api.getUserProfile()
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body?.success == true && body.data != null) {
+                    Log.d(TAG, "Successfully got user profile")
+                    Result.success(body.data)
+                } else {
+                    Log.e(TAG, "API response indicates failure: ${body?.error}")
+                    Result.failure(Exception(body?.error ?: body?.message ?: "Failed to get user profile"))
+                }
+            } else {
+                val errorMsg = parseApiError(response.errorBody())
+                Log.e(TAG, "API request failed with code ${response.code()}: $errorMsg")
+                Result.failure(Exception(errorMsg))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception in getUserProfile: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updateUserProfile(request: ProfileUpdateRequest): Result<UserProfile> {
+        return try {
+            Log.d(TAG, "Updating user profile")
+            val response = api.updateUserProfile(request)
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body?.success == true && body.data != null) {
+                    Log.d(TAG, "Successfully updated user profile")
+                    Result.success(body.data)
+                } else {
+                    Log.e(TAG, "API response indicates failure: ${body?.error}")
+                    Result.failure(Exception(body?.error ?: body?.message ?: "Failed to update profile"))
+                }
+            } else {
+                val errorMsg = parseApiError(response.errorBody())
+                Log.e(TAG, "API request failed with code ${response.code()}: $errorMsg")
+                Result.failure(Exception(errorMsg))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception in updateUserProfile: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+
+    // Address management methods
+    override suspend fun getUserAddresses(): Result<AddressPayload> {
+        return try {
+            Log.d(TAG, "Getting user addresses from API")
+            val response = api.getUserAddresses()
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body?.success == true && body.data != null) {
+                    Log.d(TAG, "Successfully got user addresses")
+                    Result.success(body.data)
+                } else {
+                    Log.e(TAG, "API response indicates failure: ${body?.error}")
+                    Result.failure(Exception(body?.error ?: body?.message ?: "Failed to get addresses"))
+                }
+            } else {
+                val errorMsg = parseApiError(response.errorBody())
+                Log.e(TAG, "API request failed with code ${response.code()}: $errorMsg")
+                Result.failure(Exception(errorMsg))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception in getUserAddresses: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun createAddress(request: CreateAddressRequest): Result<UserAddress> {
+        return try {
+            Log.d(TAG, "Creating new address")
+            val response = api.createAddress(request)
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body?.success == true && body.data != null) {
+                    Log.d(TAG, "Successfully created address")
+                    Result.success(body.data)
+                } else {
+                    Log.e(TAG, "API response indicates failure: ${body?.error}")
+                    Result.failure(Exception(body?.error ?: body?.message ?: "Failed to create address"))
+                }
+            } else {
+                val errorMsg = parseApiError(response.errorBody())
+                Log.e(TAG, "API request failed with code ${response.code()}: $errorMsg")
+                Result.failure(Exception(errorMsg))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception in createAddress: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updateAddress(addressId: String, request: UpdateAddressRequest): Result<UserAddress> {
+        return try {
+            Log.d(TAG, "Updating address: $addressId")
+            val response = api.updateAddress(addressId, request)
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body?.success == true && body.data != null) {
+                    Log.d(TAG, "Successfully updated address")
+                    Result.success(body.data)
+                } else {
+                    Log.e(TAG, "API response indicates failure: ${body?.error}")
+                    Result.failure(Exception(body?.error ?: body?.message ?: "Failed to update address"))
+                }
+            } else {
+                val errorMsg = parseApiError(response.errorBody())
+                Log.e(TAG, "API request failed with code ${response.code()}: $errorMsg")
+                Result.failure(Exception(errorMsg))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception in updateAddress: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun deleteAddress(addressId: String): Result<Map<String, Any>> {
+        return try {
+            Log.d(TAG, "Deleting address: $addressId")
+            val response = api.deleteAddress(addressId)
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body?.success == true && body.data != null) {
+                    Log.d(TAG, "Successfully deleted address")
+                    Result.success(body.data)
+                } else {
+                    Log.e(TAG, "API response indicates failure: ${body?.error}")
+                    Result.failure(Exception(body?.error ?: body?.message ?: "Failed to delete address"))
+                }
+            } else {
+                val errorMsg = parseApiError(response.errorBody())
+                Log.e(TAG, "API request failed with code ${response.code()}: $errorMsg")
+                Result.failure(Exception(errorMsg))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception in deleteAddress: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+
+    // Password management methods
+    override suspend fun changePassword(request: ChangePasswordRequest): Result<Map<String, String>> {
+        return try {
+            Log.d(TAG, "Changing password")
+            val response = api.changePassword(request)
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body?.success == true && body.data != null) {
+                    Log.d(TAG, "Successfully changed password")
+                    Result.success(body.data)
+                } else {
+                    Log.e(TAG, "API response indicates failure: ${body?.error}")
+                    Result.failure(Exception(body?.error ?: body?.message ?: "Failed to change password"))
+                }
+            } else {
+                val errorMsg = parseApiError(response.errorBody())
+                Log.e(TAG, "API request failed with code ${response.code()}: $errorMsg")
+                Result.failure(Exception(errorMsg))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception in changePassword: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
 }

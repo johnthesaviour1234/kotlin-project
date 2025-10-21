@@ -1,6 +1,6 @@
 <resources>
     <!-- Application name -->
-    <string name="app_name">Grocery Customer</string>
+    <string name="app_name">FreshMart</string>
     
     <!-- Common UI strings -->
     <string name="loading">Loading…</string>
@@ -38,10 +38,14 @@
     <string name="product_image">Product image</string>
     
     <!-- Home screen -->
-    <string name="home_title">Fresh Groceries</string>
-    <string name="welcome_message">Welcome to your grocery store</string>
+    <string name="home_title">FreshMart</string>
+    <string name="welcome_message">Your neighborhood grocery store</string>
     <string name="browse_fresh_products">Browse fresh products</string>
     <string name="featured_products">Featured Products</string>
+    <string name="shop_by_category">Shop by Category</string>
+    <string name="search_products">Search products...</string>
+    <string name="sort">Sort</string>
+    <string name="price_range">Price Range:</string>
     <string name="no_products_found">No products found</string>
     
     <!-- Categories screen -->
@@ -110,4 +114,60 @@
     <string name="cd_cart">Shopping cart</string>
     <string name="cd_view_order_details">View order details</string>
     <string name="cd_order_status">Order status</string>
+    
+    <!-- Profile Management -->
+    <string name="edit">Edit</string>
+    <string name="account_settings">Account Settings</string>
+    <string name="change_password">Change Password</string>
+    <string name="notifications">Notifications</string>
+    <string name="app_theme">App Theme</string>
+    <string name="delivery_addresses">Delivery Addresses</string>
+    <string name="add_address">Add Address</string>
+    <string name="no_addresses_found">No addresses found</string>
+    <string name="logout">Logout</string>
+    
+    <!-- Address Management -->
+    <string name="address_name">Address Name</string>
+    <string name="street_address">Street Address</string>
+    <string name="apartment">Apartment/Suite</string>
+    <string name="city">City</string>
+    <string name="state">State</string>
+    <string name="postal_code">Postal Code</string>
+    <string name="landmark">Landmark</string>
+    <string name="address_type">Address Type</string>
+    <string name="set_as_default">Set as Default</string>
+    <string name="home">Home</string>
+    <string name="work">Work</string>
+    <string name="other">Other</string>
+    <string name="default_address">Default</string>
+    
+    <!-- Profile Edit -->
+    <string name="edit_profile">Edit Profile</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="date_of_birth">Date of Birth</string>
+    
+    <!-- Password Change -->
+    <string name="current_password">Current Password</string>
+    <string name="new_password">New Password</string>
+    <string name="confirm_new_password">Confirm New Password</string>
+    <string name="password_changed_successfully">Password changed successfully</string>
+    
+    <!-- Theme Options -->
+    <string name="light_theme">Light</string>
+    <string name="dark_theme">Dark</string>
+    <string name="system_theme">System Default</string>
+    
+    <!-- Validation Messages -->
+    <string name="field_required">This field is required</string>
+    <string name="invalid_email">Please enter a valid email address</string>
+    <string name="passwords_do_not_match">Passwords do not match</string>
+    <string name="password_too_short">Password must be at least 8 characters</string>
+    <string name="password_requirements">Password must be at least 8 characters long and contain letters and numbers</string>
+    
+    <!-- Additional Resources -->
+    <string name="avatar_url">Avatar URL</string>
+    <string name="apartment_unit">Apartment/Unit (Optional)</string>
+    <string name="set_as_default_address">Set as default address</string>
+    <string name="save">Save</string>
+    
 </resources>
