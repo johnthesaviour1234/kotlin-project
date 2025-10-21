@@ -6,17 +6,25 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.grocery.customer.R
 import com.grocery.customer.ui.adapters.OrderItemsAdapter
+import com.grocery.customer.domain.repository.OrderRepository
+import com.grocery.customer.util.Resource
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.inject.Inject
 
 /**
  * Order Confirmation Fragment - Displays order confirmation details
@@ -28,6 +36,9 @@ class OrderConfirmationFragment : Fragment() {
 
     private val args: OrderConfirmationFragmentArgs by navArgs()
     private lateinit var orderItemsAdapter: OrderItemsAdapter
+    
+    @Inject
+    lateinit var orderRepository: OrderRepository
 
     // View references
     private lateinit var textViewOrderNumber: TextView
@@ -37,6 +48,7 @@ class OrderConfirmationFragment : Fragment() {
     private lateinit var recyclerViewOrderItems: RecyclerView
     private lateinit var buttonViewOrder: Button
     private lateinit var buttonContinueShopping: Button
+    private lateinit var progressBar: ProgressBar
 
     companion object {
         private const val TAG = "OrderConfirmationFragment"
@@ -67,6 +79,9 @@ class OrderConfirmationFragment : Fragment() {
         recyclerViewOrderItems = view.findViewById(R.id.recyclerViewOrderItems)
         buttonViewOrder = view.findViewById(R.id.buttonViewOrder)
         buttonContinueShopping = view.findViewById(R.id.buttonContinueShopping)
+        progressBar = ProgressBar(view.context).apply {
+            isIndeterminate = true
+        }
     }
 
     private fun setupRecyclerView() {
@@ -78,48 +93,67 @@ class OrderConfirmationFragment : Fragment() {
     }
 
     private fun displayOrderDetails() {
-        try {
-            val order = args.order
-            
-            Log.d(TAG, "Displaying order confirmation for: ${order.id}")
-            
-            // Order number with prefix
-            textViewOrderNumber.text = "Order #${order.order_number}"
-            
-            // Order date
-            textViewOrderDate.text = formatDate(order.created_at)
-            
-            // Total amount
-            textViewTotalAmount.text = getString(R.string.price_format, order.total_amount)
-            
-            // Delivery address
-            val addressParts = mutableListOf<String>()
-            addressParts.add(order.delivery_address.street)
-            
-            order.delivery_address.apartment?.let {
-                if (it.isNotBlank()) {
-                    addressParts.add(it)
-                }
+        val orderId = args.orderId
+        Log.d(TAG, "Fetching order: $orderId")
+        
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val result = orderRepository.getOrder(orderId)
+                result.fold(
+                    onSuccess = { order ->
+                        Log.d(TAG, "Successfully fetched order: ${order.id}")
+                        updateUIWithOrder(order)
+                    },
+                    onFailure = { exception ->
+                        Log.e(TAG, "Failed to fetch order: ${exception.message}", exception)
+                        Toast.makeText(
+                            context,
+                            "Failed to load order details: ${exception.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading order details: ${e.message}", e)
+                Toast.makeText(context, "Error loading order details", Toast.LENGTH_SHORT).show()
             }
-            
-            addressParts.add("${order.delivery_address.city}, ${order.delivery_address.state} ${order.delivery_address.postal_code}")
-            
-            order.delivery_address.landmark?.let {
-                if (it.isNotBlank()) {
-                    addressParts.add("Landmark: $it")
-                }
+        }
+    }
+    
+    private fun updateUIWithOrder(order: com.grocery.customer.data.remote.dto.OrderDTO) {
+        // Order number with prefix
+        textViewOrderNumber.text = "Order #${order.order_number}"
+        
+        // Order date
+        textViewOrderDate.text = formatDate(order.created_at)
+        
+        // Total amount
+        textViewTotalAmount.text = getString(R.string.price_format, order.total_amount)
+        
+        // Delivery address
+        val addressParts = mutableListOf<String>()
+        addressParts.add(order.delivery_address.street)
+        
+        order.delivery_address.apartment?.let {
+            if (it.isNotBlank()) {
+                addressParts.add(it)
             }
-            
-            textViewDeliveryAddress.text = addressParts.joinToString("\n")
-            
-            // Order items
-            order.order_items?.let { items ->
-                Log.d(TAG, "Setting up ${items.size} order items")
-                orderItemsAdapter.submitList(items)
+        }
+        
+        addressParts.add("${order.delivery_address.city}, ${order.delivery_address.state} ${order.delivery_address.postal_code}")
+        
+        order.delivery_address.landmark?.let {
+            if (it.isNotBlank()) {
+                addressParts.add("Landmark: $it")
             }
-            
-        } catch (e: Exception) {
-            Log.e(TAG, "Error displaying order details: ${e.message}", e)
+        }
+        
+        textViewDeliveryAddress.text = addressParts.joinToString("\n")
+        
+        // Order items
+        order.order_items?.let { items ->
+            Log.d(TAG, "Setting up ${items.size} order items")
+            orderItemsAdapter.submitList(items)
         }
     }
 
@@ -140,7 +174,7 @@ class OrderConfirmationFragment : Fragment() {
             try {
                 findNavController().navigate(
                     OrderConfirmationFragmentDirections.actionOrderConfirmationToOrderDetail(
-                        orderId = args.order.id
+                        orderId = args.orderId
                     )
                 )
             } catch (e: Exception) {

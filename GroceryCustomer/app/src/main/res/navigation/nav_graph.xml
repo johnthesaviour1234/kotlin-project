@@ -103,8 +103,8 @@
         tools:layout="@layout/fragment_order_confirmation" >
         
         <argument
-            android:name="order"
-            app:argType="com.grocery.customer.data.remote.dto.OrderDTO" />
+            android:name="orderId"
+            app:argType="string" />
         
         <action
             android:id="@+id/action_orderConfirmation_to_orderDetail"

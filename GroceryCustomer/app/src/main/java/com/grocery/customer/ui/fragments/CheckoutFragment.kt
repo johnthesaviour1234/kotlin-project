@@ -253,11 +253,11 @@ class CheckoutFragment : Fragment() {
                     Toast.LENGTH_LONG
                 ).show()
                 
-                // Navigate to order confirmation screen with order details
+                // Navigate to order confirmation screen with order ID
                 try {
                     findNavController().navigate(
                         CheckoutFragmentDirections.actionCheckoutToOrderConfirmation(
-                            order = state.order
+                            orderId = state.order.id
                         )
                     )
                 } catch (e: Exception) {
