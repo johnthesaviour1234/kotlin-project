@@ -19,11 +19,10 @@
         <!-- Order Number -->
         <TextView
             android:id="@+id/textViewOrderNumber"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@+id/textViewOrderStatus"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Order #ORD-2024-001" />
@@ -33,6 +32,7 @@
             android:id="@+id/textViewOrderStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
             android:text="PENDING"
@@ -54,7 +54,8 @@
             android:id="@+id/textViewOrderDate"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
             android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
             android:textColor="@color/text_secondary"
             app:layout_constraintEnd_toStartOf="@+id/textViewOrderTotal"
@@ -67,12 +68,13 @@
             android:id="@+id/textViewOrderTotal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
             android:textColor="@color/primary"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@+id/textViewOrderDate"
+            app:layout_constraintBaseline_toBaselineOf="@+id/textViewOrderDate"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/textViewOrderDate"
+            app:layout_constraintStart_toEndOf="@+id/textViewOrderDate"
             tools:text="₹522.50" />
 
         <!-- Divider -->
