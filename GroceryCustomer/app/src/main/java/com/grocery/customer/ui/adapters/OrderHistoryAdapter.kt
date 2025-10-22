@@ -50,10 +50,20 @@ class OrderHistoryAdapter(
             } else {
                 order.order_number
             }
-            textViewOrderNumber.text = displayOrderNumber
             
-            // Log for debugging
-            android.util.Log.d("OrderHistoryAdapter", "Order: order_number='${order.order_number}', displayOrderNumber='$displayOrderNumber'")
+            // Comprehensive debug logging
+            android.util.Log.d("OrderHistoryAdapter", """BIND ORDER DATA:
+            |  ID: ${order.id}
+            |  order_number: '${order.order_number}' (is null: ${order.order_number == null}, is empty: ${order.order_number?.isEmpty()})
+            |  displayOrderNumber: '$displayOrderNumber'
+            |  status: ${order.status}
+            |  created_at: ${order.created_at}
+            |  total_amount: ${order.total_amount}
+            |  order_items count: ${order.order_items?.size}
+            """.trimMargin())
+            
+            textViewOrderNumber.text = displayOrderNumber
+            android.util.Log.d("OrderHistoryAdapter", "textViewOrderNumber.text set to: '${textViewOrderNumber.text}'")
             
             textViewOrderDate.text = formatDate(order.created_at)
             textViewOrderStatus.text = order.status.replaceFirstChar { it.uppercase() }
@@ -75,14 +85,26 @@ class OrderHistoryAdapter(
         }
 
         private fun formatDate(dateString: String): String {
-            return try {
-                val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-                val outputFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-                val date = inputFormat.parse(dateString)
-                date?.let { outputFormat.format(it) } ?: dateString
-            } catch (e: Exception) {
-                dateString
+            val outputFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).apply {
+                timeZone = TimeZone.getDefault()
             }
+            val patterns = listOf(
+                "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", // with millis and timezone
+                "yyyy-MM-dd'T'HH:mm:ssXXX",     // with timezone
+                "yyyy-MM-dd'T'HH:mm:ss.SSS",    // millis, no timezone (assume UTC)
+                "yyyy-MM-dd'T'HH:mm:ss"         // no timezone (assume UTC)
+            )
+            for (pattern in patterns) {
+                try {
+                    val sdf = SimpleDateFormat(pattern, Locale.US)
+                    if (!pattern.contains("X")) {
+                        sdf.timeZone = TimeZone.getTimeZone("UTC")
+                    }
+                    val date = sdf.parse(dateString)
+                    if (date != null) return outputFormat.format(date)
+                } catch (_: Exception) { /* try next */ }
+            }
+            return dateString
         }
 
         private fun setStatusColor(status: String) {
@@ -98,7 +120,9 @@ class OrderHistoryAdapter(
             
             textViewOrderStatus.setChipBackgroundColorResource(colorResId)
             textViewOrderStatus.text = labelText
-            textViewOrderStatus.setTextColor(android.graphics.Color.WHITE)
+            textViewOrderStatus.setTextColor(
+                ContextCompat.getColor(itemView.context, R.color.on_primary)
+            )
         }
     }
 

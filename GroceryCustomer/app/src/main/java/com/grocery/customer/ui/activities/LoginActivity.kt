@@ -33,6 +33,11 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                 showError("Password must be at least 6 characters")
                 return@setOnClickListener
             }
+            
+            // Show loading immediately
+            binding.progressBar.visibility = View.VISIBLE
+            binding.buttonLogin.isEnabled = false
+            
             viewModel.login(email, password)
         }
         binding.textRegister.setOnClickListener {
@@ -56,14 +61,7 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
     }
 
     override fun setupObservers() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.isLoading.collect { loading ->
-                    binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
-                    binding.buttonLogin.isEnabled = !loading
-                }
-            }
-        }
+        // Remove automatic loading observer - we'll control it manually
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.error.collect { err ->
@@ -88,11 +86,19 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>() {
                 viewModel.loginState.collect { state ->
                     when (state) {
                         is Resource.Success -> {
+                            // Hide loading immediately on success
+                            binding.progressBar.visibility = View.GONE
+                            binding.buttonLogin.isEnabled = true
+                            
                             Toast.makeText(this@LoginActivity, "Login successful", Toast.LENGTH_SHORT).show()
                             startActivity(Intent(this@LoginActivity, MainActivity::class.java))
                             finish()
                         }
                         is Resource.Error -> {
+                            // Hide loading on error
+                            binding.progressBar.visibility = View.GONE
+                            binding.buttonLogin.isEnabled = true
+                            
                             showError(state.message ?: "Login failed")
                         }
                         is Resource.Loading -> {

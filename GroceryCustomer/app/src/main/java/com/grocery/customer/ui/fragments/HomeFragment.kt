@@ -51,6 +51,10 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
+        
+        // Ensure progress bar is hidden initially
+        binding.progressBar.visibility = View.GONE
+        
         setupUI()
         setupObservers()
         loadData()
@@ -102,7 +106,9 @@ class HomeFragment : Fragment() {
 
     private fun setupRefreshListener() {
         binding.swipeRefresh.setOnRefreshListener {
-            loadData()
+            // Only reload when user manually swipes
+            viewModel.loadFeaturedProducts()
+            viewModel.loadCategories()
         }
     }
 
@@ -132,8 +138,10 @@ class HomeFragment : Fragment() {
             when (resource) {
                 is Resource.Loading -> {
                     Log.d(TAG, "Loading featured products...")
-                    binding.swipeRefresh.isRefreshing = true
-                    binding.progressBar.visibility = View.VISIBLE
+                    // Only show progress bar if not already refreshing via swipe
+                    if (!binding.swipeRefresh.isRefreshing) {
+                        binding.progressBar.visibility = View.VISIBLE
+                    }
                     binding.textViewEmptyState.visibility = View.GONE
                 }
                 is Resource.Success -> {

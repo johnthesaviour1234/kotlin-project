@@ -74,8 +74,10 @@ class CategoriesFragment : Fragment() {
         viewModel.categories.observe(viewLifecycleOwner) { resource ->
             when (resource) {
                 is Resource.Loading -> {
-                    binding.swipeRefresh.isRefreshing = true
-                    binding.progressBar.visibility = View.VISIBLE
+                    // Only show progress bar if not already refreshing via swipe
+                    if (!binding.swipeRefresh.isRefreshing) {
+                        binding.progressBar.visibility = View.VISIBLE
+                    }
                     binding.textViewEmptyCategories.visibility = View.GONE
                 }
                 is Resource.Success -> {

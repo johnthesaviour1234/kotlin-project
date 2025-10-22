@@ -201,13 +201,13 @@ class OrderDetailFragment : Fragment() {
         }
         
         // Price breakdown
-        textViewSubtotal.text = getString(R.string.price_format, order.subtotal)
+        textViewSubtotal.text = getString(R.string.price_format, order.subtotal ?: order.total_amount)
         textViewTax.text = getString(R.string.price_format, order.tax_amount ?: 0.0)
         textViewDeliveryFee.text = getString(R.string.price_format, order.delivery_fee ?: 0.0)
         textViewTotal.text = getString(R.string.price_format, order.total_amount)
         
         // Delivery address
-        textViewDeliveryAddress.text = formatAddress(order.delivery_address)
+        textViewDeliveryAddress.text = order.delivery_address?.let { formatAddress(it) } ?: "Address not available"
         
         // Payment info
         textViewPaymentMethod.text = (order.payment_method ?: "Cash").replaceFirstChar { it.uppercase() }
@@ -224,14 +224,26 @@ class OrderDetailFragment : Fragment() {
     }
 
     private fun formatDate(dateString: String): String {
-        return try {
-            val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-            val outputFormat = SimpleDateFormat("MMM dd, yyyy 'at' h:mm a", Locale.getDefault())
-            val date = inputFormat.parse(dateString)
-            date?.let { outputFormat.format(it) } ?: dateString
-        } catch (e: Exception) {
-            dateString
+        val outputFormat = SimpleDateFormat("MMM dd, yyyy 'at' h:mm a", Locale.getDefault()).apply {
+            timeZone = TimeZone.getDefault()
         }
+        val patterns = listOf(
+            "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+            "yyyy-MM-dd'T'HH:mm:ssXXX",
+            "yyyy-MM-dd'T'HH:mm:ss.SSS",
+            "yyyy-MM-dd'T'HH:mm:ss"
+        )
+        for (pattern in patterns) {
+            try {
+                val sdf = SimpleDateFormat(pattern, Locale.US)
+                if (!pattern.contains("X")) {
+                    sdf.timeZone = TimeZone.getTimeZone("UTC")
+                }
+                val date = sdf.parse(dateString)
+                if (date != null) return outputFormat.format(date)
+            } catch (_: Exception) { /* try next */ }
+        }
+        return dateString
     }
 
     private fun formatAddress(address: com.grocery.customer.data.remote.dto.DeliveryAddressDTO): String {

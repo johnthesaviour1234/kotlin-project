@@ -350,6 +350,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Cash on Delivery"
+                        android:textColor="@color/text_primary"
                         android:checked="true"
                         android:layout_marginBottom="8dp" />
 
@@ -358,13 +359,15 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Debit/Credit Card"
+                        android:textColor="@color/text_primary"
                         android:layout_marginBottom="8dp" />
 
                     <RadioButton
                         android:id="@+id/radioButtonUPI"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="UPI Payment" />
+                        android:text="UPI Payment"
+                        android:textColor="@color/text_primary" />
 
                 </RadioGroup>
 

@@ -132,20 +132,25 @@ class OrderConfirmationFragment : Fragment() {
         
         // Delivery address
         val addressParts = mutableListOf<String>()
-        addressParts.add(order.delivery_address.street)
         
-        order.delivery_address.apartment?.let {
-            if (it.isNotBlank()) {
-                addressParts.add(it)
+        order.delivery_address?.let { address ->
+            addressParts.add(address.street)
+            
+            address.apartment?.let {
+                if (it.isNotBlank()) {
+                    addressParts.add(it)
+                }
             }
-        }
-        
-        addressParts.add("${order.delivery_address.city}, ${order.delivery_address.state} ${order.delivery_address.postal_code}")
-        
-        order.delivery_address.landmark?.let {
-            if (it.isNotBlank()) {
-                addressParts.add("Landmark: $it")
+            
+            addressParts.add("${address.city}, ${address.state} ${address.postal_code}")
+            
+            address.landmark?.let {
+                if (it.isNotBlank()) {
+                    addressParts.add("Landmark: $it")
+                }
             }
+        } ?: run {
+            addressParts.add("Address not available")
         }
         
         textViewDeliveryAddress.text = addressParts.joinToString("\n")
@@ -158,14 +163,26 @@ class OrderConfirmationFragment : Fragment() {
     }
 
     private fun formatDate(dateString: String): String {
-        return try {
-            val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-            val outputFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-            val date = inputFormat.parse(dateString)
-            date?.let { outputFormat.format(it) } ?: dateString
-        } catch (e: Exception) {
-            dateString
+        val outputFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).apply {
+            timeZone = TimeZone.getDefault()
         }
+        val patterns = listOf(
+            "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+            "yyyy-MM-dd'T'HH:mm:ssXXX",
+            "yyyy-MM-dd'T'HH:mm:ss.SSS",
+            "yyyy-MM-dd'T'HH:mm:ss"
+        )
+        for (pattern in patterns) {
+            try {
+                val sdf = SimpleDateFormat(pattern, Locale.US)
+                if (!pattern.contains("X")) {
+                    sdf.timeZone = TimeZone.getTimeZone("UTC")
+                }
+                val date = sdf.parse(dateString)
+                if (date != null) return outputFormat.format(date)
+            } catch (_: Exception) { /* try next */ }
+        }
+        return dateString
     }
 
     private fun setupClickListeners() {

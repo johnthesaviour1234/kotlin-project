@@ -103,8 +103,8 @@ class OrderHistoryFragment : Fragment() {
 
     private fun setupStatusFilter() {
         val statusOptions = arrayOf("All", "Pending", "Confirmed", "Preparing", "Ready", "Delivered", "Cancelled")
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, statusOptions)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        val adapter = ArrayAdapter(requireContext(), R.layout.spinner_item_address, statusOptions)
+        adapter.setDropDownViewResource(R.layout.spinner_item_address)
         
         spinnerStatusFilter.adapter = adapter
         spinnerStatusFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -182,6 +182,15 @@ class OrderHistoryFragment : Fragment() {
             } else {
                 layoutEmptyState.visibility = View.GONE
                 recyclerViewOrders.visibility = View.VISIBLE
+                
+                // Debug logging
+                android.util.Log.d("OrderHistoryFragment", """UPDATE UI - ORDERS LIST:
+                |  Total orders: ${state.orders.size}
+                |  Orders data:
+                """.trimMargin())
+                state.orders.forEach { order ->
+                    android.util.Log.d("OrderHistoryFragment", "    - ID: ${order.id}, order_number: '${order.order_number}', status: ${order.status}, items: ${order.order_items?.size}")
+                }
                 
                 // Update orders list
                 orderHistoryAdapter.submitList(state.orders)

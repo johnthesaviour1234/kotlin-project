@@ -2,35 +2,37 @@ package com.grocery.customer.data.remote.dto
 
 data class OrderDTO(
     val id: String,
-    val customer_id: String,
     val order_number: String,
     val status: String,
     val total_amount: Double,
-    val subtotal: Double,
+    val created_at: String,
+    val order_items: List<OrderItemDTO>? = null,
+    // Optional fields that may not be in API response
+    val customer_id: String? = null,
+    val subtotal: Double? = null,
     val tax_amount: Double? = null,
     val delivery_fee: Double? = null,
-    val customer_info: CustomerInfoDTO,
-    val delivery_address: DeliveryAddressDTO,
+    val customer_info: CustomerInfoDTO? = null,
+    val delivery_address: DeliveryAddressDTO? = null,
     val payment_method: String? = null,
     val payment_status: String? = null,
     val notes: String? = null,
     val estimated_delivery_time: String? = null,
     val delivered_at: String? = null,
-    val created_at: String,
-    val updated_at: String,
-    val order_items: List<OrderItemDTO>? = null
+    val updated_at: String? = null
 )
 
 data class OrderItemDTO(
     val id: String,
-    val order_id: String,
-    val product_id: String,
     val quantity: Int,
-    val unit_price: Double,
-    val total_price: Double,
     val product_name: String,
     val product_image_url: String? = null,
-    val created_at: String
+    // Optional fields that may not be in API response
+    val order_id: String? = null,
+    val product_id: String? = null,
+    val unit_price: Double? = null,
+    val total_price: Double? = null,
+    val created_at: String? = null
 )
 
 data class CustomerInfoDTO(

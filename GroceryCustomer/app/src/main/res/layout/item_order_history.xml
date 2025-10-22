@@ -4,113 +4,137 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
     android:layout_marginBottom="12dp"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="3dp">
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/divider">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="18dp">
 
-        <!-- Header Section: Order ID Label + Order Number + Status Badge -->
-        <LinearLayout
+        <!-- Header Section: Order Number + Status Badge -->
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="start">
+            android:paddingBottom="8dp">
 
-            <!-- Order ID Label -->
-            <TextView
-                android:layout_width="wrap_content"
+            <!-- Order Number with Icon -->
+            <LinearLayout
+                android:id="@+id/layoutOrderNumber"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Order ID"
-                android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                android:textColor="@color/text_secondary"
-                android:alpha="0.7" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/textViewOrderStatus"
+                app:layout_constraintTop_toTopOf="parent">
 
-            <!-- Order Number + Status Row -->
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:minHeight="32dp"
-                android:paddingVertical="4dp">
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginEnd="8dp"
+                    android:src="@drawable/ic_receipt"
+                    android:contentDescription="Order icon"
+                    app:tint="@color/primary" />
 
-                <!-- Order Number Value -->
                 <TextView
                     android:id="@+id/textViewOrderNumber"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:maxLines="1"
                     android:ellipsize="end"
                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                     android:textStyle="bold"
-                    android:textColor="@color/primary"
-                    android:minHeight="28dp"
-                    android:gravity="center_vertical"
-                    app:layout_constraintEnd_toStartOf="@+id/statusBarrier"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintVertical_bias="0.5"
+                    android:textColor="@color/text_primary"
+                    android:textSize="17sp"
                     tools:text="ORD-2024-001" />
 
-                <!-- Barrier to create space before status -->
-                <androidx.constraintlayout.widget.Barrier
-                    android:id="@+id/statusBarrier"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:barrierDirection="end"
-                    app:constraint_referenced_ids="textViewOrderNumber" />
+            </LinearLayout>
 
-                <!-- Order Status Badge -->
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/textViewOrderStatus"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:text="PENDING"
-                    android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
-                    android:textColor="@android:color/white"
-                    android:textStyle="bold"
-                    android:textAllCaps="false"
-                    android:maxLines="1"
-                    app:chipBackgroundColor="@color/status_pending"
-                    app:chipCornerRadius="6dp"
-                    app:chipEndPadding="0dp"
-                    app:chipStartPadding="0dp"
-                    app:chipStrokeWidth="0dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintVertical_bias="0.5"
-                    tools:text="PENDING" />
+            <!-- Order Status Badge -->
+            <com.google.android.material.chip.Chip
+                android:id="@+id/textViewOrderStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:text="PENDING"
+                android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+                android:textColor="@color/on_primary"
+                android:textStyle="bold"
+                android:textAllCaps="true"
+                android:textSize="11sp"
+                android:maxLines="1"
+                app:chipBackgroundColor="@color/status_pending"
+                app:chipCornerRadius="8dp"
+                app:chipEndPadding="0dp"
+                app:chipStartPadding="0dp"
+                app:chipMinHeight="28dp"
+                app:chipStrokeWidth="0dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="PENDING" />
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-        </LinearLayout>
-
-        <!-- Spacing -->
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="12dp" />
-
-        <!-- Details Section: Date and Total -->
+        <!-- Order Date/Time with Icon -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
+            android:paddingTop="12dp"
+            android:paddingBottom="4dp">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/ic_calendar"
+                android:contentDescription="Date icon"
+                app:tint="@color/text_secondary"
+                android:alpha="0.7" />
+
+            <TextView
+                android:id="@+id/textViewOrderDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp"
+                tools:text="Dec 15, 2024" />
+
+        </LinearLayout>
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:background="@color/divider" />
+
+        <!-- Order Details Grid -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
             android:baselineAligned="false">
 
-            <!-- Order Date Container -->
+            <!-- Total Amount Section -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -121,98 +145,90 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Order Date"
+                    android:text="Total Amount"
                     android:textAppearance="@style/TextAppearance.Material3.BodySmall"
                     android:textColor="@color/text_secondary"
-                    android:alpha="0.7" />
-
-                <TextView
-                    android:id="@+id/textViewOrderDate"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:maxLines="1"
-                    android:ellipsize="end"
-                    android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                    android:textColor="@color/text_secondary"
-                    tools:text="Dec 15, 2024" />
-
-            </LinearLayout>
-
-            <!-- Order Total Container -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="end">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Total"
-                    android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                    android:textColor="@color/text_secondary"
-                    android:alpha="0.7" />
+                    android:textSize="12sp"
+                    android:alpha="0.8" />
 
                 <TextView
                     android:id="@+id/textViewOrderTotal"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
+                    android:layout_marginTop="4dp"
                     android:maxLines="1"
                     android:ellipsize="end"
-                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                     android:textColor="@color/primary"
                     android:textStyle="bold"
+                    android:textSize="18sp"
                     tools:text="₹522.50" />
+
+            </LinearLayout>
+
+            <!-- Items Count Section -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="end"
+                android:paddingStart="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Items"
+                    android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    android:alpha="0.8" />
+
+                <TextView
+                    android:id="@+id/textViewItemCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                    android:textColor="@color/text_primary"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    tools:text="3 items" />
 
             </LinearLayout>
 
         </LinearLayout>
 
-        <!-- Divider -->
-        <View
-            android:id="@+id/divider"
+        <!-- Footer: View Details Button -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="12dp"
-            android:background="@color/divider" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal"
+            android:gravity="center">
 
-        <!-- Footer Section: Item Count + Arrow -->
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <!-- Item Count -->
             <TextView
-                android:id="@+id/textViewItemCount"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                android:textColor="@color/text_secondary"
-                app:layout_constraintEnd_toStartOf="@+id/imageViewArrow"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="3 items" />
+                android:layout_weight="1"
+                android:text="View Order Details"
+                android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+                android:textColor="@color/primary"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:gravity="center" />
 
-            <!-- Arrow Icon -->
             <ImageView
-                android:id="@+id/imageViewArrow"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginStart="8dp"
-                android:alpha="0.6"
-                android:contentDescription="View order details"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="4dp"
+                android:contentDescription="View details"
                 android:src="@drawable/ic_arrow_forward"
-                app:layout_constraintBottom_toBottomOf="@+id/textViewItemCount"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/textViewItemCount"
-                app:tint="@color/text_secondary" />
+                app:tint="@color/primary" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
 
     </LinearLayout>
 

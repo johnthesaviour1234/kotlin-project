@@ -41,6 +41,11 @@ class RegisterActivity : BaseActivity<ActivityRegisterBinding>() {
                 showError("Enter your full name")
                 return@setOnClickListener
             }
+            
+            // Show loading immediately
+            binding.progressBar.visibility = View.VISIBLE
+            binding.buttonRegister.isEnabled = false
+            
             viewModel.register(email, password, fullName, phone, "customer")
         }
         binding.textLogin.setOnClickListener {
@@ -50,14 +55,7 @@ class RegisterActivity : BaseActivity<ActivityRegisterBinding>() {
     }
 
     override fun setupObservers() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.isLoading.collect { loading ->
-                    binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
-                    binding.buttonRegister.isEnabled = !loading
-                }
-            }
-        }
+        // Remove automatic loading observer - we'll control it manually
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.error.collect { err ->
@@ -70,6 +68,10 @@ class RegisterActivity : BaseActivity<ActivityRegisterBinding>() {
                 viewModel.registerState.collect { state ->
                     when (state) {
                         is Resource.Success -> {
+                            // Hide loading immediately on success
+                            binding.progressBar.visibility = View.GONE
+                            binding.buttonRegister.isEnabled = true
+                            
                             val autoSignedIn = state.data?.tokens?.accessToken != null
                             Toast.makeText(
                                 this@RegisterActivity,
@@ -84,7 +86,13 @@ class RegisterActivity : BaseActivity<ActivityRegisterBinding>() {
                                 finish()
                             }
                         }
-                        is Resource.Error -> showError(state.message ?: "Registration failed")
+                        is Resource.Error -> {
+                            // Hide loading on error
+                            binding.progressBar.visibility = View.GONE
+                            binding.buttonRegister.isEnabled = true
+                            
+                            showError(state.message ?: "Registration failed")
+                        }
                         is Resource.Loading -> {}
                     }
                 }

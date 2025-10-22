@@ -1,6 +1,7 @@
 package com.grocery.customer.ui.fragments
 
 import android.app.DatePickerDialog
+import android.content.Intent
 import androidx.appcompat.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
@@ -26,6 +27,7 @@ import com.grocery.customer.data.remote.dto.ProfileUpdateRequest
 import com.grocery.customer.data.remote.dto.UpdateAddressRequest
 import com.grocery.customer.data.remote.dto.UserAddress
 import com.grocery.customer.databinding.FragmentProfileBinding
+import com.grocery.customer.ui.activities.LoginActivity
 import com.grocery.customer.ui.adapters.AddressAdapter
 import com.grocery.customer.ui.viewmodels.ProfileViewModel
 import com.grocery.customer.util.Resource
@@ -427,11 +429,14 @@ class ProfileFragment : Fragment() {
         builder.setMessage("Are you sure you want to logout?")
         builder.setPositiveButton("Logout") { dialog, _ ->
             viewModel.logout()
-            // In a real app, this would navigate to login activity or restart app
-            // For now, finish the app
             Log.d(TAG, "User logged out")
             Toast.makeText(context, "Logged out successfully", Toast.LENGTH_SHORT).show()
-            requireActivity().finishAffinity()
+            
+            // Navigate to login screen
+            val intent = Intent(requireContext(), LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            requireActivity().finish()
             dialog.dismiss()
         }
         builder.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }

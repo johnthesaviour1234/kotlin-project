@@ -379,8 +379,8 @@ class CheckoutFragment : Fragment() {
             addressOptions.add(displayAddress)
         }
         
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, addressOptions)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        val adapter = ArrayAdapter(requireContext(), R.layout.spinner_item_address, addressOptions)
+        adapter.setDropDownViewResource(R.layout.spinner_item_address)
         spinnerSavedAddresses.adapter = adapter
         
         spinnerSavedAddresses.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {

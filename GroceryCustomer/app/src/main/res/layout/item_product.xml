@@ -9,7 +9,7 @@
     android:focusable="true"
     app:cardCornerRadius="8dp"
     app:cardElevation="2dp"
-    app:rippleColor="@android:color/darker_gray">
+    app:rippleColor="@color/accent_orange">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -23,7 +23,7 @@
             android:layout_height="120dp"
             android:layout_marginBottom="8dp"
             android:scaleType="centerCrop"
-            android:background="@android:color/darker_gray"
+            android:background="@color/product_placeholder"
             android:contentDescription="@string/cd_product_image"
             tools:src="@android:drawable/ic_menu_gallery" />
 
@@ -46,7 +46,7 @@
             android:ellipsize="end"
             android:maxLines="2"
             android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-            android:textColor="@android:color/darker_gray"
+            android:textColor="@color/text_secondary"
             tools:text="Fresh and organic apples from local farms" />
 
         <TextView
@@ -54,7 +54,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-            android:textColor="@color/design_default_color_primary"
+            android:textColor="@color/secondary"
             android:textStyle="bold"
             tools:text="₹2.99" />
 
