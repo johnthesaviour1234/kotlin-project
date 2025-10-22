@@ -44,7 +44,17 @@ class OrderHistoryAdapter(
         private val textViewItemCount: TextView = itemView.findViewById(R.id.textViewItemCount)
 
         fun bind(order: OrderDTO) {
-            textViewOrderNumber.text = "Order #${order.order_number}"
+            // Set order number with fallback to ID if order_number is empty
+            val displayOrderNumber = if (order.order_number.isNullOrEmpty()) {
+                order.id.take(8).uppercase()
+            } else {
+                order.order_number
+            }
+            textViewOrderNumber.text = displayOrderNumber
+            
+            // Log for debugging
+            android.util.Log.d("OrderHistoryAdapter", "Order: order_number='${order.order_number}', displayOrderNumber='$displayOrderNumber'")
+            
             textViewOrderDate.text = formatDate(order.created_at)
             textViewOrderStatus.text = order.status.replaceFirstChar { it.uppercase() }
             textViewOrderTotal.text = itemView.context.getString(R.string.price_format, order.total_amount)

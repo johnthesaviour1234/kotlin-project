@@ -17,57 +17,85 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Header Section: Order Number + Status Badge -->
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <!-- Header Section: Order ID Label + Order Number + Status Badge -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="start">
 
-            <!-- Order Number -->
+            <!-- Order ID Label -->
             <TextView
-                android:id="@+id/textViewOrderNumber"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toStartOf="@+id/statusBarrier"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="Order #ORD-2024-001" />
-
-            <!-- Barrier to create space before status -->
-            <androidx.constraintlayout.widget.Barrier
-                android:id="@+id/statusBarrier"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:barrierDirection="end"
-                app:constraint_referenced_ids="textViewOrderNumber" />
+                android:text="Order ID"
+                android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                android:textColor="@color/text_secondary"
+                android:alpha="0.7" />
 
-            <!-- Order Status Badge -->
-            <com.google.android.material.chip.Chip
-                android:id="@+id/textViewOrderStatus"
-                android:layout_width="wrap_content"
+            <!-- Order Number + Status Row -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:text="PENDING"
-                android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
-                android:textColor="@android:color/white"
-                android:textStyle="bold"
-                android:textAllCaps="false"
-                android:maxLines="1"
-                app:chipBackgroundColor="@color/status_pending"
-                app:chipCornerRadius="6dp"
-                app:chipEndPadding="0dp"
-                app:chipStartPadding="0dp"
-                app:chipStrokeWidth="0dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="PENDING" />
+                android:layout_marginTop="4dp"
+                android:minHeight="32dp"
+                android:paddingVertical="4dp">
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                <!-- Order Number Value -->
+                <TextView
+                    android:id="@+id/textViewOrderNumber"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                    android:textStyle="bold"
+                    android:textColor="@color/primary"
+                    android:minHeight="28dp"
+                    android:gravity="center_vertical"
+                    app:layout_constraintEnd_toStartOf="@+id/statusBarrier"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintVertical_bias="0.5"
+                    tools:text="ORD-2024-001" />
+
+                <!-- Barrier to create space before status -->
+                <androidx.constraintlayout.widget.Barrier
+                    android:id="@+id/statusBarrier"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:barrierDirection="end"
+                    app:constraint_referenced_ids="textViewOrderNumber" />
+
+                <!-- Order Status Badge -->
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/textViewOrderStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:text="PENDING"
+                    android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    android:textAllCaps="false"
+                    android:maxLines="1"
+                    app:chipBackgroundColor="@color/status_pending"
+                    app:chipCornerRadius="6dp"
+                    app:chipEndPadding="0dp"
+                    app:chipStartPadding="0dp"
+                    app:chipStrokeWidth="0dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintVertical_bias="0.5"
+                    tools:text="PENDING" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </LinearLayout>
 
         <!-- Spacing -->
         <Space
