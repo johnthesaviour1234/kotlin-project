@@ -4,9 +4,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.chip.Chip
 import com.grocery.customer.R
 import com.grocery.customer.data.remote.dto.OrderDTO
 import java.text.SimpleDateFormat
@@ -37,7 +39,7 @@ class OrderHistoryAdapter(
         
         private val textViewOrderNumber: TextView = itemView.findViewById(R.id.textViewOrderNumber)
         private val textViewOrderDate: TextView = itemView.findViewById(R.id.textViewOrderDate)
-        private val textViewOrderStatus: TextView = itemView.findViewById(R.id.textViewOrderStatus)
+        private val textViewOrderStatus: Chip = itemView.findViewById(R.id.textViewOrderStatus)
         private val textViewOrderTotal: TextView = itemView.findViewById(R.id.textViewOrderTotal)
         private val textViewItemCount: TextView = itemView.findViewById(R.id.textViewItemCount)
 
@@ -74,19 +76,19 @@ class OrderHistoryAdapter(
         }
 
         private fun setStatusColor(status: String) {
-            val color = when (status.lowercase()) {
-                "pending" -> R.color.status_pending
-                "confirmed" -> R.color.status_confirmed
-                "preparing" -> R.color.status_preparing
-                "ready" -> R.color.status_ready
-                "delivered" -> R.color.status_delivered
-                "cancelled" -> R.color.status_cancelled
-                else -> R.color.text_secondary
+            val (colorResId, labelText) = when (status.lowercase()) {
+                "pending" -> Pair(R.color.status_pending, "PENDING")
+                "confirmed" -> Pair(R.color.status_confirmed, "CONFIRMED")
+                "preparing" -> Pair(R.color.status_preparing, "PREPARING")
+                "ready" -> Pair(R.color.status_ready, "READY")
+                "delivered" -> Pair(R.color.status_delivered, "DELIVERED")
+                "cancelled" -> Pair(R.color.status_cancelled, "CANCELLED")
+                else -> Pair(R.color.text_secondary, status.uppercase())
             }
             
-            textViewOrderStatus.setTextColor(
-                itemView.context.resources.getColor(color, itemView.context.theme)
-            )
+            textViewOrderStatus.setChipBackgroundColorResource(colorResId)
+            textViewOrderStatus.text = labelText
+            textViewOrderStatus.setTextColor(android.graphics.Color.WHITE)
         }
     }
 

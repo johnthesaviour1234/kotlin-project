@@ -29,21 +29,25 @@
             tools:text="Order #ORD-2024-001" />
 
         <!-- Order Status -->
-        <TextView
+        <com.google.android.material.chip.Chip
             android:id="@+id/textViewOrderStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_status_pill"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="4dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:text="PENDING"
             android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
             android:textColor="@android:color/white"
             android:textStyle="bold"
-            android:textAllCaps="true"
+            android:textAllCaps="false"
+            app:chipBackgroundColor="@color/status_pending"
+            app:chipCornerRadius="6dp"
+            app:chipEndPadding="0dp"
+            app:chipStartPadding="0dp"
+            app:chipStrokeWidth="0dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="DELIVERED"
-            tools:background="@color/status_delivered" />
+            tools:text="PENDING" />
 
         <!-- Order Date -->
         <TextView

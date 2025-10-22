@@ -70,13 +70,18 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonDecreaseQuantity"
-                style="@style/Widget.Material3.Button.IconButton"
+                style="@style/Widget.MaterialComponents.Button"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:contentDescription="@string/decrease_quantity"
                 android:text="−"
-                android:textSize="18sp"
-                app:backgroundTint="@color/text_disabled"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="0dp"
+                app:backgroundTint="@color/primary"
                 app:icon="@null" />
 
             <TextView
@@ -90,12 +95,17 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonIncreaseQuantity"
-                style="@style/Widget.Material3.Button.IconButton"
+                style="@style/Widget.MaterialComponents.Button"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:contentDescription="@string/increase_quantity"
                 android:text="+"
-                android:textSize="18sp"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="0dp"
                 app:backgroundTint="@color/primary"
                 app:icon="@null" />
 
