@@ -34,6 +34,12 @@ async function handler(req, res) {
           quantity,
           unit_price,
           total_price
+        ),
+        delivery_assignments(
+          id,
+          delivery_personnel_id,
+          status,
+          assigned_at
         )
       `, { count: 'exact' })
 
