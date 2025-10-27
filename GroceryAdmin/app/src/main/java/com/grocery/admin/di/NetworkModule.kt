@@ -1,7 +1,9 @@
 package com.grocery.admin.di
 
 import com.grocery.admin.BuildConfig
+import com.grocery.admin.data.local.TokenStore
 import com.grocery.admin.data.remote.ApiService
+import com.grocery.admin.data.remote.AuthInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,10 +37,18 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideAuthInterceptor(tokenStore: TokenStore): AuthInterceptor {
+        return AuthInterceptor(tokenStore)
+    }
+
+    @Provides
+    @Singleton
     fun provideOkHttpClient(
-        loggingInterceptor: HttpLoggingInterceptor
+        loggingInterceptor: HttpLoggingInterceptor,
+        authInterceptor: AuthInterceptor
     ): OkHttpClient {
         return OkHttpClient.Builder()
+            .addInterceptor(authInterceptor)
             .addInterceptor(loggingInterceptor)
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)

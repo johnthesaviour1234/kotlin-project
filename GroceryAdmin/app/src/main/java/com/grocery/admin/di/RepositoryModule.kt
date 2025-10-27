@@ -1,12 +1,7 @@
 package com.grocery.admin.di
 
-// Temporarily commented out until repository classes are created
-// import com.grocery.admin.data.repository.AuthRepositoryImpl
-// import com.grocery.admin.data.repository.ProductRepositoryImpl
-// import com.grocery.admin.data.repository.UserRepositoryImpl
-// import com.grocery.admin.domain.repository.AuthRepository
-// import com.grocery.admin.domain.repository.ProductRepository
-// import com.grocery.admin.domain.repository.UserRepository
+import com.grocery.admin.data.repository.*
+import com.grocery.admin.domain.repository.*
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -17,11 +12,9 @@ import javax.inject.Singleton
  * Hilt module for binding repository interfaces to their implementations.
  * This follows the dependency inversion principle of Clean Architecture.
  */
-// Temporarily disabled until repository implementations are created
-/*
 @Module
 @InstallIn(SingletonComponent::class)
-object RepositoryModule {
+abstract class RepositoryModule {
 
     @Binds
     @Singleton
@@ -31,14 +24,25 @@ object RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindUserRepository(
-        userRepositoryImpl: UserRepositoryImpl
-    ): UserRepository
+    abstract fun bindDashboardRepository(
+        dashboardRepositoryImpl: DashboardRepositoryImpl
+    ): DashboardRepository
 
     @Binds
     @Singleton
-    abstract fun bindProductRepository(
-        productRepositoryImpl: ProductRepositoryImpl
-    ): ProductRepository
+    abstract fun bindOrdersRepository(
+        ordersRepositoryImpl: OrdersRepositoryImpl
+    ): OrdersRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindProductsRepository(
+        productsRepositoryImpl: ProductsRepositoryImpl
+    ): ProductsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindInventoryRepository(
+        inventoryRepositoryImpl: InventoryRepositoryImpl
+    ): InventoryRepository
 }
-*/

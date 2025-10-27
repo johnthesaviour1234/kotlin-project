@@ -66,6 +66,15 @@ android {
     }
 }
 
+kapt {
+    correctErrorTypes = true
+    useBuildCache = false
+    javacOptions {
+        option("-source", "17")
+        option("-target", "17")
+    }
+}
+
 dependencies {
     // Core Android
     implementation("androidx.core:core-ktx:1.12.0")
@@ -98,6 +107,9 @@ dependencies {
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
+    
+    // DataStore - Preferences
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
     
     // Supabase - temporarily commented out for basic build
     // implementation("io.github.jan-tennert.supabase:postgrest-kt:2.0.4")
