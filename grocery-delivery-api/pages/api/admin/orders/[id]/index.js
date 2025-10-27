@@ -24,7 +24,11 @@ async function handler(req, res) {
           product_name,
           quantity,
           unit_price,
-          total_price
+          total_price,
+          products(
+            image_url,
+            description
+          )
         ),
         delivery_assignments(
           id,
@@ -45,13 +49,20 @@ async function handler(req, res) {
     }
 
     // Normalize delivery_assignments to always be an array
+    // and flatten products data into order_items
     const normalizedData = {
       ...data,
       delivery_assignments: data.delivery_assignments 
         ? (Array.isArray(data.delivery_assignments) 
             ? data.delivery_assignments 
             : [data.delivery_assignments])
-        : []
+        : [],
+      order_items: data.order_items?.map(item => ({
+        ...item,
+        image_url: item.products?.image_url || null,
+        description: item.products?.description || null,
+        products: undefined  // Remove nested products object
+      })) || []
     }
 
     res.status(200).json(formatSuccessResponse(normalizedData))
