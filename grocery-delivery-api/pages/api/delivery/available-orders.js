@@ -8,7 +8,8 @@ async function handler(req, res) {
   }
 
   try {
-    // Get orders assigned to this delivery person with status 'pending'
+    // Get orders assigned to this delivery person
+    // Include: pending (not yet accepted), accepted, in_transit, and arrived
     const { data, error } = await supabase
       .from('delivery_assignments')
       .select(`
@@ -29,7 +30,7 @@ async function handler(req, res) {
         )
       `)
       .eq('delivery_personnel_id', req.user.id)
-      .eq('status', 'pending')
+      .in('status', ['pending', 'accepted', 'in_transit', 'arrived'])
       .order('assigned_at', { ascending: true })
 
     if (error) {
