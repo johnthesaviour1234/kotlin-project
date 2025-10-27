@@ -139,4 +139,12 @@
     <!-- Dashboard Specific -->
     <string name="revenue_format">₹%,.2f</string>
     <string name="items_count">%d items</string>
+    
+    <!-- Product Specific -->
+    <string name="all_products">All Products</string>
+    <string name="active">Active</string>
+    <string name="inactive">Inactive</string>
+    <string name="featured">Featured</string>
+    <string name="price_format">₹%.2f</string>
+    <string name="stock_format">Stock: %d</string>
 </resources>

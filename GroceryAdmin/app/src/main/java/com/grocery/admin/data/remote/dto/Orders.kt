@@ -3,6 +3,7 @@ package com.grocery.admin.data.remote.dto
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.RawValue
 
 @Parcelize
 data class OrderDto(
@@ -14,7 +15,7 @@ data class OrderDto(
     @SerializedName("created_at") val createdAt: String,
     @SerializedName("updated_at") val updatedAt: String?,
     @SerializedName("items") val items: List<OrderItemDto>?,
-    @SerializedName("user_profile") val userProfile: UserProfileDto?,
+    @SerializedName("user_profile") val userProfile: @RawValue UserProfileDto?,
     @SerializedName("delivery_assignments") val deliveryAssignments: List<DeliveryAssignmentDto>?
 ) : Parcelable {
     /**
