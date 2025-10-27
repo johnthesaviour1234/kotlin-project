@@ -30,12 +30,7 @@ async function handler(req, res) {
           id,
           delivery_personnel_id,
           status,
-          assigned_at,
-          delivery_personnel:delivery_personnel_id(
-            id,
-            name,
-            phone
-          )
+          assigned_at
         )
       `)
       .eq('id', id)
