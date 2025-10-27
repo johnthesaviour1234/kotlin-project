@@ -10,13 +10,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.grocery.admin.R
 import com.grocery.admin.databinding.FragmentInventoryBinding
-import com.grocery.admin.ui.viewmodels.ProductsViewModel
+import com.grocery.admin.ui.adapters.InventoryAdapter
+import com.grocery.admin.ui.dialogs.UpdateStockDialog
+import com.grocery.admin.ui.viewmodels.InventoryViewModel
 import com.grocery.admin.util.Resource
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
  * Fragment for inventory management.
- * Shows products with their stock levels and provides basic management.
+ * Shows products with their stock levels and provides stock update functionality.
  */
 @AndroidEntryPoint
 class InventoryFragment : Fragment() {
@@ -24,7 +26,9 @@ class InventoryFragment : Fragment() {
     private var _binding: FragmentInventoryBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: ProductsViewModel by viewModels()
+    private val viewModel: InventoryViewModel by viewModels()
+    private lateinit var inventoryAdapter: InventoryAdapter
+    private var isFilteringLowStock = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,102 +42,137 @@ class InventoryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
+        setupRecyclerView()
         setupUI()
         observeViewModel()
-        
-        // Load inventory data
-        viewModel.loadProducts()
     }
 
+    private fun setupRecyclerView() {
+        inventoryAdapter = InventoryAdapter { inventoryItem ->
+            // Show update stock dialog
+            val dialog = UpdateStockDialog(
+                inventoryItem = inventoryItem,
+                onUpdateStock = { productId, stock, adjustmentType ->
+                    viewModel.updateStock(productId, stock, adjustmentType)
+                }
+            )
+            dialog.show(parentFragmentManager, "UpdateStockDialog")
+        }
+        
+        binding.recyclerView.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = inventoryAdapter
+        }
+    }
+    
     private fun setupUI() {
-        // Show coming soon message for now
         binding.tvTitle.text = "Inventory Management"
         binding.tvSubtitle.text = "Product stock levels and inventory tracking"
         
         // Setup swipe to refresh
         binding.swipeRefresh.setOnRefreshListener {
-            viewModel.refreshProducts()
+            viewModel.refreshInventory()
+        }
+        
+        // Setup filter chip
+        binding.chipLowStock.setOnCheckedChangeListener { _, isChecked ->
+            isFilteringLowStock = isChecked
+            if (isChecked) {
+                viewModel.filterLowStock()
+            } else {
+                viewModel.clearFilter()
+            }
         }
     }
 
     private fun observeViewModel() {
-        viewModel.products.observe(viewLifecycleOwner) { resource ->
+        // Observe inventory data
+        viewModel.inventory.observe(viewLifecycleOwner) { resource ->
             when (resource) {
                 is Resource.Loading -> {
                     if (!binding.swipeRefresh.isRefreshing) {
                         binding.progressBar.visibility = View.VISIBLE
                     }
-                    // Don't hide content during refresh, only on initial load
-                    if (binding.layoutContent.visibility != View.VISIBLE) {
-                        binding.layoutContent.visibility = View.GONE
-                    }
+                    binding.emptyState.visibility = View.GONE
                 }
                 is Resource.Success -> {
                     binding.progressBar.visibility = View.GONE
                     binding.swipeRefresh.isRefreshing = false
                     
-                    val products = resource.data ?: emptyList()
-                    
-                    // Always show content after successful load
-                    binding.layoutContent.visibility = View.VISIBLE
-                    
-                    // Update inventory statistics
-                    updateInventoryStats(products)
+                    val data = resource.data
+                    if (data != null) {
+                        val items = data.items
+                        
+                        if (items.isEmpty()) {
+                            binding.recyclerView.visibility = View.GONE
+                            binding.layoutStats.visibility = View.GONE
+                            binding.emptyState.visibility = View.VISIBLE
+                        } else {
+                            binding.recyclerView.visibility = View.VISIBLE
+                            binding.layoutStats.visibility = View.VISIBLE
+                            binding.emptyState.visibility = View.GONE
+                            
+                            // Update RecyclerView
+                            inventoryAdapter.submitList(items)
+                            
+                            // Update statistics
+                            updateInventoryStats(items, data.lowStockCount)
+                        }
+                    }
                 }
                 is Resource.Error -> {
                     binding.progressBar.visibility = View.GONE
                     binding.swipeRefresh.isRefreshing = false
-                    
-                    // Show content with error state
-                    binding.layoutContent.visibility = View.VISIBLE
-                    binding.tvMessage.text = "Error loading inventory: ${resource.message}\n\nPull down to try again"
+                    binding.emptyState.visibility = View.VISIBLE
                     
                     showError(resource.message ?: "Failed to load inventory")
                 }
-                null -> {
-                    // Initial state - do nothing
+            }
+        }
+        
+        // Observe stock update result
+        viewModel.updateResult.observe(viewLifecycleOwner) { resource ->
+            resource?.let {
+                when (it) {
+                    is Resource.Loading -> {
+                        // Show progress
+                    }
+                    is Resource.Success -> {
+                        showSuccess("Stock updated successfully")
+                        // Clear the result after showing
+                        viewModel.clearUpdateResult()
+                    }
+                    is Resource.Error -> {
+                        showError(it.message ?: "Failed to update stock")
+                        // Clear the result after showing
+                        viewModel.clearUpdateResult()
+                    }
                 }
             }
         }
     }
 
-    private fun updateInventoryStats(products: List<com.grocery.admin.data.remote.dto.ProductDto>) {
-        val totalProducts = products.size
-        
-        // Calculate low stock items (stock < 10)
-        val lowStockCount = products.count { product ->
-            (product.inventory?.quantity ?: 0) > 0 && (product.inventory?.quantity ?: 0) < 10
-        }
+    private fun updateInventoryStats(
+        items: List<com.grocery.admin.data.remote.dto.InventoryItemDto>,
+        lowStockCount: Int
+    ) {
+        val totalProducts = items.size
         
         // Calculate out of stock items
-        val outOfStockCount = products.count { product ->
-            (product.inventory?.quantity ?: 0) == 0
-        }
+        val outOfStockCount = items.count { it.stock == 0 }
         
         // Update UI
         binding.tvTotalProducts.text = totalProducts.toString()
         binding.tvLowStock.text = lowStockCount.toString()
         binding.tvOutOfStock.text = outOfStockCount.toString()
-        
-        // Show success message with details
-        val statusMessage = buildString {
-            append("Inventory loaded successfully!\n")
-            append("Total Products: $totalProducts\n")
-            if (lowStockCount > 0) {
-                append("⚠️ $lowStockCount item(s) running low\n")
-            }
-            if (outOfStockCount > 0) {
-                append("❌ $outOfStockCount item(s) out of stock\n")
-            }
-            if (lowStockCount == 0 && outOfStockCount == 0) {
-                append("✅ All items are well stocked")
-            }
-        }
-        binding.tvMessage.text = statusMessage
     }
 
     private fun showError(message: String) {
         Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).show()
+    }
+    
+    private fun showSuccess(message: String) {
+        Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
     }
 
     override fun onDestroyView() {

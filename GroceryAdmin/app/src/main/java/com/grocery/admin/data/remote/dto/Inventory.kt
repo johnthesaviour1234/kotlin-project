@@ -4,15 +4,22 @@ import com.google.gson.annotations.SerializedName
 
 data class InventoryItemDto(
     @SerializedName("product_id") val productId: String,
-    @SerializedName("quantity") val quantity: Int,
-    @SerializedName("reorder_level") val reorderLevel: Int?,
-    @SerializedName("last_restocked") val lastRestocked: String?,
-    @SerializedName("product") val product: ProductDto?
+    @SerializedName("stock") val stock: Int,
+    @SerializedName("updated_at") val updatedAt: String?,
+    @SerializedName("products") val products: InventoryProductDto?
+)
+
+data class InventoryProductDto(
+    @SerializedName("id") val id: String,
+    @SerializedName("name") val name: String,
+    @SerializedName("price") val price: Double,
+    @SerializedName("image_url") val imageUrl: String?,
+    @SerializedName("is_active") val isActive: Boolean
 )
 
 data class InventoryListResponse(
     @SerializedName("items") val items: List<InventoryItemDto>,
-    @SerializedName("total") val total: Int
+    @SerializedName("low_stock_count") val lowStockCount: Int
 )
 
 data class UpdateInventoryRequest(
