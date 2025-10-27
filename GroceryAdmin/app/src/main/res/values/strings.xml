@@ -147,4 +147,37 @@
     <string name="featured">Featured</string>
     <string name="price_format">₹%.2f</string>
     <string name="stock_format">Stock: %d</string>
+    
+    <!-- Product Form -->
+    <string name="tap_to_add_image">Tap to add product image</string>
+    <string name="change_image">Tap to change image</string>
+    <string name="product_details">Product Details</string>
+    <string name="category">Category</string>
+    <string name="price">Price</string>
+    <string name="product_settings">Product Settings</string>
+    <string name="featured_product">Featured Product</string>
+    <string name="featured_product_description">Display this product prominently on the homepage</string>
+    <string name="active_product">Active Product</string>
+    <string name="active_product_description">Make this product available for customers to purchase</string>
+    <string name="save_product">Save Product</string>
+    <string name="update_product">Update Product</string>
+    
+    <!-- Product Validation -->
+    <string name="product_name_required">Product name is required</string>
+    <string name="product_name_min_length">Product name must be at least 3 characters</string>
+    <string name="product_description_required">Product description is required</string>
+    <string name="product_description_min_length">Product description must be at least 10 characters</string>
+    <string name="product_price_required">Product price is required</string>
+    <string name="product_price_positive">Product price must be greater than 0</string>
+    <string name="product_price_invalid">Invalid price format</string>
+    <string name="product_stock_required">Stock quantity is required</string>
+    <string name="product_stock_negative">Stock quantity cannot be negative</string>
+    <string name="product_stock_invalid">Invalid stock quantity format</string>
+    <string name="product_category_required">Please select a category</string>
+    
+    <!-- Inventory Management -->
+    <string name="over_stock">Over Stock</string>
+    <string name="low_stock_alert">Low Stock Alert: %d products need attention</string>
+    <string name="currency_format">$%.2f</string>
+    
 </resources>

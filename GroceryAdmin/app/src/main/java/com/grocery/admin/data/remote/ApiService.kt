@@ -46,6 +46,12 @@ interface ApiService {
         @Body request: AssignOrderRequest
     ): ApiResponse<AssignOrderResponse>
     
+    // ===== Delivery Personnel =====
+    @GET("admin/delivery-personnel")
+    suspend fun getDeliveryPersonnel(
+        @Query("active_only") activeOnly: Boolean = true
+    ): ApiResponse<DeliveryPersonnelListResponse>
+    
     // ===== Products Management =====
     @GET("admin/products")
     suspend fun getProducts(

@@ -8,14 +8,22 @@ import kotlinx.parcelize.RawValue
 @Parcelize
 data class OrderDto(
     @SerializedName("id") val id: String,
-    @SerializedName("user_id") val userId: String,
+    @SerializedName("customer_id") val customerId: String,
     @SerializedName("status") val status: String,
+    @SerializedName("order_number") val orderNumber: String?,
+    @SerializedName("subtotal") val subtotal: Double,
+    @SerializedName("tax_amount") val taxAmount: Double,
+    @SerializedName("delivery_fee") val deliveryFee: Double,
     @SerializedName("total_amount") val totalAmount: Double,
+    @SerializedName("customer_info") val customerInfo: @RawValue CustomerInfoDto?,
     @SerializedName("delivery_address") val deliveryAddress: DeliveryAddressDto?,
+    @SerializedName("payment_method") val paymentMethod: String?,
+    @SerializedName("payment_status") val paymentStatus: String?,
+    @SerializedName("notes") val notes: String?,
+    @SerializedName("estimated_delivery_time") val estimatedDeliveryTime: String?,
     @SerializedName("created_at") val createdAt: String,
     @SerializedName("updated_at") val updatedAt: String?,
-    @SerializedName("items") val items: List<OrderItemDto>?,
-    @SerializedName("user_profile") val userProfile: @RawValue UserProfileDto?,
+    @SerializedName("order_items") val items: List<OrderItemDto>?,
     @SerializedName("delivery_assignments") val deliveryAssignments: List<DeliveryAssignmentDto>?
 ) : Parcelable {
     /**
@@ -25,6 +33,13 @@ data class OrderDto(
         return !deliveryAssignments.isNullOrEmpty()
     }
 }
+
+@Parcelize
+data class CustomerInfoDto(
+    @SerializedName("name") val name: String?,
+    @SerializedName("email") val email: String?,
+    @SerializedName("phone") val phone: String?
+) : Parcelable
 
 @Parcelize
 data class DeliveryAddressDto(

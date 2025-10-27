@@ -93,4 +93,10 @@
     <!-- Outline Colors -->
     <color name="outline">#FFB74D</color>
     <color name="outline_variant">#FFE0B2</color>
+    
+    <!-- Additional Colors -->
+    <color name="background_light">#FFF8F0</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    
 </resources>

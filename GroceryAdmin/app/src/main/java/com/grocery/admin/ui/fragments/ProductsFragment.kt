@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.core.os.bundleOf
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -54,12 +55,14 @@ class ProductsFragment : Fragment() {
     private fun setupRecyclerView() {
         productsAdapter = ProductsAdapter(
             onEditClick = { product ->
-                // TODO: Navigate to AddEditProductFragment with product
-                Snackbar.make(
-                    binding.root,
-                    "Edit Product: ${product.name} - To be implemented",
-                    Snackbar.LENGTH_SHORT
-                ).show()
+                // Navigate to AddEditProductFragment for editing
+                val fragment = AddEditProductFragment().apply {
+                    arguments = bundleOf("productId" to product.id)
+                }
+                requireActivity().supportFragmentManager.beginTransaction()
+                    .replace(android.R.id.content, fragment)
+                    .addToBackStack("AddEditProduct")
+                    .commit()
             },
             onDeleteClick = { product ->
                 showDeleteConfirmationDialog(product.id, product.name)
@@ -97,12 +100,12 @@ class ProductsFragment : Fragment() {
 
     private fun setupFab() {
         binding.fabAddProduct.setOnClickListener {
-            // TODO: Navigate to AddEditProductFragment without product
-            Snackbar.make(
-                binding.root,
-                "Add Product - To be implemented",
-                Snackbar.LENGTH_SHORT
-            ).show()
+            // Navigate to AddEditProductFragment for new product
+            val fragment = AddEditProductFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(android.R.id.content, fragment)
+                .addToBackStack("AddEditProduct")
+                .commit()
         }
     }
 

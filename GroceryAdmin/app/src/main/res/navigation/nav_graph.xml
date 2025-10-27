@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/dashboardFragment">
+
+    <fragment
+        android:id="@+id/dashboardFragment"
+        android:name="com.grocery.admin.ui.fragments.DashboardFragment"
+        android:label="@string/nav_dashboard"
+        tools:layout="@layout/fragment_dashboard" />
+
+    <fragment
+        android:id="@+id/ordersFragment"
+        android:name="com.grocery.admin.ui.fragments.OrdersFragment"
+        android:label="@string/nav_orders"
+        tools:layout="@layout/fragment_orders">
+        
+        <action
+            android:id="@+id/action_ordersFragment_to_orderDetailFragment"
+            app:destination="@id/orderDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/productsFragment"
+        android:name="com.grocery.admin.ui.fragments.ProductsFragment"
+        android:label="@string/nav_products"
+        tools:layout="@layout/fragment_products">
+        
+        <action
+            android:id="@+id/action_productsFragment_to_addEditProductFragment"
+            app:destination="@id/addEditProductFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/inventoryFragment"
+        android:name="com.grocery.admin.ui.fragments.InventoryFragment"
+        android:label="@string/nav_inventory"
+        tools:layout="@layout/fragment_inventory" />
+
+    <fragment
+        android:id="@+id/orderDetailFragment"
+        android:name="com.grocery.admin.ui.fragments.OrderDetailFragment"
+        android:label="Order Details"
+        tools:layout="@layout/fragment_order_detail">
+        
+        <argument
+            android:name="orderId"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addEditProductFragment"
+        android:name="com.grocery.admin.ui.fragments.AddEditProductFragment"
+        android:label="Add/Edit Product"
+        tools:layout="@layout/fragment_add_edit_product">
+        
+        <argument
+            android:name="productId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </fragment>
+
+</navigation>
