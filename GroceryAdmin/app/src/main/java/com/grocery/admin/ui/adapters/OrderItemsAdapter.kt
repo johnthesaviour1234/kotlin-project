@@ -35,25 +35,26 @@ class OrderItemsAdapter : ListAdapter<OrderItemDto, OrderItemsAdapter.OrderItemV
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(orderItem: OrderItemDto) {
-            // Product details
-            binding.tvProductName.text = orderItem.product?.name ?: "Unknown Product"
+            // Product details - prioritize product_name from API
+            binding.tvProductName.text = orderItem.productName ?: orderItem.product?.name ?: "Unknown Product"
             binding.tvQuantity.text = "Qty: ${orderItem.quantity}"
-            binding.tvUnitPrice.text = formatCurrency(orderItem.price)
-            binding.tvTotalPrice.text = formatCurrency(orderItem.price * orderItem.quantity)
+            binding.tvUnitPrice.text = formatCurrency(orderItem.unitPrice)
+            binding.tvTotalPrice.text = formatCurrency(orderItem.totalPrice)
 
-            // Product image
-            orderItem.product?.imageUrl?.let { imageUrl ->
+            // Product image - prioritize direct imageUrl field
+            val imageUrl = orderItem.imageUrl ?: orderItem.product?.imageUrl
+            if (imageUrl != null) {
                 Glide.with(binding.root.context)
                     .load(imageUrl)
                     .placeholder(R.drawable.ic_placeholder_product)
                     .error(R.drawable.ic_placeholder_product)
                     .into(binding.ivProductImage)
-            } ?: run {
+            } else {
                 binding.ivProductImage.setImageResource(R.drawable.ic_placeholder_product)
             }
 
-            // Product description
-            binding.tvProductDescription.text = orderItem.product?.description ?: ""
+            // Product description - prioritize direct description field
+            binding.tvProductDescription.text = orderItem.description ?: orderItem.product?.description ?: ""
             
             // Category info if available
             orderItem.product?.category?.let { category ->

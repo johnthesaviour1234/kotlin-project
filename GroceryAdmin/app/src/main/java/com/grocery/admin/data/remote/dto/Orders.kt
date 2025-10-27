@@ -65,9 +65,14 @@ data class DeliveryAddressDto(
 data class OrderItemDto(
     @SerializedName("id") val id: String,
     @SerializedName("product_id") val productId: String,
+    @SerializedName("product_name") val productName: String?,
     @SerializedName("quantity") val quantity: Int,
-    @SerializedName("price") val price: Double,
-    @SerializedName("product") val product: ProductDto?
+    @SerializedName("unit_price") val unitPrice: Double,
+    @SerializedName("total_price") val totalPrice: Double,
+    @SerializedName("image_url") val imageUrl: String?,
+    @SerializedName("description") val description: String?,
+    @SerializedName("price") val price: Double = unitPrice,  // Backward compatibility
+    @SerializedName("product") val product: ProductDto? = null
 ) : Parcelable
 
 @Parcelize
@@ -98,9 +103,15 @@ data class ProductInventoryDto(
 
 data class OrdersListResponse(
     @SerializedName("items") val items: List<OrderDto>,
-    @SerializedName("total") val total: Int,
+    @SerializedName("pagination") val pagination: PaginationDto
+)
+
+data class PaginationDto(
     @SerializedName("page") val page: Int,
-    @SerializedName("limit") val limit: Int
+    @SerializedName("limit") val limit: Int,
+    @SerializedName("total") val total: Int,
+    @SerializedName("total_pages") val totalPages: Int,
+    @SerializedName("has_more") val hasMore: Boolean
 )
 
 data class UpdateOrderStatusRequest(

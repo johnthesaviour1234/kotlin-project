@@ -6,13 +6,12 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupWithNavController
 import com.grocery.admin.R
 import com.grocery.admin.data.local.TokenStore
 import com.grocery.admin.databinding.ActivityMainBinding
-import com.grocery.admin.ui.fragments.DashboardFragment
-import com.grocery.admin.ui.fragments.ProductsFragment
-import com.grocery.admin.ui.fragments.OrdersFragment
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -27,28 +26,23 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     @Inject
     lateinit var tokenStore: TokenStore
     
-    private var isFirstLaunch = true
+    private lateinit var navController: NavController
 
     override fun inflateViewBinding(): ActivityMainBinding {
         return ActivityMainBinding.inflate(layoutInflater)
     }
     
-    override fun onCreate(savedInstanceState: Bundle?) {
-        isFirstLaunch = savedInstanceState == null
-        super.onCreate(savedInstanceState)
-    }
-
     override fun setupUI() {
         // Setup toolbar
         setSupportActionBar(binding.toolbar)
         
-        // Setup bottom navigation
-        setupBottomNavigation()
+        // Setup Navigation Component
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
         
-        // Load DashboardFragment by default
-        if (isFirstLaunch) {
-            loadDashboardFragment()
-        }
+        // Setup bottom navigation with NavController
+        binding.bottomNavigation.setupWithNavController(navController)
     }
 
     override fun setupObservers() {
@@ -67,49 +61,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 true
             }
             else -> super.onOptionsItemSelected(item)
-        }
-    }
-    
-    private fun loadDashboardFragment() {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainer, DashboardFragment())
-            .commit()
-    }
-    
-    private fun loadProductsFragment() {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainer, ProductsFragment())
-            .commit()
-    }
-    
-    private fun loadOrdersFragment() {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainer, OrdersFragment())
-            .commit()
-    }
-    
-    private fun setupBottomNavigation() {
-        binding.bottomNavigation.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_dashboard -> {
-                    loadDashboardFragment()
-                    true
-                }
-                R.id.nav_orders -> {
-                    loadOrdersFragment()
-                    true
-                }
-                R.id.nav_products -> {
-                    loadProductsFragment()
-                    true
-                }
-                R.id.nav_inventory -> {
-                    // TODO: Implement InventoryFragment
-                    Toast.makeText(this, "Inventory - Coming Soon", Toast.LENGTH_SHORT).show()
-                    true
-                }
-                else -> false
-            }
         }
     }
     

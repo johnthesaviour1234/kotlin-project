@@ -2,22 +2,22 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/nav_dashboard"
+        android:id="@+id/dashboardFragment"
         android:icon="@drawable/ic_dashboard"
         android:title="Dashboard" />
 
     <item
-        android:id="@+id/nav_orders"
+        android:id="@+id/ordersFragment"
         android:icon="@drawable/ic_receipt"
         android:title="Orders" />
 
     <item
-        android:id="@+id/nav_products"
+        android:id="@+id/productsFragment"
         android:icon="@drawable/ic_categories"
         android:title="Products" />
 
     <item
-        android:id="@+id/nav_inventory"
+        android:id="@+id/inventoryFragment"
         android:icon="@drawable/ic_inventory"
         android:title="Inventory" />
 

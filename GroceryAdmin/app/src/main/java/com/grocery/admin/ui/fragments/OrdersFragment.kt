@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.grocery.admin.R
@@ -189,12 +190,11 @@ class OrdersFragment : Fragment() {
     }
 
     private fun showOrderDetails(order: OrderDto) {
-        // Navigate to OrderDetailFragment
-        val transaction = requireActivity().supportFragmentManager.beginTransaction()
-        val orderDetailFragment = OrderDetailFragment.newInstance(order.id)
-        transaction.replace(android.R.id.content, orderDetailFragment)
-        transaction.addToBackStack(null)
-        transaction.commit()
+        // Navigate to OrderDetailFragment using Navigation Component
+        val bundle = Bundle().apply {
+            putString("orderId", order.id)
+        }
+        findNavController().navigate(R.id.action_ordersFragment_to_orderDetailFragment, bundle)
     }
 
     private fun showUpdateStatusDialog(order: OrderDto) {

@@ -541,6 +541,62 @@ suspend fun getOrders(
 }
 ```
 
+#### Step 3b: Get Order Details
+**Endpoint**: `GET /api/admin/orders/{order_id}`
+**Auth Required**: ✅ Admin Token
+
+**Response**:
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "order_number": "ORD001026",
+    "customer_id": "uuid",
+    "status": "pending",
+    "total_amount": 52.09,
+    "subtotal": 45.00,
+    "delivery_fee": 5.00,
+    "tax_amount": 2.09,
+    "payment_method": "cash",
+    "notes": "Please ring doorbell",
+    "customer_info": {
+      "email": "customer@example.com",
+      "full_name": "John Doe",
+      "phone": "1234567890"
+    },
+    "delivery_address": {
+      "street": "123 Main St",
+      "apartment": "Apt 4B",
+      "city": "San Francisco",
+      "state": "CA",
+      "postal_code": "94102",
+      "landmark": "Near Central Park"
+    },
+    "order_items": [
+      {
+        "id": "item_uuid",
+        "product_id": "product_uuid",
+        "product_name": "Fresh Apples",
+        "quantity": 2,
+        "unit_price": 4.99,
+        "total_price": 9.98,
+        "image_url": "https://...",
+        "description": "Organic red apples"
+      }
+    ],
+    "delivery_assignments": [],
+    "created_at": "2025-10-26T15:30:00Z",
+    "updated_at": "2025-10-26T15:30:00Z"
+  }
+}
+```
+
+**⚠️ Important Notes**:
+- `delivery_assignments` is always an **array** (fixed in Phase 5)
+- `order_items` now include `product_name`, `image_url`, and `description` (flattened from product table)
+- All product details are available directly in order items without additional queries
+
 #### Step 4: Assign Order to Delivery Driver
 **Endpoint**: `POST /api/admin/orders/assign`
 **Auth Required**: ✅ Admin Token
@@ -1151,10 +1207,16 @@ private const val BASE_URL = if (BuildConfig.DEBUG) {
 - [ ] Test complete order flow
 
 ### Admin App
-- [ ] Implement admin authentication
-- [ ] Create dashboard with metrics
-- [ ] Implement orders list (with filters)
-- [ ] Create order assignment flow
+- [x] Implement admin authentication ✅ (Phase 3)
+- [x] Create dashboard with metrics ✅ (Phase 4)
+- [x] Implement orders list (with pagination) ✅ (Phase 5)
+- [x] Create order detail view ✅ (Phase 5)
+- [x] Fix navigation with NavHostFragment ✅ (Phase 5)
+- [x] Update DTOs to match backend response ✅ (Phase 5)
+- [x] Fix delivery_assignments array handling ✅ (Phase 5)
+- [x] Display product images in order items ✅ (Phase 5)
+- [ ] Create order assignment flow (Phase 6)
+- [ ] Create order status update dialog (Phase 6)
 - [ ] Implement product management (CRUD)
 - [ ] Create inventory management UI
 - [ ] Add product image upload
@@ -1291,6 +1353,15 @@ For backend issues or questions:
 
 ---
 
-**Version**: 1.0.0  
-**Last Updated**: October 26, 2025  
+**Version**: 1.1.0  
+**Last Updated**: October 27, 2025  
 **API Base URL**: https://andoid-app-kotlin.vercel.app
+
+### Changelog
+
+#### Version 1.1.0 (October 27, 2025)
+- ✅ Added order detail endpoint documentation (`GET /api/admin/orders/{order_id}`)
+- ✅ Updated order response structure with flattened product details in order items
+- ✅ Documented `delivery_assignments` as always being an array (normalization fix)
+- ✅ Updated Admin App integration checklist to reflect Phase 5 completion
+- ✅ Added notes about product images and descriptions in order items
