@@ -10,6 +10,8 @@ import com.grocery.admin.R
 import com.grocery.admin.data.local.TokenStore
 import com.grocery.admin.databinding.ActivityMainBinding
 import com.grocery.admin.ui.fragments.DashboardFragment
+import com.grocery.admin.ui.fragments.OrdersFragment
+import com.grocery.admin.ui.fragments.ProductsFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -23,17 +25,54 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     @Inject
     lateinit var tokenStore: TokenStore
+    
+    private var isFirstLaunch = true
 
     override fun inflateViewBinding(): ActivityMainBinding {
         return ActivityMainBinding.inflate(layoutInflater)
+    }
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        isFirstLaunch = savedInstanceState == null
+        super.onCreate(savedInstanceState)
     }
 
     override fun setupUI() {
         // Setup toolbar
         setSupportActionBar(binding.toolbar)
         
-        // Load DashboardFragment
-        loadDashboardFragment()
+        // Setup bottom navigation
+        setupBottomNavigation()
+        
+        // Load DashboardFragment by default
+        if (isFirstLaunch) {
+            loadDashboardFragment()
+        }
+    }
+    
+    private fun setupBottomNavigation() {
+        binding.bottomNavigation?.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_dashboard -> {
+                    loadDashboardFragment()
+                    true
+                }
+                R.id.nav_orders -> {
+                    loadOrdersFragment()
+                    true
+                }
+                R.id.nav_products -> {
+                    loadProductsFragment()
+                    true
+                }
+                R.id.nav_inventory -> {
+                    // TODO: Implement Inventory fragment
+                    Toast.makeText(this, "Inventory - Coming soon", Toast.LENGTH_SHORT).show()
+                    true
+                }
+                else -> false
+            }
+        }
     }
 
     override fun setupObservers() {
@@ -58,6 +97,18 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     private fun loadDashboardFragment() {
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragmentContainer, DashboardFragment())
+            .commit()
+    }
+    
+    private fun loadOrdersFragment() {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, OrdersFragment())
+            .commit()
+    }
+    
+    private fun loadProductsFragment() {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, ProductsFragment())
             .commit()
     }
     
