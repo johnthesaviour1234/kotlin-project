@@ -172,10 +172,12 @@ class AddEditProductFragment : Fragment() {
         viewModel.product.observe(viewLifecycleOwner) { resource ->
             when (resource) {
                 is Resource.Success -> {
+                    binding.progressBar.visibility = View.GONE
                     val product = resource.data
                     product?.let { populateForm(it) }
                 }
                 is Resource.Error -> {
+                    binding.progressBar.visibility = View.GONE
                     showError(resource.message ?: "Failed to load product")
                 }
                 is Resource.Loading -> {

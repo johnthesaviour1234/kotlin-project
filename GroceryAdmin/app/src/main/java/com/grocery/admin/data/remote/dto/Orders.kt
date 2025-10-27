@@ -97,9 +97,11 @@ data class ProductCategorySimpleDto(
 
 @Parcelize
 data class ProductInventoryDto(
-    @SerializedName("quantity") val quantity: Int,
+    @SerializedName("stock") val stock: Int,  // API returns 'stock'
     @SerializedName("reorder_level") val reorderLevel: Int?
-) : Parcelable
+) : Parcelable {    // Helper property for backward compatibility
+    val quantity: Int get() = stock
+}
 
 data class OrdersListResponse(
     @SerializedName("items") val items: List<OrderDto>,

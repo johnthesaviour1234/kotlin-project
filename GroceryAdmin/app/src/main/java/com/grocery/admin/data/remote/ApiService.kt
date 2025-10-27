@@ -82,7 +82,7 @@ interface ApiService {
     
     // ===== Product Categories =====
     @GET("products/categories")
-    suspend fun getProductCategories(): ApiResponse<List<ProductCategoryDto>>
+    suspend fun getProductCategories(): ApiResponse<ProductCategoriesResponse>
     
     // ===== Inventory Management =====
     @GET("admin/inventory")

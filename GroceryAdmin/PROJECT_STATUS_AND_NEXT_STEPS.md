@@ -43,6 +43,9 @@
 - ProductsViewModel with proper state management
 - ProductsAdapter with DiffUtil
 - Material Design UI with proper layout
+- Navigation component integration with proper fragment transactions
+- Inventory quantity display fix (API field mapping: stock → quantity)
+- SwipeRefreshLayout integration for pull-to-refresh
 
 ### Architecture
 
@@ -55,9 +58,10 @@
 - **DI**: Hilt for dependency injection
 
 **Backend Integration**:
-- Base URL: https://grocery-app-backend-theta.vercel.app/api
-- Authentication: Bearer token (admin role)
+- Base URL: https://andoid-app-kotlin.vercel.app/api
+- Authentication: Bearer token (admin role via Supabase)
 - All CRUD operations verified and working
+- Inventory API field mapping corrected (stock → quantity)
 
 ### Current File Structure
 
@@ -357,6 +361,32 @@ app/src/main/java/com/grocery/admin/
 
 ---
 
+## Recent Bug Fixes (October 27, 2025)
+
+### Issue: Quantity Display Showing Zero in AddEditProductFragment
+**Problem**: When editing a product, the price displayed correctly but quantity always showed 0.
+
+**Root Cause**: API response returns inventory field as `"stock"` but the DTO was expecting `"quantity"`.
+```json
+// API Response:
+"inventory": {"stock": 94}
+
+// DTO was expecting:
+@SerializedName("quantity") val quantity: Int
+```
+
+**Solution**: Updated `ProductInventoryDto` in Orders.kt:
+- Changed primary field to `@SerializedName("stock")`
+- Added computed property `quantity` that returns `stock` for backward compatibility
+- No other code changes needed
+
+**Files Modified**:
+- `app/src/main/java/com/grocery/admin/data/remote/dto/Orders.kt`
+
+**Status**: ✅ Fixed and tested
+
+---
+
 ## Known Issues
 
 None currently.
@@ -371,6 +401,7 @@ For questions or issues:
 
 ---
 
-**Last Updated**: Phase 6 Completion - October 27, 2025
+**Last Updated**: Phase 6 Bug Fixes - October 27, 2025 (17:09 UTC)
+**Current Phase**: Phase 6 - Products Management (Completed + Bug Fixes)
 **Next Phase**: Phase 7 - Orders Management
 **Status**: Ready for development

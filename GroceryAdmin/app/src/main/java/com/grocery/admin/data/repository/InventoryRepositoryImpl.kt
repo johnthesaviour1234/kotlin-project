@@ -44,7 +44,7 @@ class InventoryRepositoryImpl @Inject constructor(
     override fun updateInventory(request: UpdateInventoryRequest): Flow<Resource<UpdateInventoryResponse>> = flow {
         try {
             emit(Resource.Loading())
-            Log.d(TAG, "Updating inventory - product: ${request.productId}, quantity: ${request.quantity}")
+            Log.d(TAG, "Updating inventory - product: ${request.productId}, stock: ${request.stock}")
             
             val response = apiService.updateInventory(request)
             

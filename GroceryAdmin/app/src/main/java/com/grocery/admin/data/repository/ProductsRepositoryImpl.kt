@@ -137,8 +137,9 @@ class ProductsRepositoryImpl @Inject constructor(
             val response = apiService.getProductCategories()
             
             if (response.success && response.data != null) {
-                Log.d(TAG, "Product categories fetched successfully: ${response.data.size} categories")
-                emit(Resource.Success(response.data))
+                val categories = response.data.items
+                Log.d(TAG, "Product categories fetched successfully: ${categories.size} categories")
+                emit(Resource.Success(categories))
             } else {
                 val errorMessage = response.error ?: response.message ?: "Failed to fetch categories"
                 Log.e(TAG, "Failed to fetch categories: $errorMessage")
@@ -147,6 +148,34 @@ class ProductsRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             val errorMessage = e.localizedMessage ?: "Network error occurred"
             Log.e(TAG, "Error fetching categories: $errorMessage", e)
+            emit(Resource.Error(errorMessage))
+        }
+    }
+    
+    override fun updateInventoryStock(productId: String, stock: Int): Flow<Resource<Unit>> = flow {
+        try {
+            emit(Resource.Loading())
+            Log.d(TAG, "Updating inventory stock for product $productId to $stock")
+            
+            val request = UpdateInventoryRequest(
+                productId = productId,
+                stock = stock,
+                adjustmentType = "set"
+            )
+            
+            val response = apiService.updateInventory(request)
+            
+            if (response.success) {
+                Log.d(TAG, "Inventory stock updated successfully")
+                emit(Resource.Success(Unit))
+            } else {
+                val errorMessage = response.error ?: response.message ?: "Failed to update inventory"
+                Log.e(TAG, "Failed to update inventory: $errorMessage")
+                emit(Resource.Error(errorMessage))
+            }
+        } catch (e: Exception) {
+            val errorMessage = e.localizedMessage ?: "Network error occurred"
+            Log.e(TAG, "Error updating inventory: $errorMessage", e)
             emit(Resource.Error(errorMessage))
         }
     }

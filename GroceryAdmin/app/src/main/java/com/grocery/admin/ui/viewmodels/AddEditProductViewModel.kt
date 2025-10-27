@@ -30,8 +30,8 @@ class AddEditProductViewModel @Inject constructor(
     private val _product = MutableLiveData<Resource<ProductDto>>()
     val product: LiveData<Resource<ProductDto>> = _product
 
-    private val _saveProductResult = MutableLiveData<Resource<ProductDto>>()
-    val saveProductResult: LiveData<Resource<ProductDto>> = _saveProductResult
+    private val _saveProductResult = MutableLiveData<Resource<ProductDto?>>()
+    val saveProductResult: LiveData<Resource<ProductDto?>> = _saveProductResult
 
     /**
      * Load all available categories for product assignment
@@ -86,7 +86,11 @@ class AddEditProductViewModel @Inject constructor(
             )
 
             productsRepository.createProduct(request).collect { result ->
-                _saveProductResult.value = result
+                _saveProductResult.value = when (result) {
+                    is Resource.Success -> Resource.Success(result.data)
+                    is Resource.Error -> Resource.Error(result.message ?: "Unknown error")
+                    is Resource.Loading -> Resource.Loading()
+                }
             }
         }
     }
@@ -109,7 +113,7 @@ class AddEditProductViewModel @Inject constructor(
             _saveProductResult.value = Resource.Loading()
             
             // TODO: Implement image upload when available
-            // For now, update product without image URL
+            // Update product details
             val request = UpdateProductRequest(
                 name = name,
                 description = description,
@@ -119,8 +123,39 @@ class AddEditProductViewModel @Inject constructor(
                 isActive = isActive
             )
 
+            // Store the product result for later
+            var productResult: ProductDto? = null
+            
             productsRepository.updateProduct(productId, request).collect { result ->
-                _saveProductResult.value = result
+                when (result) {
+                    is Resource.Success -> {
+                        // Store product data and update inventory stock
+                        productResult = result.data
+                        updateInventoryStock(productId, stockQuantity, productResult)
+                    }
+                    is Resource.Error -> {
+                        _saveProductResult.value = Resource.Error(result.message ?: "Unknown error")
+                    }
+                    is Resource.Loading -> {
+                        // Keep loading state
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun updateInventoryStock(productId: String, stockQuantity: Int, productData: ProductDto?) {
+        productsRepository.updateInventoryStock(productId, stockQuantity).collect { inventoryResult ->
+            // After inventory update, emit final result
+            _saveProductResult.value = when (inventoryResult) {
+                is Resource.Success -> {
+                    // Return product data with successful inventory update
+                    Resource.Success(productData)
+                }
+                is Resource.Error -> {
+                    Resource.Error("Product updated but inventory update failed: ${inventoryResult.message}")
+                }
+                is Resource.Loading -> Resource.Loading()
             }
         }
     }

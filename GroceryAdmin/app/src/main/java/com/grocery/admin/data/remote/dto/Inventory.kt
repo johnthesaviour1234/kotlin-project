@@ -17,12 +17,12 @@ data class InventoryListResponse(
 
 data class UpdateInventoryRequest(
     @SerializedName("product_id") val productId: String,
-    @SerializedName("quantity") val quantity: Int,
-    @SerializedName("reorder_level") val reorderLevel: Int? = null
+    @SerializedName("stock") val stock: Int,
+    @SerializedName("adjustment_type") val adjustmentType: String = "set" // "set", "add", or "subtract"
 )
 
 data class UpdateInventoryResponse(
     @SerializedName("product_id") val productId: String,
-    @SerializedName("quantity") val quantity: Int,
-    @SerializedName("previous_quantity") val previousQuantity: Int
+    @SerializedName("stock") val stock: Int,
+    @SerializedName("updated_at") val updatedAt: String
 )

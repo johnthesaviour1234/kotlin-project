@@ -4,18 +4,19 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.core.os.bundleOf
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.grocery.admin.R
+import com.grocery.admin.util.Resource
 import com.grocery.admin.databinding.FragmentProductsBinding
 import com.grocery.admin.ui.adapters.ProductsAdapter
 import com.grocery.admin.ui.viewmodels.ProductsViewModel
-import com.grocery.admin.util.Resource
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -46,23 +47,34 @@ class ProductsFragment : Fragment() {
         setupRecyclerView()
         setupSearchAndFilters()
         setupFab()
+        setupSwipeRefresh()
         observeViewModel()
         
         // Load products
         viewModel.loadProducts()
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Reload products when returning to this fragment
+        viewModel.refreshProducts()
+    }
+
+    private fun setupSwipeRefresh() {
+        binding.swipeRefresh.setOnRefreshListener {
+            viewModel.refreshProducts()
+        }
+    }
+
     private fun setupRecyclerView() {
         productsAdapter = ProductsAdapter(
             onEditClick = { product ->
                 // Navigate to AddEditProductFragment for editing
-                val fragment = AddEditProductFragment().apply {
-                    arguments = bundleOf("productId" to product.id)
-                }
-                requireActivity().supportFragmentManager.beginTransaction()
-                    .replace(android.R.id.content, fragment)
-                    .addToBackStack("AddEditProduct")
-                    .commit()
+                val bundle = bundleOf("productId" to product.id)
+                findNavController().navigate(
+                    R.id.action_productsFragment_to_addEditProductFragment,
+                    bundle
+                )
             },
             onDeleteClick = { product ->
                 showDeleteConfirmationDialog(product.id, product.name)
@@ -101,11 +113,9 @@ class ProductsFragment : Fragment() {
     private fun setupFab() {
         binding.fabAddProduct.setOnClickListener {
             // Navigate to AddEditProductFragment for new product
-            val fragment = AddEditProductFragment()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(android.R.id.content, fragment)
-                .addToBackStack("AddEditProduct")
-                .commit()
+            findNavController().navigate(
+                R.id.action_productsFragment_to_addEditProductFragment
+            )
         }
     }
 
@@ -113,11 +123,14 @@ class ProductsFragment : Fragment() {
         viewModel.products.observe(viewLifecycleOwner) { resource ->
             when (resource) {
                 is Resource.Loading -> {
-                    binding.progressBar.visibility = View.VISIBLE
+                    if (!binding.swipeRefresh.isRefreshing) {
+                        binding.progressBar.visibility = View.VISIBLE
+                    }
                     binding.layoutEmptyState.visibility = View.GONE
                 }
                 is Resource.Success -> {
                     binding.progressBar.visibility = View.GONE
+                    binding.swipeRefresh.isRefreshing = false
                     val products = resource.data ?: emptyList()
                     
                     if (products.isEmpty()) {
@@ -131,6 +144,7 @@ class ProductsFragment : Fragment() {
                 }
                 is Resource.Error -> {
                     binding.progressBar.visibility = View.GONE
+                    binding.swipeRefresh.isRefreshing = false
                     showError(resource.message ?: "Failed to load products")
                 }
                 null -> {

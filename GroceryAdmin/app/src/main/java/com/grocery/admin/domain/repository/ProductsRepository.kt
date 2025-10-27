@@ -11,4 +11,5 @@ interface ProductsRepository {
     fun updateProduct(productId: String, request: UpdateProductRequest): Flow<Resource<ProductDto>>
     fun deleteProduct(productId: String): Flow<Resource<DeleteProductResponse>>
     fun getProductCategories(): Flow<Resource<List<ProductCategoryDto>>>
+    fun updateInventoryStock(productId: String, stock: Int): Flow<Resource<Unit>>
 }

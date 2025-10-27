@@ -32,8 +32,12 @@ data class ProductCategoryDto(
     @SerializedName("id") val id: String,
     @SerializedName("name") val name: String,
     @SerializedName("description") val description: String?,
-    @SerializedName("icon") val icon: String?,
-    @SerializedName("display_order") val displayOrder: Int = 0
+    @SerializedName("parent_id") val parentId: String? = null,
+    @SerializedName("created_at") val createdAt: String? = null
+)
+
+data class ProductCategoriesResponse(
+    @SerializedName("items") val items: List<ProductCategoryDto>
 )
 
 data class DeleteProductResponse(
