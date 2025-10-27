@@ -49,7 +49,17 @@ async function handler(req, res) {
       return res.status(500).json(formatErrorResponse('Failed to fetch order'))
     }
 
-    res.status(200).json(formatSuccessResponse(data))
+    // Normalize delivery_assignments to always be an array
+    const normalizedData = {
+      ...data,
+      delivery_assignments: data.delivery_assignments 
+        ? (Array.isArray(data.delivery_assignments) 
+            ? data.delivery_assignments 
+            : [data.delivery_assignments])
+        : []
+    }
+
+    res.status(200).json(formatSuccessResponse(normalizedData))
   } catch (error) {
     console.error('Get order error:', error)
     res.status(500).json(formatErrorResponse('Internal server error'))

@@ -68,8 +68,18 @@ async function handler(req, res) {
       return res.status(500).json(formatErrorResponse('Failed to fetch orders'))
     }
 
+    // Normalize delivery_assignments to always be an array
+    const normalizedData = (data || []).map(order => ({
+      ...order,
+      delivery_assignments: order.delivery_assignments 
+        ? (Array.isArray(order.delivery_assignments) 
+            ? order.delivery_assignments 
+            : [order.delivery_assignments])
+        : []
+    }))
+
     res.status(200).json(formatSuccessResponse({
-      items: data || [],
+      items: normalizedData,
       pagination: {
         page: pageNum,
         limit: limitNum,
