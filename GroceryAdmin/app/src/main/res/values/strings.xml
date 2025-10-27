@@ -133,4 +133,10 @@
     <string name="cd_edit">Edit</string>
     <string name="cd_delete">Delete</string>
     <string name="cd_back">Go back</string>
+    <string name="cd_dashboard_metric">Dashboard metric icon</string>
+    <string name="cd_trend">Trend indicator</string>
+    
+    <!-- Dashboard Specific -->
+    <string name="revenue_format">₹%,.2f</string>
+    <string name="items_count">%d items</string>
 </resources>
