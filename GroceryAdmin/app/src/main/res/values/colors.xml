@@ -3,16 +3,24 @@
     <!-- Material Design 3 Primary - Vibrant Dark Green (Tailored for Indian Market) -->
     <color name="primary">#2E7D32</color>
     <color name="primary_variant">#1B5E20</color>
+    <color name="primary_container">#C8E6C9</color>
     <color name="on_primary">#FFFFFF</color>
+    <color name="on_primary_container">#1B5E20</color>
     <color name="md_theme_primary">#2E7D32</color>
     <color name="md_theme_on_primary">#FFFFFF</color>
+    <color name="md_theme_primary_container">#C8E6C9</color>
+    <color name="md_theme_on_primary_container">#1B5E20</color>
     
     <!-- Material Design 3 Secondary - Vibrant Deep Orange (Indian Market) -->
     <color name="secondary">#FF6F00</color>
     <color name="secondary_variant">#E65100</color>
+    <color name="secondary_container">#FFE0B2</color>
     <color name="on_secondary">#FFFFFF</color>
+    <color name="on_secondary_container">#E65100</color>
     <color name="md_theme_secondary">#FF6F00</color>
     <color name="md_theme_on_secondary">#FFFFFF</color>
+    <color name="md_theme_secondary_container">#FFE0B2</color>
+    <color name="md_theme_on_secondary_container">#E65100</color>
     
     <!-- Material Design 3 Tertiary - Deep Red -->
     <color name="tertiary">#D32F2F</color>

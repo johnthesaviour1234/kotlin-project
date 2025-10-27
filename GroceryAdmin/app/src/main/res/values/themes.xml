@@ -38,6 +38,10 @@
         
         <!-- Window background -->
         <item name="android:windowBackground">@color/background</item>
+        
+        <!-- Disable default action bar to use custom Toolbar -->
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
     
     <!-- Splash screen theme - simplified -->

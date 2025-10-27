@@ -1,35 +1,78 @@
 package com.grocery.admin.ui.activities
 
+import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
+import com.grocery.admin.R
+import com.grocery.admin.data.local.TokenStore
 import com.grocery.admin.databinding.ActivityMainBinding
+import com.grocery.admin.ui.fragments.DashboardFragment
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
- * Main Activity - Entry point of the Customer app.
- * This activity will handle navigation between different screens.
+ * Main Activity - Entry point of the Admin app.
+ * Displays the DashboardFragment and handles navigation.
  */
 @AndroidEntryPoint
 class MainActivity : BaseActivity<ActivityMainBinding>() {
+
+    @Inject
+    lateinit var tokenStore: TokenStore
 
     override fun inflateViewBinding(): ActivityMainBinding {
         return ActivityMainBinding.inflate(layoutInflater)
     }
 
     override fun setupUI() {
-        // Set up navigation, toolbar, bottom navigation, etc.
-        // This will be expanded when we add navigation components
+        // Setup toolbar
+        setSupportActionBar(binding.toolbar)
         
-        setupWelcomeMessage()
+        // Load DashboardFragment
+        loadDashboardFragment()
     }
 
     override fun setupObservers() {
-        // Set up observers for ViewModels
-        // This will be expanded when we add ViewModels
+        // Set up observers for ViewModels if needed
     }
-
-    private fun setupWelcomeMessage() {
-        // For now, just show a welcome message
-        // This will be replaced with proper navigation setup
-        binding.textViewWelcome.text = "Welcome to Grocery Admin App!"
+    
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+    
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_logout -> {
+                logout()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+    
+    private fun loadDashboardFragment() {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, DashboardFragment())
+            .commit()
+    }
+    
+    private fun logout() {
+        lifecycleScope.launch {
+            // Clear tokens
+            tokenStore.clear()
+            
+            Toast.makeText(this@MainActivity, "Logged out successfully", Toast.LENGTH_SHORT).show()
+            
+            // Navigate to Login
+            val intent = Intent(this@MainActivity, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
+        }
     }
 }
