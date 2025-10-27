@@ -10,12 +10,12 @@ async function handler(req, res) {
   try {
     const { assignment_id, status, notes = '', proof_of_delivery = null } = req.body
 
-    const validStatuses = ['in_transit', 'completed']
+    const validStatuses = ['in_transit', 'arrived', 'completed']
     
     if (!assignment_id || !status) {
       return res.status(400).json(formatErrorResponse('Missing required fields: assignment_id, status'))
     }
-
+    
     if (!validStatuses.includes(status)) {
       return res.status(400).json(formatErrorResponse(`Invalid status. Must be one of: ${validStatuses.join(', ')}`))
     }
