@@ -9,4 +9,5 @@ interface OrdersRepository {
     fun getOrderById(orderId: String): Flow<Resource<OrderDto>>
     fun updateOrderStatus(orderId: String, status: String, notes: String? = null): Flow<Resource<OrderDto>>
     fun assignOrder(orderId: String, deliveryPersonnelId: String, estimatedMinutes: Int = 30): Flow<Resource<AssignOrderResponse>>
+    fun getDeliveryPersonnel(activeOnly: Boolean = true): Flow<Resource<DeliveryPersonnelListResponse>>
 }

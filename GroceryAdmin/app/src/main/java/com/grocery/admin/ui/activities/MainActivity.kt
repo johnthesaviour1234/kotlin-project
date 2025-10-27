@@ -11,6 +11,8 @@ import com.grocery.admin.data.local.TokenStore
 import com.grocery.admin.databinding.ActivityMainBinding
 import com.grocery.admin.ui.fragments.DashboardFragment
 import com.grocery.admin.ui.fragments.ProductsFragment
+import com.grocery.admin.ui.fragments.OrdersFragment
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -39,6 +41,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     override fun setupUI() {
         // Setup toolbar
         setSupportActionBar(binding.toolbar)
+        
+        // Setup bottom navigation
+        setupBottomNavigation()
         
         // Load DashboardFragment by default
         if (isFirstLaunch) {
@@ -75,6 +80,37 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragmentContainer, ProductsFragment())
             .commit()
+    }
+    
+    private fun loadOrdersFragment() {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, OrdersFragment())
+            .commit()
+    }
+    
+    private fun setupBottomNavigation() {
+        binding.bottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_dashboard -> {
+                    loadDashboardFragment()
+                    true
+                }
+                R.id.nav_orders -> {
+                    loadOrdersFragment()
+                    true
+                }
+                R.id.nav_products -> {
+                    loadProductsFragment()
+                    true
+                }
+                R.id.nav_inventory -> {
+                    // TODO: Implement InventoryFragment
+                    Toast.makeText(this, "Inventory - Coming Soon", Toast.LENGTH_SHORT).show()
+                    true
+                }
+                else -> false
+            }
+        }
     }
     
     private fun logout() {

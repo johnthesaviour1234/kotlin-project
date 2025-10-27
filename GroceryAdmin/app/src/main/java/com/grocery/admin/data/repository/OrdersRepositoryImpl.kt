@@ -108,4 +108,26 @@ class OrdersRepositoryImpl @Inject constructor(
             emit(Resource.Error(errorMessage))
         }
     }
+    
+    override fun getDeliveryPersonnel(activeOnly: Boolean): Flow<Resource<DeliveryPersonnelListResponse>> = flow {
+        try {
+            emit(Resource.Loading())
+            Log.d(TAG, "Fetching delivery personnel - activeOnly: $activeOnly")
+            
+            val response = apiService.getDeliveryPersonnel(activeOnly)
+            
+            if (response.success && response.data != null) {
+                Log.d(TAG, "Delivery personnel fetched successfully: ${response.data.items.size} items")
+                emit(Resource.Success(response.data))
+            } else {
+                val errorMessage = response.error ?: response.message ?: "Failed to fetch delivery personnel"
+                Log.e(TAG, "Failed to fetch delivery personnel: $errorMessage")
+                emit(Resource.Error(errorMessage))
+            }
+        } catch (e: Exception) {
+            val errorMessage = e.localizedMessage ?: "Network error occurred"
+            Log.e(TAG, "Error fetching delivery personnel: $errorMessage", e)
+            emit(Resource.Error(errorMessage))
+        }
+    }
 }
