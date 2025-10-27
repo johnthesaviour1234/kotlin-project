@@ -17,14 +17,31 @@
         <item name="colorOnBackground">@color/on_background</item>
         <item name="colorOnSurface">@color/on_surface</item>
         
+        <!-- Surface variant colors -->
+        <item name="colorSurfaceVariant">@color/surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/on_surface_variant</item>
+        
+        <!-- Tertiary colors -->
+        <item name="colorTertiary">@color/tertiary</item>
+        <item name="colorOnTertiary">@color/on_tertiary</item>
+        
         <!-- Error colors -->
         <item name="colorError">@color/error</item>
         <item name="colorOnError">@color/on_error</item>
+        
+        <!-- Text colors -->
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
         
         <!-- Status bar -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         
         <!-- Window background -->
         <item name="android:windowBackground">@color/background</item>
+    </style>
+    
+    <!-- Splash screen theme - simplified -->
+    <style name="Theme.GroceryAdmin.Splash" parent="Theme.GroceryAdmin">
+        <item name="android:windowBackground">@color/primary</item>
     </style>
 </resources>
