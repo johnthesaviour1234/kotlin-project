@@ -193,6 +193,19 @@
                         tools:text="Estimated delivery: Dec 16, 2024 at 2:00 PM"
                         tools:visibility="visible" />
 
+                    <!-- Track Delivery Button -->
+                    <Button
+                        android:id="@+id/buttonTrackDelivery"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="Track Delivery"
+                        android:textAllCaps="false"
+                        android:visibility="gone"
+                        app:icon="@drawable/ic_arrow_forward"
+                        style="@style/Widget.Material3.Button"
+                        tools:visibility="visible" />
+
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>

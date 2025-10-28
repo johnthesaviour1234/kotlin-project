@@ -1,5 +1,6 @@
 package com.grocery.customer.ui.fragments
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import com.grocery.customer.R
 import com.grocery.customer.data.remote.dto.OrderDTO
+import com.grocery.customer.ui.activities.TrackDeliveryActivity
 import com.grocery.customer.ui.adapters.OrderItemsAdapter
 import com.grocery.customer.ui.viewmodels.OrderDetailViewModel
 import com.grocery.customer.ui.viewmodels.OrderDetailUiState
@@ -68,7 +70,11 @@ class OrderDetailFragment : Fragment() {
     private lateinit var textViewNotes: TextView
     private lateinit var layoutNotes: MaterialCardView
     
+    // Track Delivery Button
+    private lateinit var buttonTrackDelivery: Button
+    
     private lateinit var orderItemsAdapter: OrderItemsAdapter
+    private var currentOrder: OrderDTO? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -122,6 +128,9 @@ class OrderDetailFragment : Fragment() {
         // Notes
         textViewNotes = view.findViewById(R.id.textViewNotes)
         layoutNotes = view.findViewById(R.id.layoutNotes)
+        
+        // Track Delivery Button
+        buttonTrackDelivery = view.findViewById(R.id.buttonTrackDelivery)
     }
 
     private fun setupRecyclerView() {
@@ -142,6 +151,16 @@ class OrderDetailFragment : Fragment() {
         
         buttonRetry.setOnClickListener {
             viewModel.loadOrderDetails(args.orderId)
+        }
+        
+        buttonTrackDelivery.setOnClickListener {
+            currentOrder?.let { order ->
+                val intent = Intent(requireContext(), TrackDeliveryActivity::class.java).apply {
+                    putExtra(TrackDeliveryActivity.EXTRA_ORDER_ID, order.id)
+                    putExtra(TrackDeliveryActivity.EXTRA_ORDER_NUMBER, order.order_number)
+                }
+                startActivity(intent)
+            }
         }
     }
 
@@ -178,6 +197,8 @@ class OrderDetailFragment : Fragment() {
     }
 
     private fun populateOrderDetails(order: OrderDTO) {
+        currentOrder = order
+        
         // Update toolbar title
         toolbarTitle.text = "Order #${order.order_number}"
         
@@ -186,6 +207,13 @@ class OrderDetailFragment : Fragment() {
         textViewOrderDate.text = "Placed on ${formatDate(order.created_at)}"
         textViewOrderStatus.text = order.status.replaceFirstChar { it.uppercase() }
         setStatusColor(order.status)
+        
+        // Show Track Delivery button for out_for_delivery status
+        if (order.status == "out_for_delivery") {
+            buttonTrackDelivery.visibility = View.VISIBLE
+        } else {
+            buttonTrackDelivery.visibility = View.GONE
+        }
         
         // Estimated delivery
         if (order.estimated_delivery_time != null) {

@@ -131,4 +131,10 @@ interface ApiService {
         @Query("limit") limit: Int = 10,
         @Query("status") status: String? = null
     ): Response<OrderHistoryResponse>
+    
+    // Driver location tracking endpoint
+    @GET("orders/{orderId}/driver-location")
+    suspend fun getDriverLocation(
+        @Path("orderId") orderId: String
+    ): Response<ApiResponse<com.grocery.customer.data.dto.DriverLocationResponse>>
 }
