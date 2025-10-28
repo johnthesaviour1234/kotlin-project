@@ -6,9 +6,16 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     
+    <!-- Location permissions for delivery tracking -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    
     <!-- Optional permissions for future features -->
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
 
     <application
         android:name=".GroceryDeliveryApplication"
@@ -23,15 +30,59 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
 
+        <!-- Splash Activity - Entry point -->
         <activity
-            android:name=".ui.activities.MainActivity"
+            android:name=".ui.activities.SplashActivity"
             android:exported="true"
-            android:theme="@style/Theme.GroceryDelivery">
+            android:theme="@style/Theme.GroceryDelivery.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Login Activity -->
+        <activity
+            android:name=".ui.activities.LoginActivity"
+            android:exported="false"
+            android:theme="@style/Theme.GroceryDelivery.NoActionBar" />
+
+        <!-- Register Activity -->
+        <activity
+            android:name=".ui.activities.RegisterActivity"
+            android:exported="false"
+            android:theme="@style/Theme.GroceryDelivery.NoActionBar" />
+
+        <!-- Main Activity -->
+        <activity
+            android:name=".ui.activities.MainActivity"
+            android:exported="false"
+            android:theme="@style/Theme.GroceryDelivery" />
+
+        <!-- Active Delivery Activity -->
+        <activity
+            android:name=".ui.activities.ActiveDeliveryActivity"
+            android:exported="false"
+            android:theme="@style/Theme.GroceryDelivery" />
+
+        <!-- Delivery History Activity -->
+        <activity
+            android:name=".ui.activities.DeliveryHistoryActivity"
+            android:exported="false"
+            android:theme="@style/Theme.GroceryDelivery" />
+
+        <!-- Profile Activity -->
+        <activity
+            android:name=".ui.activities.ProfileActivity"
+            android:exported="false"
+            android:theme="@style/Theme.GroceryDelivery" />
+
+        <!-- Location Tracking Service -->
+        <service
+            android:name=".services.LocationTrackingService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="location" />
 
     </application>
 

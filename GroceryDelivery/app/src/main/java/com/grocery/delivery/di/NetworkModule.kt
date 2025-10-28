@@ -1,7 +1,7 @@
 package com.grocery.delivery.di
 
 import com.grocery.delivery.BuildConfig
-import com.grocery.delivery.data.remote.ApiService
+import com.grocery.delivery.data.api.DeliveryApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -58,7 +58,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideApiService(retrofit: Retrofit): ApiService {
-        return retrofit.create(ApiService::class.java)
+    fun provideDeliveryApiService(retrofit: Retrofit): DeliveryApiService {
+        return retrofit.create(DeliveryApiService::class.java)
     }
 }

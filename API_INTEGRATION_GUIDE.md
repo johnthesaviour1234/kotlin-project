@@ -978,6 +978,100 @@ class LocationTrackingService : Service() {
 }
 ```
 
+#### Step 6: View Delivery History
+**Endpoint**: `GET /api/delivery/orders/history`
+**Auth Required**: ✅ Delivery Driver Token
+
+**Query Parameters**:
+- `limit` (optional): Items per page (default: 50)
+- `offset` (optional): Pagination offset (default: 0)
+
+**Response**:
+```json
+{
+  "success": true,
+  "data": {
+    "items": [
+      {
+        "id": "assignment_uuid",
+        "order_id": "order_uuid",
+        "status": "completed",
+        "assigned_at": "2025-10-27T12:37:34.765063+00:00",
+        "accepted_at": "2025-10-27T19:40:06.668683+00:00",
+        "estimated_delivery_minutes": 30,
+        "notes": "Delivered successfully",
+        "created_at": "2025-10-27T12:37:34.765063+00:00",
+        "updated_at": "2025-10-28T08:02:17.725238+00:00",
+        "orders": {
+          "id": "order_uuid",
+          "order_number": "ORD001018",
+          "total_amount": 52.61,
+          "delivery_address": {
+            "street": "Apt 4B, parking",
+            "city": "mumbai",
+            "state": "maharashtra",
+            "postal_code": "400001"
+          },
+          "customer_info": {
+            "full_name": "abcd",
+            "email": "abcd@gmail.com"
+          },
+          "notes": "Please call on arrival",
+          "delivered_at": "2025-10-28T08:02:17.725238+00:00",
+          "created_at": "2025-10-26T15:30:00Z"
+        }
+      }
+    ],
+    "count": 4,
+    "limit": 50,
+    "offset": 0
+  },
+  "timestamp": "2025-10-28T09:07:52.349Z"
+}
+```
+
+**What This Shows**:
+- ✅ All completed deliveries for the logged-in driver
+- ✅ Full order details including customer info and delivery address
+- ✅ Timestamps for assignment, acceptance, and delivery
+- ✅ Total amount earned per delivery
+- ✅ Supports pagination for large history lists
+
+**Kotlin Implementation**:
+```kotlin
+interface DeliveryApiService {
+    @GET("delivery/orders/history")
+    suspend fun getOrderHistory(
+        @Header("Authorization") token: String,
+        @Query("limit") limit: Int? = 50,
+        @Query("offset") offset: Int? = 0
+    ): Response<DeliveryOrdersResponse>
+}
+
+// Usage in Repository
+fun getOrderHistory(limit: Int = 50): Flow<Resource<List<DeliveryAssignment>>> = flow {
+    try {
+        emit(Resource.Loading())
+        
+        val response = apiService.getOrderHistory(getAuthHeader(), limit, 0)
+        
+        if (response.isSuccessful && response.body() != null) {
+            val ordersResponse = response.body()!!
+            
+            if (ordersResponse.success && ordersResponse.data != null) {
+                emit(Resource.Success(ordersResponse.data.items ?: emptyList()))
+            } else {
+                emit(Resource.Error("Failed to fetch order history"))
+            }
+        } else {
+            emit(Resource.Error(response.message() ?: "Network error"))
+        }
+    } catch (e: Exception) {
+        emit(Resource.Error(e.localizedMessage ?: "An unexpected error occurred"))
+    }
+}
+```
+
 ---
 
 ## Error Handling
@@ -1224,16 +1318,16 @@ private const val BASE_URL = if (BuildConfig.DEBUG) {
 - [ ] Test admin operations
 
 ### Delivery App
-- [ ] Implement driver authentication
-- [ ] Create available orders list
-- [ ] Implement accept/decline flow
-- [ ] Create active delivery UI
-- [ ] Implement status updates
-- [ ] Add GPS location tracking
-- [ ] Create delivery completion flow
-- [ ] Implement delivery history
-- [ ] Handle all error cases
-- [ ] Test complete delivery flow
+- [x] Implement driver authentication ✅
+- [x] Create available orders list ✅
+- [x] Implement accept/decline flow ✅
+- [x] Create active delivery UI ✅
+- [x] Implement status updates ✅
+- [x] Add GPS location tracking ✅
+- [x] Create delivery completion flow ✅
+- [x] Implement delivery history ✅ (Fixed October 28, 2025)
+- [x] Handle all error cases ✅
+- [x] Test complete delivery flow ✅
 
 ---
 
@@ -1353,11 +1447,18 @@ For backend issues or questions:
 
 ---
 
-**Version**: 1.1.0  
-**Last Updated**: October 27, 2025  
+**Version**: 1.2.0  
+**Last Updated**: October 28, 2025  
 **API Base URL**: https://andoid-app-kotlin.vercel.app
 
 ### Changelog
+
+#### Version 1.2.0 (October 28, 2025)
+- ✅ Added delivery history endpoint documentation (`GET /api/delivery/orders/history`)
+- ✅ Fixed missing endpoint deployment - committed and deployed history.js and profile.js
+- ✅ Updated Delivery App integration checklist to mark all features complete
+- ✅ Added Kotlin implementation examples for delivery history
+- ✅ Verified delivery history working with 4 completed deliveries showing correctly
 
 #### Version 1.1.0 (October 27, 2025)
 - ✅ Added order detail endpoint documentation (`GET /api/admin/orders/{order_id}`)
