@@ -6,7 +6,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 /**
- * GET /api/orders/[orderId]/driver-location
+ * GET /api/orders/[id]/driver-location
  * Fetch the latest location of the delivery driver for an order
  * Used by customer app for real-time tracking
  */
@@ -19,7 +19,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { orderId } = req.query
+    const { id: orderId } = req.query
 
     if (!orderId) {
       return res.status(400).json({
