@@ -148,8 +148,14 @@ export default async function handler(req, res) {
       // Log but don't fail the order - cart can be cleared manually
     }
 
-    // ✅ NEW: Broadcast new order event to admins
-    await eventBroadcaster.orderCreated(order.id, orderWithItems);
+    // ✅ Broadcast new order event to admins and customer (for multi-device sync)
+    await eventBroadcaster.orderCreated(
+      order.id,
+      order.order_number,
+      user.id,
+      order.total_amount,
+      orderWithItems
+    );
 
     res.status(201).json({
       message: 'Order created successfully',

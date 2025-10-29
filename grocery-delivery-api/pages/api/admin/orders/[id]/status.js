@@ -12,7 +12,8 @@ async function handler(req, res) {
     const { id } = req.query
     const { status, notes = '' } = req.body
 
-    const validStatuses = ['pending', 'confirmed', 'preparing', 'ready', 'out_for_delivery', 'delivered', 'cancelled']
+    // Grocery delivery statuses only
+    const validStatuses = ['pending', 'confirmed', 'out_for_delivery', 'arrived', 'delivered', 'cancelled']
     
     if (!status || !validStatuses.includes(status)) {
       return res.status(400).json(formatErrorResponse(`Invalid status. Must be one of: ${validStatuses.join(', ')}`))
@@ -77,11 +78,12 @@ async function handler(req, res) {
       }
     )
 
-    // ✅ NEW: Broadcast event to all subscribers
+    // ✅ Broadcast status change to all subscribers (customer, driver, admins)
     const deliveryPersonnelId = currentOrder.delivery_assignments?.[0]?.delivery_personnel_id || null
     await eventBroadcaster.orderStatusChanged(
       id,
-      status,
+      currentOrder.status, // old status
+      status, // new status
       currentOrder.customer_id,
       deliveryPersonnelId
     )

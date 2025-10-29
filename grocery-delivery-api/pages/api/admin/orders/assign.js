@@ -41,21 +41,33 @@ async function handler(req, res) {
       }
     )
 
-    // ✅ NEW: Get customer ID for broadcasting
+    // ✅ Get order details for broadcasting
     const { data: orderData } = await supabase
       .from('orders')
-      .select('customer_id')
+      .select('customer_id, order_number, status')
       .eq('id', order_id)
       .single()
 
-    // ✅ NEW: Broadcast assignment event
-    if (orderData) {
+    // ✅ Broadcast assignment event to driver, customer, admins
+    if (orderData && data && data[0]) {
       await eventBroadcaster.orderAssigned(
         data[0].id, // assignment ID
         order_id,
+        orderData.order_number,
         delivery_personnel_id,
         orderData.customer_id
       )
+      
+      // ✅ Also broadcast status change (pending → confirmed)
+      if (orderData.status === 'pending') {
+        await eventBroadcaster.orderStatusChanged(
+          order_id,
+          'pending',
+          'confirmed',
+          orderData.customer_id,
+          delivery_personnel_id
+        )
+      }
     }
 
     res.status(200).json(formatSuccessResponse(data[0], 'Order assigned successfully'))

@@ -165,33 +165,42 @@ class EventBroadcaster {
 
   /**
    * Broadcast order status change
+   * Grocery delivery statuses: pending, confirmed, out_for_delivery, arrived, delivered, cancelled
    * @param {string} orderId - Order ID
+   * @param {string} oldStatus - Previous status
    * @param {string} newStatus - New order status
    * @param {string} userId - Customer user ID
    * @param {string} deliveryPersonnelId - Driver ID (optional)
    */
-  async orderStatusChanged(orderId, newStatus, userId, deliveryPersonnelId = null) {
+  async orderStatusChanged(orderId, oldStatus, newStatus, userId, deliveryPersonnelId = null) {
     try {
-      const payload = { orderId, status: newStatus }
+      const payload = { 
+        order_id: orderId, 
+        old_status: oldStatus,
+        new_status: newStatus
+      }
 
       // Broadcast to multiple channels
       const broadcasts = [
         // All admins
-        this.broadcastToChannel('admin:orders', 'status_changed', payload),
+        this.broadcastToChannel('admin:orders', 'order_status_changed', payload),
         
         // Specific customer
-        this.broadcastToChannel(`user:${userId}`, 'order_updated', payload)
+        this.broadcastToChannel(`user:${userId}`, 'order_status_changed', payload),
+        
+        // Order-specific channel
+        this.broadcastToChannel(`order:${orderId}`, 'status_changed', payload)
       ]
 
       // If delivery personnel assigned, notify them too
       if (deliveryPersonnelId) {
         broadcasts.push(
-          this.broadcastToChannel('delivery:assignments', 'order_status_changed', payload)
+          this.broadcastToChannel(`driver:${deliveryPersonnelId}`, 'order_status_changed', payload)
         )
       }
 
       await Promise.all(broadcasts)
-      console.log(`[EventBroadcaster] Order ${orderId} status changed to ${newStatus}`)
+      console.log(`[EventBroadcaster] Order ${orderId} status: ${oldStatus} → ${newStatus}`)
     } catch (error) {
       console.error('[EventBroadcaster] Error broadcasting order status change:', error)
     }
@@ -200,15 +209,30 @@ class EventBroadcaster {
   /**
    * Broadcast new order created
    * @param {string} orderId - Order ID
-   * @param {object} orderData - Order details
+   * @param {string} orderNumber - Order number (e.g. ORD001026)
+   * @param {string} userId - Customer user ID
+   * @param {number} totalAmount - Total order amount
+   * @param {object} orderData - Full order details
    */
-  async orderCreated(orderId, orderData) {
+  async orderCreated(orderId, orderNumber, userId, totalAmount, orderData = null) {
     try {
-      await this.broadcastToChannel('admin:orders', 'new_order', {
-        orderId,
-        order: orderData
-      })
-      console.log(`[EventBroadcaster] New order created: ${orderId}`)
+      const payload = {
+        order_id: orderId,
+        order_number: orderNumber,
+        user_id: userId,
+        total_amount: totalAmount,
+        status: 'pending'
+      }
+      
+      await Promise.all([
+        // Notify all admins
+        this.broadcastToChannel('admin:orders', 'new_order', payload),
+        
+        // Notify customer (for multi-device sync)
+        this.broadcastToChannel(`user:${userId}`, 'order_created', payload)
+      ])
+      
+      console.log(`[EventBroadcaster] New order created: ${orderNumber} (${orderId})`)
     } catch (error) {
       console.error('[EventBroadcaster] Error broadcasting new order:', error)
     }
@@ -218,25 +242,35 @@ class EventBroadcaster {
    * Broadcast order assignment to driver
    * @param {string} assignmentId - Assignment ID
    * @param {string} orderId - Order ID
+   * @param {string} orderNumber - Order number
    * @param {string} deliveryPersonnelId - Driver ID
    * @param {string} userId - Customer ID
+   * @param {object} orderDetails - Order details (address, items, etc.)
    */
-  async orderAssigned(assignmentId, orderId, deliveryPersonnelId, userId) {
+  async orderAssigned(assignmentId, orderId, orderNumber, deliveryPersonnelId, userId, orderDetails = null) {
     try {
-      const payload = { assignmentId, orderId, deliveryPersonnelId }
+      const payload = { 
+        assignment_id: assignmentId, 
+        order_id: orderId,
+        order_number: orderNumber,
+        delivery_personnel_id: deliveryPersonnelId
+      }
 
       await Promise.all([
-        // Notify driver
-        this.broadcastToChannel(`driver:${deliveryPersonnelId}`, 'new_assignment', payload),
+        // Notify specific driver
+        this.broadcastToChannel(`driver:${deliveryPersonnelId}`, 'order_assigned', payload),
         
         // Notify customer
         this.broadcastToChannel(`user:${userId}`, 'order_assigned', payload),
         
-        // Notify all delivery personnel
-        this.broadcastToChannel('delivery:assignments', 'new_assignment', payload)
+        // Notify order-specific channel
+        this.broadcastToChannel(`order:${orderId}`, 'driver_assigned', payload),
+        
+        // Notify all admins
+        this.broadcastToChannel('admin:orders', 'order_assigned', payload)
       ])
       
-      console.log(`[EventBroadcaster] Order ${orderId} assigned to driver ${deliveryPersonnelId}`)
+      console.log(`[EventBroadcaster] Order ${orderNumber} assigned to driver ${deliveryPersonnelId}`)
     } catch (error) {
       console.error('[EventBroadcaster] Error broadcasting order assignment:', error)
     }
