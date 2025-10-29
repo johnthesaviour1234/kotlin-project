@@ -1,9 +1,20 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+// Use Vercel environment variable names
+const supabaseUrl = process.env.SUPABASE_URL
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
+// Validate environment variables
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error('Missing Supabase credentials:', {
+    hasUrl: !!supabaseUrl,
+    hasKey: !!supabaseServiceKey
+  })
+}
+
+const supabase = supabaseUrl && supabaseServiceKey 
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null
 
 /**
  * GET /api/orders/[id]/driver-location
@@ -11,6 +22,15 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey)
  * Used by customer app for real-time tracking
  */
 export default async function handler(req, res) {
+  // Check if Supabase is properly configured
+  if (!supabase) {
+    console.error('Supabase client not initialized - missing environment variables')
+    return res.status(500).json({
+      success: false,
+      error: 'Database connection not configured',
+      details: 'Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variables'
+    })
+  }
   if (req.method !== 'GET') {
     return res.status(405).json({
       success: false,
