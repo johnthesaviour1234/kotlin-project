@@ -52,10 +52,11 @@ class AuthRepositoryImpl @Inject constructor(
                 
                 if (body?.success == true && body.data != null) {
                     val tokens = body.data.tokens
-                    Log.d(TAG, "Tokens received - Access: ${tokens.accessToken != null}, Refresh: ${tokens.refreshToken != null}")
+                    val userId = body.data.user.id
+                    Log.d(TAG, "Tokens received - Access: ${tokens.accessToken != null}, Refresh: ${tokens.refreshToken != null}, UserId: $userId")
                     
-                    tokenStore.saveTokens(tokens.accessToken, tokens.refreshToken, tokens.expiresAt)
-                    Log.d(TAG, "Login successful")
+                    tokenStore.saveTokens(tokens.accessToken, tokens.refreshToken, tokens.expiresAt, userId)
+                    Log.d(TAG, "Login successful with user ID: $userId")
                     Result.success(body.data)
                 } else {
                     val errorMsg = body?.error ?: body?.message ?: "Login failed"
@@ -88,7 +89,8 @@ class AuthRepositoryImpl @Inject constructor(
                     // Save tokens if present
                     val tokens = body.data.tokens
                     if (tokens != null) {
-                        tokenStore.saveTokens(tokens.accessToken, tokens.refreshToken, tokens.expiresAt)
+                        val userId = body.data.user.id
+                        tokenStore.saveTokens(tokens.accessToken, tokens.refreshToken, tokens.expiresAt, userId)
                     }
                     Result.success(body.data)
                 } else {

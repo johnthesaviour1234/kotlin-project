@@ -152,26 +152,24 @@ class EventBroadcaster {
    */
   async broadcastToChannel(channelName, event, payload) {
     try {
-      const channel = await this.getChannel(channelName)
+      // Create a new channel WITHOUT subscribing (fire-and-forget)
+      const channel = supabase.channel(channelName)
       
       const fullPayload = {
         ...payload,
         timestamp: new Date().toISOString()
       }
       
-      await channel.send({
+      // Send broadcast message immediately without waiting for subscription
+      const result = await channel.send({
         type: 'broadcast',
         event,
         payload: fullPayload
       })
-      console.log(`[EventBroadcaster] ✅ Broadcasted ${event} to ${channelName}`)
+      
+      console.log(`[EventBroadcaster] ✅ Broadcasted ${event} to ${channelName}`, result)
     } catch (error) {
       console.error(`[EventBroadcaster] ❌ Broadcast failed for ${event} to ${channelName}:`, error.message)
-      // Queue the event for retry
-      this.queueEvent(channelName, event, {
-        ...payload,
-        timestamp: new Date().toISOString()
-      })
     }
   }
 

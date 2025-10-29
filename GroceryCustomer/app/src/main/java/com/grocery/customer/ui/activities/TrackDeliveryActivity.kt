@@ -148,10 +148,20 @@ class TrackDeliveryActivity : AppCompatActivity() {
                         )
                     }
                 } else {
-                    showError(
-                        message = "Unable to fetch location",
-                        details = response.body()?.error ?: response.message() ?: "Unknown error"
-                    )
+                    // Check if delivery is completed/not in progress
+                    val errorMsg = response.body()?.error ?: ""
+                    if (response.code() == 400 && errorMsg.contains("not currently in progress", ignoreCase = true)) {
+                        // Delivery is completed, redirect to order details
+                        navigateToOrderDetails()
+                    } else if (response.code() == 404 && errorMsg.contains("No delivery assignment", ignoreCase = true)) {
+                        // No delivery assignment found, redirect to order details
+                        navigateToOrderDetails()
+                    } else {
+                        showError(
+                            message = "Unable to fetch location",
+                            details = errorMsg.ifEmpty { response.message() ?: "Unknown error" }
+                        )
+                    }
                 }
             } catch (e: Exception) {
                 showError(
@@ -160,6 +170,13 @@ class TrackDeliveryActivity : AppCompatActivity() {
                 )
             }
         }
+    }
+    
+    private fun navigateToOrderDetails() {
+        Toast.makeText(this, "Delivery completed! Check your order details.", Toast.LENGTH_LONG).show()
+        
+        // Go back to order details (previous screen)
+        finish()
     }
 
     private fun updateDriverLocation(lat: Double, lng: Double) {

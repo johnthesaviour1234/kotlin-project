@@ -34,13 +34,15 @@ class TokenStore @Inject constructor(
     private val KEY_ACCESS_TOKEN = stringPreferencesKey("access_token")
     private val KEY_REFRESH_TOKEN = stringPreferencesKey("refresh_token")
     private val KEY_EXPIRES_AT = longPreferencesKey("expires_at")
+    private val KEY_USER_ID = stringPreferencesKey("user_id")
 
-    suspend fun saveTokens(accessToken: String?, refreshToken: String?, expiresAt: Long?) {
-        Log.d(TAG, "Saving tokens - Access: ${if (accessToken != null) "Present (${accessToken.length} chars)" else "null"}, Refresh: ${refreshToken != null}, ExpiresAt: $expiresAt")
+    suspend fun saveTokens(accessToken: String?, refreshToken: String?, expiresAt: Long?, userId: String? = null) {
+        Log.d(TAG, "Saving tokens - Access: ${if (accessToken != null) "Present (${accessToken.length} chars)" else "null"}, Refresh: ${refreshToken != null}, ExpiresAt: $expiresAt, UserId: ${userId != null}")
         dataStore.edit { prefs ->
             if (accessToken != null) prefs[KEY_ACCESS_TOKEN] = accessToken else prefs.remove(KEY_ACCESS_TOKEN)
             if (refreshToken != null) prefs[KEY_REFRESH_TOKEN] = refreshToken else prefs.remove(KEY_REFRESH_TOKEN)
             if (expiresAt != null) prefs[KEY_EXPIRES_AT] = expiresAt else prefs.remove(KEY_EXPIRES_AT)
+            if (userId != null) prefs[KEY_USER_ID] = userId else prefs.remove(KEY_USER_ID)
         }
         Log.d(TAG, "Tokens saved successfully")
     }
@@ -53,5 +55,11 @@ class TokenStore @Inject constructor(
         val token = dataStore.data.map { it[KEY_ACCESS_TOKEN] }.firstOrNull()
         Log.d(TAG, "Retrieved access token: ${if (token?.isNotBlank() == true) "Present (${token.length} chars)" else "Missing/Empty"}")
         return token
+    }
+    
+    suspend fun getUserId(): String? {
+        val userId = dataStore.data.map { it[KEY_USER_ID] }.firstOrNull()
+        Log.d(TAG, "Retrieved user ID: ${if (userId?.isNotBlank() == true) "Present" else "Missing/Empty"}")
+        return userId
     }
 }

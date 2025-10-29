@@ -6,6 +6,7 @@ plugins {
     id("kotlin-parcelize")
     id("io.gitlab.arturbosch.detekt")
     id("org.jlleitschuh.gradle.ktlint")
+    kotlin("plugin.serialization") version "1.9.20"
 }
 
 android {
@@ -111,12 +112,15 @@ dependencies {
     // DataStore - Preferences
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     
-    // Supabase - temporarily commented out for basic build
-    // implementation("io.github.jan-tennert.supabase:postgrest-kt:2.0.4")
-    // implementation("io.github.jan-tennert.supabase:auth-kt:2.0.4")
-    // implementation("io.github.jan-tennert.supabase:realtime-kt:2.0.4")
-    // implementation("io.github.jan-tennert.supabase:storage-kt:2.0.4")
-    // implementation("io.ktor:ktor-client-android:2.3.7")
+    // Supabase for real-time features and authentication
+    implementation("io.github.jan-tennert.supabase:postgrest-kt:2.0.4")
+    implementation("io.github.jan-tennert.supabase:realtime-kt:2.0.4")
+    implementation("io.github.jan-tennert.supabase:gotrue-kt:2.0.4")
+    implementation("io.ktor:ktor-client-okhttp:2.3.7")
+    implementation("io.ktor:ktor-client-core:2.3.7")
+
+    // Kotlin serialization for Supabase
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     
     // Async/Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")

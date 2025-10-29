@@ -19,7 +19,10 @@ data class OrderDTO(
     val notes: String? = null,
     val estimated_delivery_time: String? = null,
     val delivered_at: String? = null,
-    val updated_at: String? = null
+    val updated_at: String? = null,
+    val delivery_personnel_id: String? = null,
+    val delivery_personnel_name: String? = null,
+    val delivery_personnel_phone: String? = null
 )
 
 data class OrderItemDTO(

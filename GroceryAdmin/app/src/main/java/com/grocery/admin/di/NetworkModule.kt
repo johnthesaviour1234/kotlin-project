@@ -8,6 +8,12 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.gotrue.Auth
+import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.realtime.Realtime
+import io.ktor.client.engine.okhttp.OkHttp
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -70,5 +76,25 @@ object NetworkModule {
     @Singleton
     fun provideApiService(retrofit: Retrofit): ApiService {
         return retrofit.create(ApiService::class.java)
+    }
+
+    /**
+     * Provide Supabase client for real-time features
+     * Phase 2: Event-Driven Architecture for Admin app
+     */
+    @Provides
+    @Singleton
+    fun provideSupabaseClient(): SupabaseClient {
+        val supabaseUrl = "https://hfxdxxpmcemdjsvhsdcf.supabase.co"
+        val supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmeGR4eHBtY2VtZGpzdmhzZGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA2NjU5MTcsImV4cCI6MjA3NjI0MTkxN30.X9lzy9TnHRjuzvWLYdsLUXHcd0668WwemOJ-GFQHqG8"
+
+        return createSupabaseClient(
+            supabaseUrl = supabaseUrl,
+            supabaseKey = supabaseKey
+        ) {
+            install(Postgrest)
+            install(Realtime)
+            install(Auth)
+        }
     }
 }

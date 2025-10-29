@@ -368,9 +368,11 @@ class ActiveDeliveryActivity : BaseActivity<ActivityActiveDeliveryBinding>() {
         if (isLocationTrackingActive) return
         
         currentAssignment?.let { assignment ->
+            // Pass the actual order ID from the orders table, not the assignment ID
+            val orderId = assignment.orderId ?: assignment.orders?.id
             val intent = Intent(this, LocationTrackingService::class.java).apply {
                 action = LocationTrackingService.ACTION_START_TRACKING
-                putExtra(LocationTrackingService.EXTRA_DELIVERY_ID, assignment.id)
+                putExtra(LocationTrackingService.EXTRA_ORDER_ID, orderId)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(intent)
