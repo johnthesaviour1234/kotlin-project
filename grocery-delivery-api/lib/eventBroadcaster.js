@@ -26,13 +26,21 @@ class EventBroadcaster {
   }
 
   /**
-   * Get or create a channel
+   * Get or create a channel (and subscribe if needed)
    * @param {string} channelName - Name of the channel
    * @returns {object} Supabase channel instance
    */
   getChannel(channelName) {
     if (!this.channels.has(channelName)) {
       const channel = supabase.channel(channelName)
+      // Subscribe to channel immediately so broadcasts can be sent
+      channel.subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log(`[EventBroadcaster] Subscribed to channel: ${channelName}`)
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error(`[EventBroadcaster] Error subscribing to channel: ${channelName}`)
+        }
+      })
       this.channels.set(channelName, channel)
     }
     return this.channels.get(channelName)
