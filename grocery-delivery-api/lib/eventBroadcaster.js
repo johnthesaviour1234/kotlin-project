@@ -23,6 +23,10 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey)
 class EventBroadcaster {
   constructor() {
     this.channels = new Map()
+    this.eventQueue = new Map() // Map<channelName, Array<{event, payload, timestamp}>>
+    this.retryInterval = 5000 // Retry every 5 seconds
+    this.maxRetries = 12 // Retry for up to 1 minute (12 * 5s)
+    this.startRetryWorker()
   }
 
   /**
@@ -47,6 +51,88 @@ class EventBroadcaster {
   }
 
   /**
+   * Start background worker to retry failed broadcasts
+   */
+  startRetryWorker() {
+    setInterval(() => {
+      this.processEventQueue()
+    }, this.retryInterval)
+  }
+
+  /**
+   * Process queued events and retry sending
+   */
+  async processEventQueue() {
+    const now = Date.now()
+    
+    for (const [channelName, events] of this.eventQueue.entries()) {
+      if (events.length === 0) continue
+      
+      console.log(`[EventBroadcaster] Processing ${events.length} queued events for ${channelName}`)
+      
+      // Try to send each queued event
+      const remainingEvents = []
+      
+      for (const queuedEvent of events) {
+        const age = now - queuedEvent.timestamp
+        const retryCount = queuedEvent.retryCount || 0
+        
+        // Skip if too old or max retries exceeded
+        if (retryCount >= this.maxRetries) {
+          console.warn(`[EventBroadcaster] Dropping event ${queuedEvent.event} for ${channelName} (max retries exceeded)`)
+          continue
+        }
+        
+        try {
+          const channel = this.getChannel(channelName)
+          await channel.send({
+            type: 'broadcast',
+            event: queuedEvent.event,
+            payload: queuedEvent.payload
+          })
+          console.log(`[EventBroadcaster] ✅ Retry successful: ${queuedEvent.event} to ${channelName}`)
+          // Successfully sent, don't add back to queue
+        } catch (error) {
+          console.error(`[EventBroadcaster] ❌ Retry failed: ${queuedEvent.event} to ${channelName}:`, error.message)
+          // Add back to queue with incremented retry count
+          remainingEvents.push({
+            ...queuedEvent,
+            retryCount: retryCount + 1
+          })
+        }
+      }
+      
+      // Update queue with remaining events
+      if (remainingEvents.length > 0) {
+        this.eventQueue.set(channelName, remainingEvents)
+      } else {
+        this.eventQueue.delete(channelName)
+      }
+    }
+  }
+
+  /**
+   * Add event to queue for retry
+   * @param {string} channelName - Channel name
+   * @param {string} event - Event type  
+   * @param {object} payload - Event payload
+   */
+  queueEvent(channelName, event, payload) {
+    if (!this.eventQueue.has(channelName)) {
+      this.eventQueue.set(channelName, [])
+    }
+    
+    this.eventQueue.get(channelName).push({
+      event,
+      payload,
+      timestamp: Date.now(),
+      retryCount: 0
+    })
+    
+    console.log(`[EventBroadcaster] Queued ${event} for ${channelName} (queue size: ${this.eventQueue.get(channelName).length})`)
+  }
+
+  /**
    * Broadcast event to a specific channel
    * @param {string} channelName - Target channel name
    * @param {string} event - Event type
@@ -55,18 +141,25 @@ class EventBroadcaster {
   async broadcastToChannel(channelName, event, payload) {
     try {
       const channel = this.getChannel(channelName)
+      
+      const fullPayload = {
+        ...payload,
+        timestamp: new Date().toISOString()
+      }
+      
       await channel.send({
         type: 'broadcast',
         event,
-        payload: {
-          ...payload,
-          timestamp: new Date().toISOString()
-        }
+        payload: fullPayload
       })
-      console.log(`[EventBroadcaster] Broadcasted ${event} to ${channelName}`)
+      console.log(`[EventBroadcaster] ✅ Broadcasted ${event} to ${channelName}`)
     } catch (error) {
-      console.error(`[EventBroadcaster] Error broadcasting to ${channelName}:`, error)
-      throw error
+      console.error(`[EventBroadcaster] ❌ Broadcast failed for ${event} to ${channelName}:`, error.message)
+      // Queue the event for retry
+      this.queueEvent(channelName, event, {
+        ...payload,
+        timestamp: new Date().toISOString()
+      })
     }
   }
 
