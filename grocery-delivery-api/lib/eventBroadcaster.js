@@ -32,19 +32,31 @@ class EventBroadcaster {
   /**
    * Get or create a channel (and subscribe if needed)
    * @param {string} channelName - Name of the channel
-   * @returns {object} Supabase channel instance
+   * @returns {Promise<object>} Supabase channel instance
    */
-  getChannel(channelName) {
+  async getChannel(channelName) {
     if (!this.channels.has(channelName)) {
       const channel = supabase.channel(channelName)
-      // Subscribe to channel immediately so broadcasts can be sent
-      channel.subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-          console.log(`[EventBroadcaster] Subscribed to channel: ${channelName}`)
-        } else if (status === 'CHANNEL_ERROR') {
-          console.error(`[EventBroadcaster] Error subscribing to channel: ${channelName}`)
-        }
+      
+      // Subscribe and WAIT for subscription to complete
+      await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error(`Channel subscription timeout: ${channelName}`))
+        }, 10000) // 10 second timeout
+        
+        channel.subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            console.log(`[EventBroadcaster] ✅ Subscribed to channel: ${channelName}`)
+            clearTimeout(timeout)
+            resolve()
+          } else if (status === 'CHANNEL_ERROR') {
+            console.error(`[EventBroadcaster] ❌ Error subscribing to channel: ${channelName}`)
+            clearTimeout(timeout)
+            reject(new Error(`Failed to subscribe to ${channelName}`))
+          }
+        })
       })
+      
       this.channels.set(channelName, channel)
     }
     return this.channels.get(channelName)
@@ -140,7 +152,7 @@ class EventBroadcaster {
    */
   async broadcastToChannel(channelName, event, payload) {
     try {
-      const channel = this.getChannel(channelName)
+      const channel = await this.getChannel(channelName)
       
       const fullPayload = {
         ...payload,
