@@ -151,8 +151,9 @@ class EventBroadcaster {
    * @param {object} payload - Event data
    */
   async broadcastToChannel(channelName, event, payload) {
+    console.log(`[EventBroadcaster] 📡 Attempting to broadcast ${event} to ${channelName}`)
+    
     try {
-      // Create a new channel WITHOUT subscribing (fire-and-forget)
       const channel = supabase.channel(channelName)
       
       const fullPayload = {
@@ -160,14 +161,30 @@ class EventBroadcaster {
         timestamp: new Date().toISOString()
       }
       
-      // Send broadcast message immediately without waiting for subscription
+      // Try to subscribe with short timeout, then send
+      const subscribed = await Promise.race([
+        new Promise((resolve) => {
+          channel.subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+              console.log(`[EventBroadcaster] ✅ Subscribed to ${channelName}`)
+              resolve(true)
+            }
+          })
+        }),
+        new Promise((resolve) => setTimeout(() => {
+          console.warn(`[EventBroadcaster] ⚠️ Subscription timeout for ${channelName}`)
+          resolve(false)
+        }, 3000))
+      ])
+      
+      // Send regardless of subscription status
       const result = await channel.send({
         type: 'broadcast',
         event,
         payload: fullPayload
       })
       
-      console.log(`[EventBroadcaster] ✅ Broadcasted ${event} to ${channelName}`, result)
+      console.log(`[EventBroadcaster] ✅ Sent ${event} to ${channelName} (subscribed: ${subscribed})`, result)
     } catch (error) {
       console.error(`[EventBroadcaster] ❌ Broadcast failed for ${event} to ${channelName}:`, error.message)
     }
