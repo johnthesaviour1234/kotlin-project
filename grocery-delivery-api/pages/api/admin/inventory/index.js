@@ -1,6 +1,7 @@
 import { withAdminAuth, logAdminActivity } from '../../../../lib/adminMiddleware.js'
 import { supabase } from '../../../../lib/supabase.js'
 import { formatSuccessResponse, formatErrorResponse } from '../../../../lib/validation.js'
+import eventBroadcaster from '../../../../lib/eventBroadcaster.js'
 
 async function handler(req, res) {
   const { method } = req
@@ -113,6 +114,15 @@ async function updateStock(req, res) {
       product_id,
       { adjustment_type, stock: stockValue, new_stock: data.stock }
     )
+
+    // ✅ NEW: Broadcast stock update event
+    await eventBroadcaster.productStockChanged(product_id, data.stock)
+
+    // ✅ NEW: Check for low stock and send alert
+    const LOW_STOCK_THRESHOLD = 10
+    if (data.stock <= LOW_STOCK_THRESHOLD) {
+      await eventBroadcaster.lowStockAlert(product_id, data.stock, LOW_STOCK_THRESHOLD)
+    }
 
     res.status(200).json(formatSuccessResponse(data, 'Inventory updated successfully'))
   } catch (error) {

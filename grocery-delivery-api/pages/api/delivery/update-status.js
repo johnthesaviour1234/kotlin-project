@@ -1,6 +1,7 @@
 import { withAdminAuth } from '../../../lib/adminMiddleware.js'
 import { supabase } from '../../../lib/supabase.js'
 import { formatSuccessResponse, formatErrorResponse } from '../../../lib/validation.js'
+import eventBroadcaster from '../../../lib/eventBroadcaster.js'
 
 async function handler(req, res) {
   if (req.method !== 'PUT') {
@@ -32,6 +33,29 @@ async function handler(req, res) {
     if (error) {
       console.error('Error updating delivery status:', error)
       return res.status(500).json(formatErrorResponse(error.message || 'Failed to update delivery status'))
+    }
+
+    // ✅ NEW: Get order and customer info for broadcasting
+    const { data: assignmentData } = await supabase
+      .from('delivery_assignments')
+      .select(`
+        id,
+        order_id,
+        orders(
+          customer_id
+        )
+      `)
+      .eq('id', assignment_id)
+      .single()
+
+    // ✅ NEW: Broadcast delivery status update
+    if (assignmentData) {
+      await eventBroadcaster.deliveryStatusUpdated(
+        assignment_id,
+        status,
+        assignmentData.order_id,
+        assignmentData.orders.customer_id
+      )
     }
 
     res.status(200).json(formatSuccessResponse({ status }, 'Delivery status updated successfully'))

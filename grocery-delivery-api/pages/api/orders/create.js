@@ -1,5 +1,6 @@
 import { supabase } from '../../../lib/supabase';
 import { authMiddleware } from '../../../lib/authMiddleware';
+import eventBroadcaster from '../../../lib/eventBroadcaster.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -146,6 +147,9 @@ export default async function handler(req, res) {
       console.warn('Cart clearing failed after order creation:', clearCartError);
       // Log but don't fail the order - cart can be cleared manually
     }
+
+    // ✅ NEW: Broadcast new order event to admins
+    await eventBroadcaster.orderCreated(order.id, orderWithItems);
 
     res.status(201).json({
       message: 'Order created successfully',

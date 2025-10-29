@@ -1,6 +1,7 @@
 import { withAdminAuth, logAdminActivity } from '../../../../../lib/adminMiddleware.js'
 import { supabase } from '../../../../../lib/supabase.js'
 import { formatSuccessResponse, formatErrorResponse } from '../../../../../lib/validation.js'
+import eventBroadcaster from '../../../../../lib/eventBroadcaster.js'
 
 async function handler(req, res) {
   if (req.method !== 'PUT') {
@@ -17,10 +18,19 @@ async function handler(req, res) {
       return res.status(400).json(formatErrorResponse(`Invalid status. Must be one of: ${validStatuses.join(', ')}`))
     }
 
-    // Fetch current order
+    // Fetch current order with customer and delivery info
     const { data: currentOrder, error: fetchError } = await supabase
       .from('orders')
-      .select('id, status, order_number')
+      .select(`
+        id, 
+        status, 
+        order_number, 
+        customer_id,
+        delivery_assignments(
+          id,
+          delivery_personnel_id
+        )
+      `)
       .eq('id', id)
       .single()
 
@@ -65,6 +75,15 @@ async function handler(req, res) {
         new_status: status,
         order_number: currentOrder.order_number
       }
+    )
+
+    // ✅ NEW: Broadcast event to all subscribers
+    const deliveryPersonnelId = currentOrder.delivery_assignments?.[0]?.delivery_personnel_id || null
+    await eventBroadcaster.orderStatusChanged(
+      id,
+      status,
+      currentOrder.customer_id,
+      deliveryPersonnelId
     )
 
     res.status(200).json(formatSuccessResponse(updatedOrder, 'Order status updated successfully'))

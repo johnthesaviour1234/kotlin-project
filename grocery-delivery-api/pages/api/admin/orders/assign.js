@@ -1,6 +1,7 @@
 import { withAdminAuth, logAdminActivity } from '../../../../lib/adminMiddleware.js'
 import { supabase } from '../../../../lib/supabase.js'
 import { formatSuccessResponse, formatErrorResponse } from '../../../../lib/validation.js'
+import eventBroadcaster from '../../../../lib/eventBroadcaster.js'
 
 async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -39,6 +40,23 @@ async function handler(req, res) {
         estimated_minutes
       }
     )
+
+    // ✅ NEW: Get customer ID for broadcasting
+    const { data: orderData } = await supabase
+      .from('orders')
+      .select('customer_id')
+      .eq('id', order_id)
+      .single()
+
+    // ✅ NEW: Broadcast assignment event
+    if (orderData) {
+      await eventBroadcaster.orderAssigned(
+        data[0].id, // assignment ID
+        order_id,
+        delivery_personnel_id,
+        orderData.customer_id
+      )
+    }
 
     res.status(200).json(formatSuccessResponse(data[0], 'Order assigned successfully'))
   } catch (error) {
