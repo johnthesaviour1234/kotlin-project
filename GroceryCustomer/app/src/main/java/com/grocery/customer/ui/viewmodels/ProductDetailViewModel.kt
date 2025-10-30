@@ -4,8 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.grocery.customer.data.local.Event
-import com.grocery.customer.data.local.EventBus
 import com.grocery.customer.data.remote.dto.Inventory
 import com.grocery.customer.data.remote.dto.ProductDetail
 import com.grocery.customer.domain.repository.CartRepository
@@ -23,8 +21,7 @@ import javax.inject.Inject
 class ProductDetailViewModel @Inject constructor(
     private val productRepository: ProductRepository,
     private val cartRepository: CartRepository,
-    private val savedStateHandle: SavedStateHandle,
-    private val eventBus: EventBus
+    private val savedStateHandle: SavedStateHandle
 ) : BaseViewModel() {
 
     private val _productDetail = MutableLiveData<Resource<ProductDetail>>()
@@ -38,67 +35,7 @@ class ProductDetailViewModel @Inject constructor(
 
     private var currentProductId: String? = null
 
-    init {
-        // Subscribe to product stock changes
-        viewModelScope.launch {
-            eventBus.subscribe<Event.ProductStockChanged>().collect { event ->
-                if (event.productId == currentProductId) {
-                    // Update stock in real-time
-                    _productDetail.value?.data?.let { product ->
-                        val updatedInventory = product.inventory?.copy(stock = event.newStock)
-                            ?: Inventory(stock = event.newStock, updated_at = null)
-                        val updatedProduct = product.copy(inventory = updatedInventory)
-                        _productDetail.value = Resource.Success(updatedProduct)
-
-                        // Adjust quantity if current quantity exceeds new stock
-                        val currentQty = _quantity.value ?: 1
-                        if (currentQty > event.newStock) {
-                            _quantity.value = maxOf(1, event.newStock)
-                        }
-                    }
-                }
-            }
-        }
-
-        // Subscribe to product out of stock events
-        viewModelScope.launch {
-            eventBus.subscribe<Event.ProductOutOfStock>().collect { event ->
-                if (event.productId == currentProductId) {
-                    // Update product to show out of stock
-                    _productDetail.value?.data?.let { product ->
-                        val updatedInventory = product.inventory?.copy(stock = 0)
-                            ?: Inventory(stock = 0, updated_at = null)
-                        val updatedProduct = product.copy(inventory = updatedInventory)
-                        _productDetail.value = Resource.Success(updatedProduct)
-                        _quantity.value = 1 // Reset quantity
-                    }
-                }
-            }
-        }
-
-        // Subscribe to product price changes
-        viewModelScope.launch {
-            eventBus.subscribe<Event.ProductPriceChanged>().collect { event ->
-                if (event.productId == currentProductId) {
-                    // Update price in real-time
-                    _productDetail.value?.data?.let { product ->
-                        val updatedProduct = product.copy(price = event.newPrice)
-                        _productDetail.value = Resource.Success(updatedProduct)
-                    }
-                }
-            }
-        }
-
-        // Subscribe to product deleted events
-        viewModelScope.launch {
-            eventBus.subscribe<Event.ProductDeleted>().collect { event ->
-                if (event.productId == currentProductId) {
-                    // Show error that product is no longer available
-                    _productDetail.value = Resource.Error("This product is no longer available")
-                }
-            }
-        }
-    }
+    // EventBus subscriptions removed as part of State Sync Migration
 
     fun loadProductDetail(productId: String) {
         currentProductId = productId
@@ -159,14 +96,6 @@ class ProductDetailViewModel @Inject constructor(
                     result.fold(
                         onSuccess = { 
                             _addToCartState.value = Resource.Success(Unit)
-                            // ✅ Publish item added to cart event
-                            eventBus.publish(
-                                Event.ItemAddedToCart(
-                                    productId = product.id,
-                                    productName = product.name,
-                                    quantity = qty
-                                )
-                            )
                         },
                         onFailure = { exception ->
                             _addToCartState.value = Resource.Error(
