@@ -1,7 +1,6 @@
 import { withAdminAuth, logAdminActivity } from '../../../../lib/adminMiddleware.js'
 import { supabase } from '../../../../lib/supabase.js'
 import { formatSuccessResponse, formatErrorResponse } from '../../../../lib/validation.js'
-import eventBroadcaster from '../../../../lib/eventBroadcaster.js'
 
 async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -40,35 +39,6 @@ async function handler(req, res) {
         estimated_minutes
       }
     )
-
-    // ✅ Get order details for broadcasting
-    const { data: orderData } = await supabase
-      .from('orders')
-      .select('customer_id, order_number, status')
-      .eq('id', order_id)
-      .single()
-
-    // ✅ Broadcast assignment event to driver, customer, admins
-    if (orderData && data && data[0]) {
-      await eventBroadcaster.orderAssigned(
-        data[0].id, // assignment ID
-        order_id,
-        orderData.order_number,
-        delivery_personnel_id,
-        orderData.customer_id
-      )
-      
-      // ✅ Also broadcast status change (pending → confirmed)
-      if (orderData.status === 'pending') {
-        await eventBroadcaster.orderStatusChanged(
-          order_id,
-          'pending',
-          'confirmed',
-          orderData.customer_id,
-          delivery_personnel_id
-        )
-      }
-    }
 
     res.status(200).json(formatSuccessResponse(data[0], 'Order assigned successfully'))
   } catch (error) {

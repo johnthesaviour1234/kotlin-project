@@ -1,6 +1,5 @@
 import { supabase, supabaseClient, getAuthenticatedClient } from '../../../lib/supabase'
 import { formatSuccessResponse, formatErrorResponse } from '../../../lib/validation'
-import eventBroadcaster from '../../../lib/eventBroadcaster.js'
 
 function getBearer(req) {
   const h = req.headers['authorization'] || req.headers['Authorization']
@@ -130,9 +129,6 @@ export default async function handler(req, res) {
         return res.status(500).json(formatErrorResponse('Failed to add to cart', [{ field: 'database', message: result.error.message }]))
       }
 
-      // ✅ NEW: Broadcast cart update event
-      await eventBroadcaster.cartUpdated(userId, { action: 'item_added', productId: product_id, quantity })
-
       return res.status(200).json(formatSuccessResponse(result.data))
     }
 
@@ -161,9 +157,6 @@ export default async function handler(req, res) {
           return res.status(500).json(formatErrorResponse('Failed to remove from cart', [{ field: 'database', message: error.message }]))
         }
 
-        // ✅ NEW: Broadcast cart update event
-        await eventBroadcaster.cartUpdated(userId, { action: 'item_removed', itemId: id })
-
         return res.status(200).json(formatSuccessResponse({ message: 'Item removed from cart' }))
       } else {
         // Update quantity
@@ -182,9 +175,6 @@ export default async function handler(req, res) {
           return res.status(500).json(formatErrorResponse('Failed to update cart', [{ field: 'database', message: error.message }]))
         }
 
-        // ✅ NEW: Broadcast cart update event
-        await eventBroadcaster.cartUpdated(userId, { action: 'quantity_updated', itemId: id, quantity })
-
         return res.status(200).json(formatSuccessResponse(data))
       }
     }
@@ -200,9 +190,6 @@ export default async function handler(req, res) {
       if (error) {
         return res.status(500).json(formatErrorResponse('Failed to clear cart', [{ field: 'database', message: error.message }]))
       }
-
-      // ✅ NEW: Broadcast cart cleared event
-      await eventBroadcaster.cartUpdated(userId, { action: 'cart_cleared' })
 
       return res.status(200).json(formatSuccessResponse({ message: 'Cart cleared successfully' }))
     }

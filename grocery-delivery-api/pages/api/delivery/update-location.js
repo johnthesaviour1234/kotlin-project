@@ -1,7 +1,6 @@
 import { withAdminAuth } from '../../../lib/adminMiddleware.js'
 import { supabase } from '../../../lib/supabase.js'
 import { formatSuccessResponse, formatErrorResponse } from '../../../lib/validation.js'
-import eventBroadcaster from '../../../lib/eventBroadcaster.js'
 
 async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -39,14 +38,6 @@ async function handler(req, res) {
       console.error('Error updating location:', error)
       return res.status(500).json(formatErrorResponse('Failed to update location'))
     }
-
-    // ✅ NEW: Broadcast driver location update
-    await eventBroadcaster.driverLocationUpdated(
-      req.user.id,
-      parseFloat(latitude),
-      parseFloat(longitude),
-      order_id
-    )
 
     res.status(201).json(formatSuccessResponse(data, 'Location updated successfully'))
   } catch (error) {
