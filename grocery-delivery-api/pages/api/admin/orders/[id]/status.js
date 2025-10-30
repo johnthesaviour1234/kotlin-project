@@ -1,7 +1,6 @@
 import { withAdminAuth, logAdminActivity } from '../../../../../lib/adminMiddleware.js'
 import { supabase } from '../../../../../lib/supabase.js'
 import { formatSuccessResponse, formatErrorResponse } from '../../../../../lib/validation.js'
-import eventBroadcaster from '../../../../../lib/eventBroadcaster.js'
 
 async function handler(req, res) {
   if (req.method !== 'PUT') {
@@ -76,16 +75,6 @@ async function handler(req, res) {
         new_status: status,
         order_number: currentOrder.order_number
       }
-    )
-
-    // ✅ Broadcast status change to all subscribers (customer, driver, admins)
-    const deliveryPersonnelId = currentOrder.delivery_assignments?.[0]?.delivery_personnel_id || null
-    await eventBroadcaster.orderStatusChanged(
-      id,
-      currentOrder.status, // old status
-      status, // new status
-      currentOrder.customer_id,
-      deliveryPersonnelId
     )
 
     res.status(200).json(formatSuccessResponse(updatedOrder, 'Order status updated successfully'))
