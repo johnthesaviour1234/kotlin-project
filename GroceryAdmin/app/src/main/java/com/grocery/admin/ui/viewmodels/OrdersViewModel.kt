@@ -3,8 +3,6 @@ package com.grocery.admin.ui.viewmodels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.grocery.admin.data.local.Event
-import com.grocery.admin.data.local.EventBus
 import com.grocery.admin.data.remote.dto.OrderDto
 import com.grocery.admin.domain.repository.OrdersRepository
 import com.grocery.admin.util.Resource
@@ -17,8 +15,7 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class OrdersViewModel @Inject constructor(
-    private val ordersRepository: OrdersRepository,
-    private val eventBus: EventBus
+    private val ordersRepository: OrdersRepository
 ) : BaseViewModel() {
 
     private val _orders = MutableLiveData<Resource<List<OrderDto>>>()
@@ -36,30 +33,6 @@ class OrdersViewModel @Inject constructor(
     private var currentSearchQuery: String = ""
     private var allOrders: List<OrderDto> = emptyList()
 
-    init {
-        // Subscribe to order status changes for real-time updates
-        viewModelScope.launch {
-            eventBus.subscribe<Event.OrderStatusChanged>().collect { event ->
-                updateOrderStatusInList(event.orderId, event.newStatus)
-            }
-        }
-
-        // Subscribe to new order creation events
-        viewModelScope.launch {
-            eventBus.subscribe<Event.OrderCreated>().collect { event ->
-                // Refresh orders list to show new order
-                refreshOrders()
-            }
-        }
-
-        // Subscribe to order assignment events
-        viewModelScope.launch {
-            eventBus.subscribe<Event.OrderAssigned>().collect { event ->
-                // Refresh to show assignment details
-                refreshOrders()
-            }
-        }
-    }
 
     /**
      * Load orders from the API
@@ -179,18 +152,5 @@ class OrdersViewModel @Inject constructor(
         _orders.value = Resource.Success(filteredOrders)
     }
 
-    /**
-     * Update order status in the list (for real-time updates)
-     */
-    private fun updateOrderStatusInList(orderId: String, newStatus: String) {
-        allOrders = allOrders.map { order ->
-            if (order.id == orderId) {
-                order.copy(status = newStatus)
-            } else {
-                order
-            }
-        }
-        applyFiltersAndSearch()
-    }
 
 }

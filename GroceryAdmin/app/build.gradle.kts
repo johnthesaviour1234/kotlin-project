@@ -112,15 +112,6 @@ dependencies {
     // DataStore - Preferences
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     
-    // Supabase for real-time features and authentication
-    implementation("io.github.jan-tennert.supabase:postgrest-kt:2.0.4")
-    implementation("io.github.jan-tennert.supabase:realtime-kt:2.0.4")
-    implementation("io.github.jan-tennert.supabase:gotrue-kt:2.0.4")
-    implementation("io.ktor:ktor-client-okhttp:2.3.7")
-    implementation("io.ktor:ktor-client-core:2.3.7")
-
-    // Kotlin serialization for Supabase
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     
     // Async/Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")

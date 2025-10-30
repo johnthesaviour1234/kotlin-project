@@ -9,9 +9,6 @@ import com.grocery.admin.data.remote.dto.RegisterRequest
 import com.grocery.admin.data.remote.dto.RegisterResponse
 import com.grocery.admin.domain.repository.AuthRepository
 import com.grocery.admin.util.Resource
-import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.gotrue.auth
-import io.github.jan.supabase.gotrue.providers.builtin.Email
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -20,8 +17,7 @@ import javax.inject.Singleton
 @Singleton
 class AuthRepositoryImpl @Inject constructor(
     private val apiService: ApiService,
-    private val tokenStore: TokenStore,
-    private val supabaseClient: SupabaseClient
+    private val tokenStore: TokenStore
 ) : AuthRepository {
     
     companion object {
@@ -43,18 +39,6 @@ class AuthRepositoryImpl @Inject constructor(
                     refreshToken = tokens.refreshToken,
                     expiresAt = tokens.expiresAt
                 )
-                
-                // CRITICAL: Also sign in to Supabase for Realtime authentication
-                try {
-                    supabaseClient.auth.signInWith(Email) {
-                        this.email = email
-                        this.password = password
-                    }
-                    Log.d(TAG, "Supabase authentication successful")
-                } catch (authError: Exception) {
-                    Log.e(TAG, "Supabase authentication failed, but backend login successful", authError)
-                    // Continue anyway - backend auth is primary
-                }
                 
                 emit(Resource.Success(response.data))
             } else {
@@ -114,14 +98,6 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun logout() {
         Log.d(TAG, "Logging out user")
         tokenStore.clear()
-        
-        // Also sign out from Supabase
-        try {
-            supabaseClient.auth.signOut()
-            Log.d(TAG, "Supabase sign out successful")
-        } catch (e: Exception) {
-            Log.e(TAG, "Supabase sign out failed", e)
-        }
     }
     
     override suspend fun isLoggedIn(): Boolean {

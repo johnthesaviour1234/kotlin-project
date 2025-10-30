@@ -11,7 +11,6 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.grocery.admin.R
 import com.grocery.admin.data.local.TokenStore
-import com.grocery.admin.data.remote.RealtimeManager
 import com.grocery.admin.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -27,8 +26,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     @Inject
     lateinit var tokenStore: TokenStore
 
-    @Inject
-    lateinit var realtimeManager: RealtimeManager
     
     private lateinit var navController: NavController
 
@@ -47,9 +44,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         
         // Setup bottom navigation with NavController
         binding.bottomNavigation.setupWithNavController(navController)
-
-        // Initialize RealtimeManager for admin events
-        realtimeManager.initialize()
     }
 
     override fun setupObservers() {
@@ -73,9 +67,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     
     private fun logout() {
         lifecycleScope.launch {
-            // Unsubscribe from realtime channels
-            realtimeManager.unsubscribeAll()
-
             // Clear tokens
             tokenStore.clear()
             
