@@ -13,7 +13,6 @@ import com.grocery.customer.databinding.ActivityMainBinding
 import com.grocery.customer.BuildConfig
 import com.grocery.customer.data.local.TokenStore
 import com.grocery.customer.data.remote.ApiService
-import com.grocery.customer.data.remote.RealtimeManager
 import com.grocery.customer.domain.repository.CartRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -34,9 +33,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     lateinit var cartRepository: CartRepository
     
     @Inject
-    lateinit var realtimeManager: RealtimeManager
-    
-    @Inject
     lateinit var tokenStore: TokenStore
 
     companion object {
@@ -50,27 +46,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     override fun setupUI() {
         Log.d(TAG, "MainActivity started")
         Log.d(TAG, "API Base URL: ${BuildConfig.API_BASE_URL}")
-        initializeRealtime()
         setupNavigation()
         setupCartBadge()
         testApiConnection()
-    }
-    
-    private fun initializeRealtime() {
-        lifecycleScope.launch {
-            try {
-                val userId = tokenStore.getUserId()
-                if (userId != null) {
-                    Log.d(TAG, "Initializing RealtimeManager for user: $userId")
-                    realtimeManager.initialize(userId)
-                    Log.d(TAG, "RealtimeManager initialized successfully")
-                } else {
-                    Log.w(TAG, "No user ID found, RealtimeManager not initialized")
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to initialize RealtimeManager", e)
-            }
-        }
     }
     
     private fun testApiConnection() {
@@ -135,11 +113,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     
     override fun onDestroy() {
         super.onDestroy()
-        try {
-            Log.d(TAG, "Unsubscribing from all realtime channels")
-            realtimeManager.unsubscribeAll()
-        } catch (e: Exception) {
-            Log.e(TAG, "Error unsubscribing from realtime", e)
-        }
+        // Realtime cleanup removed as part of State Sync Migration
     }
 }

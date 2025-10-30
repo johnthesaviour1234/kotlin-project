@@ -131,13 +131,7 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
     
-    // Supabase - Real-time integration (Phase 2)
-    implementation("io.github.jan-tennert.supabase:postgrest-kt:2.1.3")
-    implementation("io.github.jan-tennert.supabase:realtime-kt:2.1.3")
-    implementation("io.ktor:ktor-client-android:2.3.7")
-    implementation("io.ktor:ktor-client-okhttp:2.3.7")
-    implementation("io.ktor:ktor-utils:2.3.7")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    // Supabase dependencies removed as part of State Sync Migration
     
     // Async/Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")

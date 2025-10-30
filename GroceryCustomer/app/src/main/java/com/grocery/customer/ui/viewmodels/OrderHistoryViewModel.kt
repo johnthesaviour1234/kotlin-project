@@ -2,8 +2,6 @@ package com.grocery.customer.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.grocery.customer.data.local.Event
-import com.grocery.customer.data.local.EventBus
 import com.grocery.customer.data.remote.dto.*
 import com.grocery.customer.domain.usecase.GetOrderHistoryUseCase
 import com.grocery.customer.domain.usecase.GetOrderDetailsUseCase
@@ -21,8 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class OrderHistoryViewModel @Inject constructor(
     private val getOrderHistoryUseCase: GetOrderHistoryUseCase,
-    private val getOrderDetailsUseCase: GetOrderDetailsUseCase,
-    private val eventBus: EventBus
+    private val getOrderDetailsUseCase: GetOrderDetailsUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(OrderHistoryUiState())
@@ -33,21 +30,7 @@ class OrderHistoryViewModel @Inject constructor(
 
     init {
         loadOrders()
-
-        // Subscribe to order status changes for real-time updates
-        viewModelScope.launch {
-            eventBus.subscribe<Event.OrderStatusChanged>().collect { event ->
-                updateOrderStatus(event.orderId, event.newStatus)
-            }
-        }
-
-        // Subscribe to order creation events
-        viewModelScope.launch {
-            eventBus.subscribe<Event.OrderCreated>().collect { event ->
-                // Refresh orders list to show new order
-                loadOrders(refresh = true)
-            }
-        }
+        // EventBus subscriptions removed as part of State Sync Migration
     }
 
     /**
