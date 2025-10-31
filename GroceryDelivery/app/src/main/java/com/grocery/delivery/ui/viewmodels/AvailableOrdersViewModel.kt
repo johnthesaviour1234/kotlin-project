@@ -1,15 +1,18 @@
 package com.grocery.delivery.ui.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.grocery.delivery.data.dto.DeliveryAssignment
 import com.grocery.delivery.data.repository.DeliveryRepository
+import com.grocery.delivery.services.RealtimeManager
 import com.grocery.delivery.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -17,8 +20,13 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class AvailableOrdersViewModel @Inject constructor(
-    private val deliveryRepository: DeliveryRepository
+    private val deliveryRepository: DeliveryRepository,
+    private val realtimeManager: RealtimeManager
 ) : ViewModel() {
+    
+    companion object {
+        private const val TAG = "AvailableOrdersViewModel"
+    }
     
     private val _ordersState = MutableLiveData<Resource<List<DeliveryAssignment>>>()
     val ordersState: LiveData<Resource<List<DeliveryAssignment>>> = _ordersState
@@ -28,6 +36,7 @@ class AvailableOrdersViewModel @Inject constructor(
     
     init {
         loadAvailableOrders()
+        observeRealtimeEvents()
     }
     
     fun loadAvailableOrders() {
@@ -68,5 +77,19 @@ class AvailableOrdersViewModel @Inject constructor(
     
     fun resetActionState() {
         _actionState.value = null
+    }
+    
+    /**
+     * Observe real-time events for order changes.
+     */
+    private fun observeRealtimeEvents() {
+        // Listen for order refresh trigger
+        viewModelScope.launch {
+            realtimeManager.orderRefreshTrigger.collect {
+                Log.d(TAG, "Order refresh triggered by realtime event")
+                // Refresh orders list
+                loadAvailableOrders()
+            }
+        }
     }
 }

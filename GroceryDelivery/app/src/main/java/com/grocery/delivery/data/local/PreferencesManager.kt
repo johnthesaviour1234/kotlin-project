@@ -23,6 +23,7 @@ class PreferencesManager @Inject constructor(
         private const val PREF_NAME = "delivery_prefs"
         private const val KEY_AUTH_TOKEN = "auth_token"
         private const val KEY_REFRESH_TOKEN = "refresh_token"
+        private const val KEY_EXPIRES_AT = "expires_at"
         private const val KEY_USER_ID = "user_id"
         private const val KEY_USER_EMAIL = "user_email"
         private const val KEY_USER_NAME = "user_name"
@@ -33,7 +34,9 @@ class PreferencesManager @Inject constructor(
      * Auth token operations
      */
     fun saveAuthToken(token: String) {
-        sharedPreferences.edit().putString(KEY_AUTH_TOKEN, token).apply()
+        // Remove any whitespace/newlines from token before saving
+        val cleanToken = token.replace("\n", "").replace("\r", "").trim()
+        sharedPreferences.edit().putString(KEY_AUTH_TOKEN, cleanToken).apply()
     }
     
     fun getAuthToken(): String? {
@@ -46,6 +49,15 @@ class PreferencesManager @Inject constructor(
     
     fun getRefreshToken(): String? {
         return sharedPreferences.getString(KEY_REFRESH_TOKEN, null)
+    }
+    
+    fun saveExpiresAt(expiresAt: Long) {
+        sharedPreferences.edit().putLong(KEY_EXPIRES_AT, expiresAt).apply()
+    }
+    
+    fun getExpiresAt(): Long? {
+        val expiresAt = sharedPreferences.getLong(KEY_EXPIRES_AT, -1L)
+        return if (expiresAt == -1L) null else expiresAt
     }
     
     /**

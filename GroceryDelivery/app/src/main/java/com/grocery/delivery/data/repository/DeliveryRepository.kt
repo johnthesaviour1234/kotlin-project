@@ -1,5 +1,6 @@
 package com.grocery.delivery.data.repository
 
+import android.util.Log
 import com.grocery.delivery.data.api.DeliveryApiService
 import com.grocery.delivery.data.dto.*
 import com.grocery.delivery.data.local.PreferencesManager
@@ -18,6 +19,10 @@ class DeliveryRepository @Inject constructor(
     private val preferencesManager: PreferencesManager
 ) {
     
+    companion object {
+        private const val TAG = "DeliveryRepository"
+    }
+    
     private fun getAuthHeader(): String {
         val token = preferencesManager.getAuthToken()
         return "Bearer $token"
@@ -34,7 +39,7 @@ class DeliveryRepository @Inject constructor(
         try {
             emit(Resource.Loading())
             
-            val response = apiService.getAvailableOrders(getAuthHeader())
+            val response = apiService.getAvailableOrders()
             
             if (response.isSuccessful && response.body() != null) {
                 val ordersResponse = response.body()!!
@@ -45,7 +50,14 @@ class DeliveryRepository @Inject constructor(
                     emit(Resource.Error("Failed to fetch orders"))
                 }
             } else {
-                emit(Resource.Error(response.message() ?: "Network error"))
+                // Handle 401 - token expired
+                if (response.code() == 401) {
+                    Log.e(TAG, "401 Unauthorized - Token expired, clearing tokens")
+                    preferencesManager.clearAll()
+                    emit(Resource.Error("Session expired. Please login again.", isAuthError = true))
+                } else {
+                    emit(Resource.Error(response.message() ?: "Network error"))
+                }
             }
         } catch (e: Exception) {
             emit(Resource.Error(e.localizedMessage ?: "An unexpected error occurred"))
@@ -65,7 +77,7 @@ class DeliveryRepository @Inject constructor(
                 return@flow
             }
             
-            val response = apiService.getActiveOrder(getAuthHeader(), driverId)
+            val response = apiService.getActiveOrder(driverId)
             
             if (response.isSuccessful && response.body() != null) {
                 val orderResponse = response.body()!!
@@ -90,7 +102,7 @@ class DeliveryRepository @Inject constructor(
         try {
             emit(Resource.Loading())
             
-            val response = apiService.getOrderHistory(getAuthHeader(), limit, 0)
+            val response = apiService.getOrderHistory(limit, 0)
             
             if (response.isSuccessful && response.body() != null) {
                 val ordersResponse = response.body()!!
@@ -120,7 +132,7 @@ class DeliveryRepository @Inject constructor(
                 notes = notes
             )
             
-            val response = apiService.acceptOrder(getAuthHeader(), request)
+            val response = apiService.acceptOrder(request)
             
             if (response.isSuccessful && response.body() != null) {
                 val orderResponse = response.body()!!
@@ -150,7 +162,7 @@ class DeliveryRepository @Inject constructor(
                 reason = reason
             )
             
-            val response = apiService.declineOrder(getAuthHeader(), request)
+            val response = apiService.declineOrder(request)
             
             if (response.isSuccessful && response.body() != null) {
                 val orderResponse = response.body()!!
@@ -187,7 +199,7 @@ class DeliveryRepository @Inject constructor(
                 proofOfDelivery = proofOfDelivery
             )
             
-            val response = apiService.updateOrderStatus(getAuthHeader(), request)
+            val response = apiService.updateOrderStatus(request)
             
             if (response.isSuccessful && response.body() != null) {
                 val orderResponse = response.body()!!
@@ -228,7 +240,7 @@ class DeliveryRepository @Inject constructor(
                 heading = heading
             )
             
-            val response = apiService.updateLocation(getAuthHeader(), request)
+            val response = apiService.updateLocation(request)
             
             if (response.isSuccessful && response.body() != null) {
                 val locationResponse = response.body()!!
@@ -253,7 +265,7 @@ class DeliveryRepository @Inject constructor(
         try {
             emit(Resource.Loading())
             
-            val response = apiService.getProfile(getAuthHeader())
+            val response = apiService.getProfile()
             
             if (response.isSuccessful && response.body() != null) {
                 val apiResponse = response.body()!!
@@ -290,7 +302,7 @@ class DeliveryRepository @Inject constructor(
                 preferences = preferences
             )
             
-            val response = apiService.updateProfile(getAuthHeader(), request)
+            val response = apiService.updateProfile(request)
             
             if (response.isSuccessful && response.body() != null) {
                 val apiResponse = response.body()!!

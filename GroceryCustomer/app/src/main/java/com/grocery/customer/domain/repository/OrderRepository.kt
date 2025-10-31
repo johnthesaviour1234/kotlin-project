@@ -37,4 +37,12 @@ interface OrderRepository {
         limit: Int = 10, 
         status: String? = null
     ): Result<OrderHistoryResponse>
+    
+    /**
+     * Force refresh orders from backend after realtime update.
+     * This is called by RealtimeManager when order changes are received.
+     * 
+     * @return Result indicating success or error
+     */
+    suspend fun refreshOrders(): Result<Unit>
 }

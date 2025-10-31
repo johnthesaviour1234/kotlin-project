@@ -45,6 +45,9 @@ class AuthRepository @Inject constructor(
                     loginResponse.data.tokens.refreshToken?.let {
                         preferencesManager.saveRefreshToken(it)
                     }
+                    loginResponse.data.tokens.expiresAt?.let {
+                        preferencesManager.saveExpiresAt(it)
+                    }
                     preferencesManager.saveUserId(loginResponse.data.user.id)
                     preferencesManager.saveUserEmail(loginResponse.data.user.email)
                     loginResponse.data.user.fullName?.let {
@@ -98,6 +101,9 @@ class AuthRepository @Inject constructor(
                     registerResponse.data.tokens.refreshToken?.let {
                         preferencesManager.saveRefreshToken(it)
                     }
+                    registerResponse.data.tokens.expiresAt?.let {
+                        preferencesManager.saveExpiresAt(it)
+                    }
                     preferencesManager.saveUserId(registerResponse.data.user.id)
                     preferencesManager.saveUserEmail(registerResponse.data.user.email)
                     registerResponse.data.user.fullName?.let {
@@ -123,13 +129,11 @@ class AuthRepository @Inject constructor(
         try {
             emit(Resource.Loading())
             
-            val token = preferencesManager.getAuthToken()
-            if (token != null) {
-                try {
-                    apiService.logout("Bearer $token")
-                } catch (e: Exception) {
-                    // Ignore logout API errors, clear local data anyway
-                }
+            try {
+                // AuthInterceptor will add the token automatically
+                apiService.logout()
+            } catch (e: Exception) {
+                // Ignore logout API errors, clear local data anyway
             }
             
             // Clear all stored data

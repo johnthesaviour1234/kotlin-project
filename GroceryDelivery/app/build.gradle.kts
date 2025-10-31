@@ -4,6 +4,7 @@ plugins {
     id("org.jetbrains.kotlin.kapt")
     id("dagger.hilt.android.plugin")
     id("kotlin-parcelize")
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.10"
     id("io.gitlab.arturbosch.detekt")
     id("org.jlleitschuh.gradle.ktlint")
 }
@@ -21,9 +22,9 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         
-        // Supabase configuration
-        buildConfigField("String", "SUPABASE_URL", "\"https://sjujrmvfzzzfskknvgjx.supabase.co\"")
-        buildConfigField("String", "SUPABASE_ANON_KEY", "\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNqdWpybXZmenpxZnNra252Z2p4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyMTgzOTAsImV4cCI6MjA0NDc5NDM5MH0.gHOxJOB-DfJBY4nPWGWLQzf1Vbj0F6tTa_pqSkl1234\"")
+        // Supabase configuration (Updated for Realtime Sync)
+        buildConfigField("String", "SUPABASE_URL", "\"https://hfxdxxpmcemdjsvhsdcf.supabase.co\"")
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmeGR4eHBtY2VtZGpzdmhzZGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA2NjU5MTcsImV4cCI6MjA3NjI0MTkxN30.X9lzy9TnHRjuzvWLYdsLUXHcd0668WwemOJ-GFQHqG8\"")
         
         // API configuration
         buildConfigField("String", "API_BASE_URL", "\"https://andoid-app-kotlin.vercel.app/api/\"")
@@ -99,12 +100,12 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
     
-    // Supabase - temporarily commented out for basic build
-    // implementation("io.github.jan-tennert.supabase:postgrest-kt:2.0.4")
-    // implementation("io.github.jan-tennert.supabase:auth-kt:2.0.4")
-    // implementation("io.github.jan-tennert.supabase:realtime-kt:2.0.4")
-    // implementation("io.github.jan-tennert.supabase:storage-kt:2.0.4")
-    // implementation("io.ktor:ktor-client-android:2.3.7")
+    // Supabase Realtime for WebSocket-based sync
+    implementation("io.github.jan-tennert.supabase:realtime-kt:2.6.0")
+    implementation("io.github.jan-tennert.supabase:postgrest-kt:2.6.0")
+    implementation("io.ktor:ktor-client-okhttp:2.3.7") // OkHttp engine supports WebSockets and Android TLS
+    implementation("io.ktor:ktor-client-websockets:2.3.7")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     
     // Async/Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")

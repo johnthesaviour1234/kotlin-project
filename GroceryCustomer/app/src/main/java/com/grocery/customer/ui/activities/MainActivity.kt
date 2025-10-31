@@ -13,6 +13,9 @@ import com.grocery.customer.databinding.ActivityMainBinding
 import com.grocery.customer.BuildConfig
 import com.grocery.customer.data.local.TokenStore
 import com.grocery.customer.data.remote.ApiService
+import com.grocery.customer.data.sync.RealtimeManager
+import com.grocery.customer.data.workers.BackgroundSyncWorker
+import com.grocery.customer.domain.repository.AuthRepository
 import com.grocery.customer.domain.repository.CartRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -34,6 +37,14 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     
     @Inject
     lateinit var tokenStore: TokenStore
+    
+    @Inject
+    lateinit var authRepository: AuthRepository
+    
+    @Inject
+    lateinit var realtimeManager: RealtimeManager
+    
+    private var currentUserId: String? = null
 
     companion object {
         private const val TAG = "MainActivity"
@@ -46,9 +57,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     override fun setupUI() {
         Log.d(TAG, "MainActivity started")
         Log.d(TAG, "API Base URL: ${BuildConfig.API_BASE_URL}")
+        Log.d(TAG, "Supabase URL: ${BuildConfig.SUPABASE_URL}")
         setupNavigation()
         setupCartBadge()
         testApiConnection()
+        initializeRealtimeSync()
     }
     
     private fun testApiConnection() {
@@ -80,7 +93,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     }
 
     override fun setupObservers() {
-        // TODO: Set up observers for ViewModels when needed
+        // Observe realtime connection state
+        lifecycleScope.launch {
+            realtimeManager.connectionState.collect { state ->
+                Log.d(TAG, "Realtime connection state: $state")
+            }
+        }
     }
 
     private fun setupNavigation() {
@@ -111,8 +129,92 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         }
     }
     
+    /**
+     * Initialize realtime synchronization
+     * Gets the current user ID and prepares for realtime subscriptions
+     */
+    private fun initializeRealtimeSync() {
+        lifecycleScope.launch {
+            try {
+                // Get current user ID from token store
+                // You may need to decode JWT or call an API to get user ID
+                // For now, we'll get it when user resumes the app
+                Log.d(TAG, "Realtime sync initialized - will subscribe in onResume()")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to initialize realtime sync", e)
+            }
+        }
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "App resumed - starting realtime sync")
+        
+        // Subscribe to realtime channels when app comes to foreground
+        lifecycleScope.launch {
+            try {
+                // Get current user from auth repository
+                val userResult = authRepository.getCurrentUser()
+                if (userResult.isSuccess) {
+                    val user = userResult.getOrNull()
+                    val userId = user?.id
+                    if (userId != null) {
+                        currentUserId = userId
+                        Log.d(TAG, "Subscribing to realtime for user: $userId (${user.email})")
+                        realtimeManager.subscribeToCartChanges(userId)
+                        realtimeManager.subscribeToOrderChanges(userId)
+                        Log.d(TAG, "✅ Realtime sync active - cart and orders will update in real-time")
+                    } else {
+                        Log.w(TAG, "No user ID available for realtime sync")
+                    }
+                } else {
+                    Log.w(TAG, "User not logged in - realtime sync disabled")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to subscribe to realtime", e)
+            }
+        }
+        
+        // Keep WorkManager sync as fallback
+        BackgroundSyncWorker.cancelBackgroundSync(this)
+        BackgroundSyncWorker.scheduleForegroundSync(this)
+    }
+    
+    override fun onPause() {
+        super.onPause()
+        Log.d(TAG, "App paused - unsubscribing from realtime to save battery")
+        
+        // Unsubscribe from realtime when app goes to background to save battery
+        lifecycleScope.launch {
+            try {
+                realtimeManager.unsubscribeAll()
+                Log.d(TAG, "Successfully unsubscribed from realtime")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to unsubscribe from realtime", e)
+            }
+        }
+        
+        // Switch to background sync via WorkManager
+        BackgroundSyncWorker.cancelForegroundSync(this)
+        BackgroundSyncWorker.scheduleBackgroundSync(this)
+    }
+    
     override fun onDestroy() {
         super.onDestroy()
-        // Realtime cleanup removed as part of State Sync Migration
+        Log.d(TAG, "MainActivity destroyed - cleaning up realtime")
+        
+        // Final cleanup of realtime connections
+        lifecycleScope.launch {
+            try {
+                realtimeManager.unsubscribeAll()
+                Log.d(TAG, "Realtime cleanup complete")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error during realtime cleanup", e)
+            }
+        }
+        
+        // Note: Background sync will continue even after app is destroyed
+        // To stop all sync, call BackgroundSyncWorker.cancelAllSync(this)
     }
+    
 }

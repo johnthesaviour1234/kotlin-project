@@ -8,12 +8,17 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.grocery.admin.R
 import com.grocery.admin.data.remote.dto.DashboardMetrics
 import com.grocery.admin.databinding.FragmentDashboardBinding
+import com.grocery.admin.ui.util.SessionExpiredHandler
 import com.grocery.admin.ui.viewmodels.DashboardViewModel
 import com.grocery.admin.util.Resource
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -54,6 +59,17 @@ class DashboardFragment : Fragment() {
     }
     
     private fun observeViewModel() {
+        // Observe session expiration
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.sessionExpired.collect {
+                    requireActivity().let { activity ->
+                        SessionExpiredHandler.showSessionExpiredDialog(activity)
+                    }
+                }
+            }
+        }
+        
         // Observe dashboard metrics
         viewModel.dashboardMetrics.observe(viewLifecycleOwner) { resource ->
             when (resource) {

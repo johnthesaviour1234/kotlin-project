@@ -137,4 +137,13 @@ interface ApiService {
     suspend fun getDriverLocation(
         @Path("orderId") orderId: String
     ): Response<ApiResponse<com.grocery.customer.data.dto.DriverLocationResponse>>
+
+    // State sync endpoints
+    @GET("sync/state")
+    suspend fun getSyncState(): Response<SyncStateResponse>
+
+    @POST("sync/resolve")
+    suspend fun resolveSyncConflict(
+        @Body request: SyncResolveRequest
+    ): Response<SyncResolveResponse>
 }

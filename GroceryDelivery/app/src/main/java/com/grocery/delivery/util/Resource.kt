@@ -15,8 +15,9 @@ sealed class Resource<T>(
 
     /**
      * Represents an error state with optional data and error message.
+     * @param isAuthError Indicates if this is an authentication error (401)
      */
-    class Error<T>(message: String, data: T? = null) : Resource<T>(data, message)
+    class Error<T>(message: String, data: T? = null, val isAuthError: Boolean = false) : Resource<T>(data, message)
 
     /**
      * Represents a loading state with optional data.

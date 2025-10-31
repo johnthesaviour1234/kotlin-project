@@ -2,6 +2,7 @@ package com.grocery.admin.ui.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -9,8 +10,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import com.grocery.admin.BuildConfig
 import com.grocery.admin.R
 import com.grocery.admin.data.local.TokenStore
+import com.grocery.admin.data.sync.RealtimeManager
 import com.grocery.admin.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -23,9 +26,15 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : BaseActivity<ActivityMainBinding>() {
 
+    companion object {
+        private const val TAG = "Admin_MainActivity"
+    }
+
     @Inject
     lateinit var tokenStore: TokenStore
-
+    
+    @Inject
+    lateinit var realtimeManager: RealtimeManager
     
     private lateinit var navController: NavController
 
@@ -44,10 +53,71 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         
         // Setup bottom navigation with NavController
         binding.bottomNavigation.setupWithNavController(navController)
+        
+        // Log configuration
+        Log.d(TAG, "Admin app started")
+        Log.d(TAG, "API Base URL: ${BuildConfig.API_BASE_URL}")
+        Log.d(TAG, "Supabase URL: ${BuildConfig.SUPABASE_URL}")
     }
 
     override fun setupObservers() {
-        // Set up observers for ViewModels if needed
+        // Observe realtime connection state
+        lifecycleScope.launch {
+            realtimeManager.connectionState.collect { state ->
+                Log.d(TAG, "Realtime connection state: $state")
+            }
+        }
+        
+        // Observe order refresh triggers from realtime
+        lifecycleScope.launch {
+            realtimeManager.orderRefreshTrigger.collect {
+                Log.d(TAG, "🔄 Realtime order change detected - triggering UI refresh")
+                // Broadcast to all fragments/viewmodels via local broadcast or event bus
+                // For now, fragments will need to observe this themselves
+            }
+        }
+        
+        // Observe assignment refresh triggers from realtime
+        lifecycleScope.launch {
+            realtimeManager.assignmentRefreshTrigger.collect {
+                Log.d(TAG, "🔄 Realtime assignment change detected")
+            }
+        }
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "Admin app resumed - starting realtime sync")
+        
+        // Subscribe to realtime when app comes to foreground
+        lifecycleScope.launch {
+            try {
+                // Admin sees ALL orders and assignments
+                realtimeManager.subscribeToAllOrders()
+                realtimeManager.subscribeToDeliveryAssignments()
+                Log.d(TAG, "✅ Realtime sync active - monitoring all orders and assignments")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to start realtime sync", e)
+            }
+        }
+    }
+    
+    override fun onPause() {
+        super.onPause()
+        Log.d(TAG, "Admin app paused - pausing realtime sync")
+        
+        // Unsubscribe when app goes to background to save battery
+        lifecycleScope.launch {
+            realtimeManager.unsubscribeAll()
+        }
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        // Cleanup realtime connections
+        lifecycleScope.launch {
+            realtimeManager.unsubscribeAll()
+        }
     }
     
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

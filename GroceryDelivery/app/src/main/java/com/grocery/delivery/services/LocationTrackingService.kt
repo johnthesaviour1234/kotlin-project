@@ -163,12 +163,6 @@ class LocationTrackingService : Service() {
     private fun sendLocationToBackend(location: Location) {
         serviceScope.launch {
             try {
-                val token = preferencesManager.getAuthToken()
-                if (token == null) {
-                    Log.e(TAG, "No auth token available")
-                    return@launch
-                }
-
                 val request = LocationUpdateRequest(
                     latitude = location.latitude,
                     longitude = location.longitude,
@@ -178,7 +172,8 @@ class LocationTrackingService : Service() {
                     orderId = currentOrderId
                 )
 
-                val response = apiService.updateLocation("Bearer $token", request)
+                // AuthInterceptor will add the token automatically
+                val response = apiService.updateLocation(request)
 
                 if (response.isSuccessful) {
                     Log.d(TAG, "Location updated successfully")

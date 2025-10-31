@@ -1,8 +1,10 @@
 package com.grocery.customer.data.repository
 
 import android.util.Log
+import com.grocery.customer.data.local.TokenStore
 import com.grocery.customer.data.remote.ApiService
 import com.grocery.customer.data.remote.dto.*
+import com.grocery.customer.domain.exceptions.TokenExpiredException
 import com.grocery.customer.domain.repository.CartRepository
 import com.grocery.customer.domain.repository.ProductRepository
 import kotlinx.coroutines.CoroutineScope
@@ -21,7 +23,8 @@ import javax.inject.Singleton
 @Singleton
 class CartRepositoryImpl @Inject constructor(
     private val productRepository: ProductRepository,
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val tokenStore: TokenStore
 ) : CartRepository {
     
     private val _cartState = MutableStateFlow(Cart())
@@ -40,6 +43,11 @@ class CartRepositoryImpl @Inject constructor(
         try {
             Log.d("CartRepository", "Loading cart from API...")
             val response = apiService.getCart()
+            if (response.code() == 401) {
+                Log.e("CartRepository", "401 Unauthorized - Token expired")
+                tokenStore.clear()
+                throw TokenExpiredException("Session expired. Please login again.")
+            }
             if (response.isSuccessful) {
                 val apiItems = response.body()?.data?.items ?: emptyList()
                 Log.d("CartRepository", "API returned ${apiItems.size} cart items")
@@ -105,6 +113,10 @@ class CartRepositoryImpl @Inject constructor(
                     )
                     
                     val response = apiService.addToCart(addRequest)
+                    if (response.code() == 401) {
+                        tokenStore.clear()
+                        throw TokenExpiredException("Session expired. Please login again.")
+                    }
                     if (response.isSuccessful) {
                         // Reload cart from API to get updated state
                         loadCartFromApi()
@@ -141,6 +153,10 @@ class CartRepositoryImpl @Inject constructor(
                 val updateRequest = UpdateCartQuantityRequest(quantity = quantity)
                 val response = apiService.updateCartQuantity(cartItem.product.id, updateRequest)
                 
+                if (response.code() == 401) {
+                    tokenStore.clear()
+                    throw TokenExpiredException("Session expired. Please login again.")
+                }
                 if (response.isSuccessful) {
                     // Reload cart from API to get updated state
                     loadCartFromApi()
@@ -168,6 +184,10 @@ class CartRepositoryImpl @Inject constructor(
             // Try to remove using the DELETE endpoint first
             try {
                 val response = apiService.removeFromCart(cartItem.product.id)
+                if (response.code() == 401) {
+                    tokenStore.clear()
+                    throw TokenExpiredException("Session expired. Please login again.")
+                }
                 if (response.isSuccessful) {
                     // Reload cart from API to get updated state
                     loadCartFromApi()
@@ -182,6 +202,10 @@ class CartRepositoryImpl @Inject constructor(
             val updateRequest = UpdateCartQuantityRequest(quantity = 0)
             val updateResponse = apiService.updateCartQuantity(cartItem.product.id, updateRequest)
             
+            if (updateResponse.code() == 401) {
+                tokenStore.clear()
+                throw TokenExpiredException("Session expired. Please login again.")
+            }
             if (updateResponse.isSuccessful) {
                 // Reload cart from API to get updated state
                 loadCartFromApi()
@@ -200,6 +224,10 @@ class CartRepositoryImpl @Inject constructor(
         return try {
             // Clear cart via API
             val response = apiService.clearCart()
+            if (response.code() == 401) {
+                tokenStore.clear()
+                throw TokenExpiredException("Session expired. Please login again.")
+            }
             if (response.isSuccessful) {
                 // Update local state immediately
                 _cartState.value = Cart()

@@ -8,15 +8,19 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.lifecycleScope
 import com.grocery.delivery.R
 import com.grocery.delivery.data.dto.DeliveryAssignment
 import com.grocery.delivery.data.local.PreferencesManager
 import com.grocery.delivery.databinding.ActivityMainBinding
 import com.grocery.delivery.ui.adapters.AvailableOrdersAdapter
+import com.grocery.delivery.services.ConnectionState
+import com.grocery.delivery.services.RealtimeManager
 import com.grocery.delivery.ui.dialogs.OrderDetailDialog
 import com.grocery.delivery.ui.viewmodels.AvailableOrdersViewModel
 import com.grocery.delivery.utils.Resource
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -31,6 +35,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     
     @Inject
     lateinit var preferencesManager: PreferencesManager
+    
+    @Inject
+    lateinit var realtimeManager: RealtimeManager
 
     override fun inflateViewBinding(): ActivityMainBinding {
         return ActivityMainBinding.inflate(layoutInflater)
@@ -41,6 +48,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         setupRecyclerView()
         setupSwipeRefresh()
         setupBottomNavigation()
+        setupRealtimeConnection()
     }
 
     override fun setupObservers() {
@@ -257,5 +265,66 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     private fun hideErrorMessage() {
         binding.textViewError.visibility = View.GONE
+    }
+    
+    /**
+     * Setup real-time connection for order updates.
+     */
+    private fun setupRealtimeConnection() {
+        lifecycleScope.launch {
+            realtimeManager.connect()
+        }
+        
+        // Observe connection state
+        lifecycleScope.launch {
+            realtimeManager.connectionState.collect { state ->
+                when (state) {
+                    is ConnectionState.Connected -> {
+                        android.util.Log.d("MainActivity", "Realtime connected")
+                    }
+                    is ConnectionState.Connecting -> {
+                        android.util.Log.d("MainActivity", "Realtime connecting...")
+                    }
+                    is ConnectionState.Disconnected -> {
+                        android.util.Log.d("MainActivity", "Realtime disconnected")
+                    }
+                    is ConnectionState.Error -> {
+                        android.util.Log.e("MainActivity", "Realtime error: ${state.message}")
+                    }
+                }
+            }
+        }
+        
+        // Observe order refresh triggers from realtime
+        lifecycleScope.launch {
+            realtimeManager.orderRefreshTrigger.collect {
+                android.util.Log.d("MainActivity", "🔔 Realtime order update received - auto-refreshing list")
+                viewModel.refreshOrders()
+            }
+        }
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        // Reconnect realtime if needed
+        if (!realtimeManager.isConnected()) {
+            lifecycleScope.launch {
+                realtimeManager.connect()
+            }
+        }
+    }
+    
+    override fun onPause() {
+        super.onPause()
+        // Keep realtime connected even when app is in background
+        // Only disconnect on logout or when explicitly needed
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        // Disconnect realtime when activity is destroyed
+        lifecycleScope.launch {
+            realtimeManager.disconnect()
+        }
     }
 }

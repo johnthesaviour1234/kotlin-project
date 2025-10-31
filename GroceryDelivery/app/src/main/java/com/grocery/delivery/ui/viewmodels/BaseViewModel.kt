@@ -5,8 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.grocery.delivery.util.Resource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
@@ -21,6 +24,10 @@ abstract class BaseViewModel : ViewModel() {
 
     protected val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
+
+    // Session expiration event
+    private val _sessionExpired = MutableSharedFlow<Unit>()
+    val sessionExpired: SharedFlow<Unit> = _sessionExpired.asSharedFlow()
 
     /**
      * Execute a suspend function with automatic loading state management.
@@ -68,6 +75,10 @@ abstract class BaseViewModel : ViewModel() {
                 
                 if (result is Resource.Error) {
                     _error.value = result.message
+                    // Check if it's an auth error and emit session expired
+                    if (result.isAuthError) {
+                        _sessionExpired.emit(Unit)
+                    }
                 }
             } catch (exception: Exception) {
                 val errorMessage = handleError(exception)

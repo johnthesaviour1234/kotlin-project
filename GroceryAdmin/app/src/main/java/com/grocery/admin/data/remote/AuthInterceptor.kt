@@ -7,6 +7,11 @@ import okhttp3.Interceptor
 import okhttp3.Response
 import javax.inject.Inject
 
+/**
+ * AuthInterceptor - Adds authentication token to API requests
+ * Keeps it simple: just adds Bearer token, no complex logic
+ * 401 errors are handled at the repository layer
+ */
 class AuthInterceptor @Inject constructor(
     private val tokenStore: TokenStore
 ) : Interceptor {

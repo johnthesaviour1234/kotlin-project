@@ -1,17 +1,20 @@
 package com.grocery.admin.ui.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.grocery.admin.R
 import com.grocery.admin.data.remote.dto.OrderDto
+import com.grocery.admin.data.sync.RealtimeManager
 import com.grocery.admin.databinding.FragmentOrdersBinding
 import com.grocery.admin.ui.adapters.OrdersAdapter
 import com.grocery.admin.ui.dialogs.UpdateOrderStatusDialog
@@ -19,6 +22,8 @@ import com.grocery.admin.ui.dialogs.AssignDriverDialog
 import com.grocery.admin.ui.viewmodels.OrdersViewModel
 import com.grocery.admin.util.Resource
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * Fragment for managing orders in the admin panel.
@@ -26,12 +31,19 @@ import dagger.hilt.android.AndroidEntryPoint
  */
 @AndroidEntryPoint
 class OrdersFragment : Fragment() {
+    
+    companion object {
+        private const val TAG = "OrdersFragment"
+    }
 
     private var _binding: FragmentOrdersBinding? = null
     private val binding get() = _binding!!
 
     private val viewModel: OrdersViewModel by viewModels()
     private lateinit var ordersAdapter: OrdersAdapter
+    
+    @Inject
+    lateinit var realtimeManager: RealtimeManager
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,6 +61,7 @@ class OrdersFragment : Fragment() {
         setupSearchAndFilters()
         setupSwipeRefresh()
         observeViewModel()
+        observeRealtimeUpdates()
         
         // Load orders
         viewModel.loadOrders()
@@ -103,6 +116,18 @@ class OrdersFragment : Fragment() {
     private fun setupSwipeRefresh() {
         binding.swipeRefresh.setOnRefreshListener {
             viewModel.refreshOrders()
+        }
+    }
+    
+    /**
+     * Observe realtime order updates and auto-refresh
+     */
+    private fun observeRealtimeUpdates() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            realtimeManager.orderRefreshTrigger.collect {
+                Log.d(TAG, "🔔 Realtime order update received - auto-refreshing list")
+                viewModel.refreshOrders()
+            }
         }
     }
 

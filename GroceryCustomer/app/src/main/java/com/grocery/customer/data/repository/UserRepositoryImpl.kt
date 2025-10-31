@@ -1,8 +1,10 @@
 package com.grocery.customer.data.repository
 
 import android.util.Log
+import com.grocery.customer.data.local.TokenStore
 import com.grocery.customer.data.remote.ApiService
 import com.grocery.customer.data.remote.dto.*
+import com.grocery.customer.domain.exceptions.TokenExpiredException
 import com.grocery.customer.domain.repository.UserRepository
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -12,7 +14,8 @@ import javax.inject.Singleton
  */
 @Singleton
 class UserRepositoryImpl @Inject constructor(
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val tokenStore: TokenStore
 ) : UserRepository {
     
     companion object {
@@ -22,6 +25,10 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun getUserProfile(): Result<UserProfile> {
         return try {
             val response = apiService.getUserProfile()
+            if (response.code() == 401) {
+                tokenStore.clear()
+                throw TokenExpiredException("Session expired. Please login again.")
+            }
             if (response.isSuccessful) {
                 response.body()?.data?.let { profile ->
                     Result.success(profile)
@@ -39,6 +46,10 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun getUserAddresses(): Result<List<UserAddress>> {
         return try {
             val response = apiService.getUserAddresses()
+            if (response.code() == 401) {
+                tokenStore.clear()
+                throw TokenExpiredException("Session expired. Please login again.")
+            }
             if (response.isSuccessful) {
                 response.body()?.data?.items?.let { addresses ->
                     Result.success(addresses)
@@ -68,6 +79,10 @@ class UserRepositoryImpl @Inject constructor(
             )
             
             val response = apiService.createAddress(request)
+            if (response.code() == 401) {
+                tokenStore.clear()
+                throw TokenExpiredException("Session expired. Please login again.")
+            }
             if (response.isSuccessful) {
                 response.body()?.data?.let { createdAddress ->
                     Result.success(createdAddress)
@@ -97,6 +112,10 @@ class UserRepositoryImpl @Inject constructor(
             )
             
             val response = apiService.updateAddress(addressId, request)
+            if (response.code() == 401) {
+                tokenStore.clear()
+                throw TokenExpiredException("Session expired. Please login again.")
+            }
             if (response.isSuccessful) {
                 response.body()?.data?.let { updatedAddress ->
                     Result.success(updatedAddress)
@@ -114,6 +133,10 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun deleteAddress(addressId: String): Result<Unit> {
         return try {
             val response = apiService.deleteAddress(addressId)
+            if (response.code() == 401) {
+                tokenStore.clear()
+                throw TokenExpiredException("Session expired. Please login again.")
+            }
             if (response.isSuccessful) {
                 Result.success(Unit)
             } else {

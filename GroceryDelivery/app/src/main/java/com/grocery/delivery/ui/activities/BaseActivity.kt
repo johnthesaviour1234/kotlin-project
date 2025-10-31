@@ -2,7 +2,13 @@ package com.grocery.delivery.ui.activities
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.viewbinding.ViewBinding
+import com.grocery.delivery.ui.util.SessionExpiredHandler
+import com.grocery.delivery.ui.viewmodels.BaseViewModel
+import kotlinx.coroutines.launch
 
 /**
  * Base Activity class that provides common functionality for all activities.
@@ -31,6 +37,12 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
      */
     abstract fun setupObservers()
 
+    /**
+     * Override this to provide the ViewModel for session expiration observation.
+     * Return null if the activity doesn't need session handling.
+     */
+    protected open fun getViewModel(): BaseViewModel? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
@@ -39,6 +51,23 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
         
         setupUI()
         setupObservers()
+        observeSessionExpiration()
+    }
+
+    /**
+     * Observe session expiration from ViewModel
+     */
+    private fun observeSessionExpiration() {
+        val viewModel = getViewModel() ?: return
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.sessionExpired.collect {
+                    // Show session expired dialog and navigate to login
+                    SessionExpiredHandler.showSessionExpiredDialog(this@BaseActivity)
+                }
+            }
+        }
     }
 
     override fun onDestroy() {

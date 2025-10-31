@@ -2,11 +2,15 @@ package com.grocery.customer.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.grocery.customer.domain.exceptions.TokenExpiredException
 import com.grocery.customer.util.Resource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
@@ -21,6 +25,10 @@ abstract class BaseViewModel : ViewModel() {
 
     protected val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
+    
+    // Session expired event - emitted when token expires
+    private val _sessionExpired = MutableSharedFlow<Unit>()
+    val sessionExpired: SharedFlow<Unit> = _sessionExpired.asSharedFlow()
 
     /**
      * Execute a suspend function with automatic loading state management.
@@ -82,6 +90,13 @@ abstract class BaseViewModel : ViewModel() {
      */
     protected open fun handleError(exception: Exception): String {
         val errorMessage = when (exception) {
+            is TokenExpiredException -> {
+                // Emit session expired event for UI to handle
+                viewModelScope.launch {
+                    _sessionExpired.emit(Unit)
+                }
+                exception.message ?: "Session expired. Please login again."
+            }
             is java.net.UnknownHostException -> "Network error. Please check your connection."
             is java.net.SocketTimeoutException -> "Request timeout. Please try again."
             is retrofit2.HttpException -> {

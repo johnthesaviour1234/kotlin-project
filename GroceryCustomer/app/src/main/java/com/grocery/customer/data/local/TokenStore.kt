@@ -62,4 +62,16 @@ class TokenStore @Inject constructor(
         Log.d(TAG, "Retrieved user ID: ${if (userId?.isNotBlank() == true) "Present" else "Missing/Empty"}")
         return userId
     }
+    
+    suspend fun getExpiresAt(): Long? {
+        val expiresAt = dataStore.data.map { it[KEY_EXPIRES_AT] }.firstOrNull()
+        Log.d(TAG, "Retrieved expires_at: $expiresAt")
+        return expiresAt
+    }
+    
+    suspend fun getRefreshToken(): String? {
+        val token = dataStore.data.map { it[KEY_REFRESH_TOKEN] }.firstOrNull()
+        Log.d(TAG, "Retrieved refresh token: ${if (token?.isNotBlank() == true) "Present" else "Missing/Empty"}")
+        return token
+    }
 }
