@@ -55,6 +55,11 @@ android {
         jvmTarget = "17"
     }
 
+    // Ensure Gradle uses JDK 17 toolchain for Kotlin/kapt to avoid JDK 21 module issues
+    kotlin {
+        jvmToolchain(17)
+    }
+
     buildFeatures {
         viewBinding = true
         buildConfig = true

@@ -125,9 +125,8 @@ class OrdersAdapter(
             return when (status.lowercase()) {
                 "pending" -> R.color.status_pending
                 "confirmed" -> R.color.status_confirmed
-                "preparing" -> R.color.status_preparing
-                "ready" -> R.color.status_ready
                 "out_for_delivery" -> R.color.primary
+                "arrived" -> R.color.primary
                 "delivered" -> R.color.status_delivered
                 "cancelled" -> R.color.status_cancelled
                 else -> R.color.text_secondary
@@ -138,9 +137,8 @@ class OrdersAdapter(
             return when (status.lowercase()) {
                 "pending" -> R.color.surface_variant
                 "confirmed" -> R.color.surface_variant
-                "preparing" -> R.color.surface_variant
-                "ready" -> R.color.surface_variant
                 "out_for_delivery" -> R.color.surface_variant
+                "arrived" -> R.color.surface_variant
                 "delivered" -> R.color.surface_variant
                 "cancelled" -> R.color.surface_variant
                 else -> R.color.surface

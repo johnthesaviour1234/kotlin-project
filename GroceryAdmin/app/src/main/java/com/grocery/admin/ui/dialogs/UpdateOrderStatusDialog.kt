@@ -34,9 +34,8 @@ class UpdateOrderStatusDialog : DialogFragment() {
     private val statusOptions = listOf(
         StatusOption("pending", "Pending", "Order placed, awaiting confirmation"),
         StatusOption("confirmed", "Confirmed", "Order confirmed by admin"),
-        StatusOption("preparing", "Preparing", "Order is being prepared"),
-        StatusOption("ready", "Ready", "Order ready for delivery"),
         StatusOption("out_for_delivery", "Out for Delivery", "Order is on the way"),
+        StatusOption("arrived", "Arrived", "Driver arrived at destination"),
         StatusOption("delivered", "Delivered", "Order successfully delivered"),
         StatusOption("cancelled", "Cancelled", "Order has been cancelled")
     )
@@ -128,10 +127,9 @@ class UpdateOrderStatusDialog : DialogFragment() {
         // Define valid status transitions
         val validTransitions = when (currentStatus.lowercase()) {
             "pending" -> listOf("confirmed", "cancelled")
-            "confirmed" -> listOf("preparing", "cancelled")
-            "preparing" -> listOf("ready", "cancelled")
-            "ready" -> listOf("out_for_delivery", "cancelled")
-            "out_for_delivery" -> listOf("delivered", "cancelled")
+            "confirmed" -> listOf("out_for_delivery", "arrived", "cancelled")
+            "out_for_delivery" -> listOf("arrived", "delivered", "cancelled")
+            "arrived" -> listOf("delivered", "cancelled")
             "delivered" -> emptyList() // Final state
             "cancelled" -> emptyList() // Final state
             else -> statusOptions.map { it.value }
@@ -205,9 +203,8 @@ class UpdateOrderStatusDialog : DialogFragment() {
         return when (status.lowercase()) {
             "pending" -> R.color.status_pending
             "confirmed" -> R.color.status_confirmed
-            "preparing" -> R.color.status_preparing
-            "ready" -> R.color.status_ready
             "out_for_delivery" -> R.color.primary
+            "arrived" -> R.color.primary
             "delivered" -> R.color.status_delivered
             "cancelled" -> R.color.status_cancelled
             else -> R.color.text_secondary
