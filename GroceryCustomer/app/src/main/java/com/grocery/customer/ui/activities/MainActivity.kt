@@ -103,7 +103,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         // Clear all user data
         lifecycleScope.launch {
             try {
-                tokenStore.clearTokens()
+                tokenStore.clear()
                 realtimeManager.unsubscribeAll()
                 BackgroundSyncWorker.cancelAllSync(this@MainActivity)
                 
