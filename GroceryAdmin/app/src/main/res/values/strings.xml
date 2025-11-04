@@ -178,6 +178,6 @@
     <!-- Inventory Management -->
     <string name="over_stock">Over Stock</string>
     <string name="low_stock_alert">Low Stock Alert: %d products need attention</string>
-    <string name="currency_format">$%.2f</string>
+    <string name="currency_format">₹%.2f</string>
     
 </resources>

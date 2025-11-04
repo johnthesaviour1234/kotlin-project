@@ -1,5 +1,7 @@
 package com.grocery.admin.domain.repository
 
+import android.content.Context
+import android.net.Uri
 import com.grocery.admin.data.remote.dto.*
 import com.grocery.admin.util.Resource
 import kotlinx.coroutines.flow.Flow
@@ -12,4 +14,5 @@ interface ProductsRepository {
     fun deleteProduct(productId: String): Flow<Resource<DeleteProductResponse>>
     fun getProductCategories(): Flow<Resource<List<ProductCategoryDto>>>
     fun updateInventoryStock(productId: String, stock: Int): Flow<Resource<Unit>>
+    suspend fun uploadProductImage(context: Context, imageUri: Uri, productName: String): Result<String>
 }

@@ -9,6 +9,9 @@ import com.grocery.admin.data.remote.dto.RegisterRequest
 import com.grocery.admin.data.remote.dto.RegisterResponse
 import com.grocery.admin.domain.repository.AuthRepository
 import com.grocery.admin.util.Resource
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.gotrue.auth
+import io.github.jan.supabase.gotrue.providers.builtin.Email
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -17,7 +20,8 @@ import javax.inject.Singleton
 @Singleton
 class AuthRepositoryImpl @Inject constructor(
     private val apiService: ApiService,
-    private val tokenStore: TokenStore
+    private val tokenStore: TokenStore,
+    private val supabaseClient: SupabaseClient
 ) : AuthRepository {
     
     companion object {
@@ -29,16 +33,31 @@ class AuthRepositoryImpl @Inject constructor(
             emit(Resource.Loading())
             Log.d(TAG, "Attempting login for email: $email")
             
+            // Step 1: Login to backend API
             val response = apiService.login(LoginRequest(email, password))
             
             if (response.success && response.data != null) {
-                Log.d(TAG, "Login successful")
+                Log.d(TAG, "Backend login successful")
                 val tokens = response.data.tokens
                 tokenStore.saveTokens(
                     accessToken = tokens.accessToken,
                     refreshToken = tokens.refreshToken,
                     expiresAt = tokens.expiresAt
                 )
+                
+                // Step 2: Authenticate with Supabase Auth for Storage access
+                try {
+                    Log.d(TAG, "Authenticating with Supabase Auth...")
+                    supabaseClient.auth.signInWith(Email) {
+                        this.email = email
+                        this.password = password
+                    }
+                    Log.d(TAG, "Supabase authentication successful")
+                } catch (authError: Exception) {
+                    Log.e(TAG, "Supabase auth failed: ${authError.message}", authError)
+                    // Don't fail the login if Supabase auth fails
+                    // The backend tokens are still valid
+                }
                 
                 emit(Resource.Success(response.data))
             } else {
@@ -97,6 +116,16 @@ class AuthRepositoryImpl @Inject constructor(
     
     override suspend fun logout() {
         Log.d(TAG, "Logging out user")
+        
+        // Logout from Supabase Auth
+        try {
+            supabaseClient.auth.signOut()
+            Log.d(TAG, "Supabase sign out successful")
+        } catch (e: Exception) {
+            Log.e(TAG, "Supabase sign out error: ${e.message}", e)
+        }
+        
+        // Clear local tokens
         tokenStore.clear()
     }
     

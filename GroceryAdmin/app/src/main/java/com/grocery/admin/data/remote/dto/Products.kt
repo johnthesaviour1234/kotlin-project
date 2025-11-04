@@ -14,6 +14,7 @@ data class CreateProductRequest(
     @SerializedName("description") val description: String?,
     @SerializedName("price") val price: Double,
     @SerializedName("category_id") val categoryId: String,
+    @SerializedName("image_url") val imageUrl: String? = null,
     @SerializedName("featured") val featured: Boolean = false,
     @SerializedName("is_active") val isActive: Boolean = true,
     @SerializedName("initial_stock") val initialStock: Int? = null
@@ -24,6 +25,7 @@ data class UpdateProductRequest(
     @SerializedName("description") val description: String?,
     @SerializedName("price") val price: Double?,
     @SerializedName("category_id") val categoryId: String?,
+    @SerializedName("image_url") val imageUrl: String? = null,
     @SerializedName("featured") val featured: Boolean?,
     @SerializedName("is_active") val isActive: Boolean?
 )

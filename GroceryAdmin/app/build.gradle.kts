@@ -120,6 +120,7 @@ dependencies {
     // Supabase Realtime for WebSocket-based sync
     implementation("io.github.jan-tennert.supabase:realtime-kt:2.6.0")
     implementation("io.github.jan-tennert.supabase:postgrest-kt:2.6.0")
+    implementation("io.github.jan-tennert.supabase:storage-kt:2.6.0")
     implementation("io.ktor:ktor-client-okhttp:2.3.7") // OkHttp engine supports WebSockets and Android TLS
     implementation("io.ktor:ktor-client-websockets:2.3.7")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")

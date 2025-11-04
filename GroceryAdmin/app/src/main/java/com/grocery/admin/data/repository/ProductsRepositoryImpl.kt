@@ -1,18 +1,26 @@
 package com.grocery.admin.data.repository
 
+import android.content.Context
+import android.net.Uri
+import android.provider.OpenableColumns
 import android.util.Log
 import com.grocery.admin.data.remote.ApiService
 import com.grocery.admin.data.remote.dto.*
 import com.grocery.admin.domain.repository.ProductsRepository
 import com.grocery.admin.util.Resource
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import java.io.InputStream
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class ProductsRepositoryImpl @Inject constructor(
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val supabaseClient: SupabaseClient
 ) : ProductsRepository {
     
     companion object {
@@ -177,6 +185,68 @@ class ProductsRepositoryImpl @Inject constructor(
             val errorMessage = e.localizedMessage ?: "Network error occurred"
             Log.e(TAG, "Error updating inventory: $errorMessage", e)
             emit(Resource.Error(errorMessage))
+        }
+    }
+    
+    /**
+     * Upload product image to Supabase Storage and return the public URL
+     * @param context Application context for accessing content resolver
+     * @param imageUri URI of the image to upload
+     * @param productName Name of the product (used for generating file name)
+     * @return Result with the public URL of the uploaded image
+     */
+    override suspend fun uploadProductImage(
+        context: Context,
+        imageUri: Uri,
+        productName: String
+    ): Result<String> {
+        return try {
+            Log.d(TAG, "Starting image upload for product: $productName")
+            
+            // Read image data from URI
+            val inputStream: InputStream? = context.contentResolver.openInputStream(imageUri)
+            if (inputStream == null) {
+                Log.e(TAG, "Failed to open input stream for image")
+                return Result.failure(Exception("Failed to read image file"))
+            }
+            
+            val imageBytes = inputStream.readBytes()
+            inputStream.close()
+            
+            // Get file extension
+            val extension = getFileExtension(context, imageUri) ?: "jpg"
+            
+            // Generate unique file name
+            val fileName = "${productName.replace(" ", "_").lowercase()}_${UUID.randomUUID()}.${extension}"
+            
+            Log.d(TAG, "Uploading image: $fileName, size: ${imageBytes.size} bytes")
+            
+            // Upload to Supabase Storage
+            val bucket = supabaseClient.storage.from("product-images")
+            bucket.upload(fileName, imageBytes, upsert = false)
+            
+            // Get public URL
+            val publicUrl = bucket.publicUrl(fileName)
+            
+            Log.d(TAG, "Image uploaded successfully: $publicUrl")
+            Result.success(publicUrl)
+            
+        } catch (e: Exception) {
+            val errorMessage = "Failed to upload image: ${e.localizedMessage}"
+            Log.e(TAG, errorMessage, e)
+            Result.failure(Exception(errorMessage))
+        }
+    }
+    
+    /**
+     * Get file extension from URI
+     */
+    private fun getFileExtension(context: Context, uri: Uri): String? {
+        return context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            cursor.moveToFirst()
+            val name = cursor.getString(nameIndex)
+            name.substringAfterLast('.', "")
         }
     }
 }

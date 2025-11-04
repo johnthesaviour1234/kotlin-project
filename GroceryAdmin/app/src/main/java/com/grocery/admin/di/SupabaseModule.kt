@@ -12,6 +12,7 @@ import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.gotrue.Auth
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.realtime.Realtime
+import io.github.jan.supabase.storage.Storage
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.websocket.WebSockets
@@ -61,6 +62,9 @@ object SupabaseModule {
             
             // Install Postgrest for database queries
             install(Postgrest)
+            
+            // Install Storage for file uploads
+            install(Storage)
             
             // Install Realtime for WebSocket-based real-time sync
             install(Realtime) {

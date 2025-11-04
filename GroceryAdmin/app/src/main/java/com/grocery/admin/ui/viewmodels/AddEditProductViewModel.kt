@@ -1,9 +1,10 @@
 package com.grocery.admin.ui.viewmodels
 
+import android.app.Application
 import android.net.Uri
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.grocery.admin.data.remote.dto.ProductDto
 import com.grocery.admin.data.remote.dto.ProductCategoryDto
@@ -21,8 +22,9 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class AddEditProductViewModel @Inject constructor(
-    private val productsRepository: ProductsRepository
-) : ViewModel() {
+    private val productsRepository: ProductsRepository,
+    application: Application
+) : AndroidViewModel(application) {
 
     private val _categories = MutableLiveData<Resource<List<ProductCategoryDto>>>()
     val categories: LiveData<Resource<List<ProductCategoryDto>>> = _categories
@@ -73,24 +75,48 @@ class AddEditProductViewModel @Inject constructor(
         viewModelScope.launch {
             _saveProductResult.value = Resource.Loading()
             
-            // TODO: Implement image upload when available
-            // For now, create product without image URL
-            val request = CreateProductRequest(
-                name = name,
-                description = description,
-                price = price,
-                categoryId = categoryId,
-                featured = isFeatured,
-                isActive = isActive,
-                initialStock = stockQuantity
-            )
-
-            productsRepository.createProduct(request).collect { result ->
-                _saveProductResult.value = when (result) {
-                    is Resource.Success -> Resource.Success(result.data)
-                    is Resource.Error -> Resource.Error(result.message ?: "Unknown error")
-                    is Resource.Loading -> Resource.Loading()
+            try {
+                // Upload image first if provided
+                val imageUrl = if (imageUri != null) {
+                    val uploadResult = productsRepository.uploadProductImage(
+                        context = getApplication<Application>().applicationContext,
+                        imageUri = imageUri,
+                        productName = name
+                    )
+                    
+                    if (uploadResult.isSuccess) {
+                        uploadResult.getOrNull()
+                    } else {
+                        _saveProductResult.value = Resource.Error(
+                            "Failed to upload image: ${uploadResult.exceptionOrNull()?.message}"
+                        )
+                        return@launch
+                    }
+                } else {
+                    null
                 }
+                
+                // Create product with image URL
+                val request = CreateProductRequest(
+                    name = name,
+                    description = description,
+                    price = price,
+                    categoryId = categoryId,
+                    imageUrl = imageUrl,
+                    featured = isFeatured,
+                    isActive = isActive,
+                    initialStock = stockQuantity
+                )
+
+                productsRepository.createProduct(request).collect { result ->
+                    _saveProductResult.value = when (result) {
+                        is Resource.Success -> Resource.Success(result.data)
+                        is Resource.Error -> Resource.Error(result.message ?: "Unknown error")
+                        is Resource.Loading -> Resource.Loading()
+                    }
+                }
+            } catch (e: Exception) {
+                _saveProductResult.value = Resource.Error(e.localizedMessage ?: "Unknown error")
             }
         }
     }
@@ -112,34 +138,58 @@ class AddEditProductViewModel @Inject constructor(
         viewModelScope.launch {
             _saveProductResult.value = Resource.Loading()
             
-            // TODO: Implement image upload when available
-            // Update product details
-            val request = UpdateProductRequest(
-                name = name,
-                description = description,
-                price = price,
-                categoryId = categoryId,
-                featured = isFeatured,
-                isActive = isActive
-            )
+            try {
+                // Upload new image if provided
+                val imageUrl = if (imageUri != null) {
+                    val uploadResult = productsRepository.uploadProductImage(
+                        context = getApplication<Application>().applicationContext,
+                        imageUri = imageUri,
+                        productName = name
+                    )
+                    
+                    if (uploadResult.isSuccess) {
+                        uploadResult.getOrNull()
+                    } else {
+                        _saveProductResult.value = Resource.Error(
+                            "Failed to upload image: ${uploadResult.exceptionOrNull()?.message}"
+                        )
+                        return@launch
+                    }
+                } else {
+                    null
+                }
+                
+                // Update product details
+                val request = UpdateProductRequest(
+                    name = name,
+                    description = description,
+                    price = price,
+                    categoryId = categoryId,
+                    imageUrl = imageUrl,
+                    featured = isFeatured,
+                    isActive = isActive
+                )
 
-            // Store the product result for later
-            var productResult: ProductDto? = null
-            
-            productsRepository.updateProduct(productId, request).collect { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        // Store product data and update inventory stock
-                        productResult = result.data
-                        updateInventoryStock(productId, stockQuantity, productResult)
-                    }
-                    is Resource.Error -> {
-                        _saveProductResult.value = Resource.Error(result.message ?: "Unknown error")
-                    }
-                    is Resource.Loading -> {
-                        // Keep loading state
+                // Store the product result for later
+                var productResult: ProductDto? = null
+                
+                productsRepository.updateProduct(productId, request).collect { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            // Store product data and update inventory stock
+                            productResult = result.data
+                            updateInventoryStock(productId, stockQuantity, productResult)
+                        }
+                        is Resource.Error -> {
+                            _saveProductResult.value = Resource.Error(result.message ?: "Unknown error")
+                        }
+                        is Resource.Loading -> {
+                            // Keep loading state
+                        }
                     }
                 }
+            } catch (e: Exception) {
+                _saveProductResult.value = Resource.Error(e.localizedMessage ?: "Unknown error")
             }
         }
     }
