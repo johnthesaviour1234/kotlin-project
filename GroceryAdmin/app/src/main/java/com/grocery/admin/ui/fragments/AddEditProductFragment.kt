@@ -153,10 +153,10 @@ class AddEditProductFragment : Fragment() {
                     val categoryNames = categories.map { it.name }
                     val adapter = ArrayAdapter(
                         requireContext(),
-                        android.R.layout.simple_spinner_item,
+                        R.layout.spinner_item_category,
                         categoryNames
                     )
-                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    adapter.setDropDownViewResource(R.layout.spinner_dropdown_item_category)
                     binding.spnCategory.adapter = adapter
                 }
                 is Resource.Error -> {

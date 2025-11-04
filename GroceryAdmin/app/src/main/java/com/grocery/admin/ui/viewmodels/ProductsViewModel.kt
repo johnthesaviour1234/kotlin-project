@@ -106,6 +106,32 @@ class ProductsViewModel @Inject constructor(
         }
     }
     
+    fun filterByActive() {
+        val filtered = allProducts.filter { it.isActive }
+        _products.value = Resource.Success(filtered)
+    }
+    
+    fun filterByInactive() {
+        val filtered = allProducts.filter { !it.isActive }
+        _products.value = Resource.Success(filtered)
+    }
+    
+    fun filterByFeatured() {
+        val filtered = allProducts.filter { it.featured }
+        _products.value = Resource.Success(filtered)
+    }
+    
+    fun filterByLowStock(threshold: Int = 10) {
+        val filtered = allProducts.filter { product ->
+            product.inventory?.stock?.let { it < threshold } == true
+        }
+        _products.value = Resource.Success(filtered)
+    }
+    
+    fun showAllProducts() {
+        _products.value = Resource.Success(allProducts)
+    }
+    
     fun refreshProducts() {
         _isRefreshing.value = true
         loadProducts(page = currentPage)

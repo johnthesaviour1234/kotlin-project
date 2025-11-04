@@ -48,4 +48,10 @@
     <style name="Theme.GroceryAdmin.Splash" parent="Theme.GroceryAdmin">
         <item name="android:windowBackground">@color/primary</item>
     </style>
+    
+    <!-- Toolbar theme with white icons -->
+    <style name="ToolbarTheme" parent="ThemeOverlay.Material3.Dark">
+        <item name="colorControlNormal">@color/white</item>
+        <item name="android:textColorPrimary">@color/white</item>
+    </style>
 </resources>

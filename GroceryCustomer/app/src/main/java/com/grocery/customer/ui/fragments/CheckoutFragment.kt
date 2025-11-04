@@ -254,16 +254,22 @@ class CheckoutFragment : Fragment() {
                 ).show()
                 
                 // Navigate to order confirmation screen with order ID
+                // Clear backstack up to home to prevent duplicate orders and navigation issues
                 try {
+                    val navOptions = androidx.navigation.NavOptions.Builder()
+                        .setPopUpTo(R.id.homeFragment, false) // Pop everything up to home (excluding home)
+                        .build()
+                    
                     findNavController().navigate(
                         CheckoutFragmentDirections.actionCheckoutToOrderConfirmation(
                             orderId = state.order.id
-                        )
+                        ),
+                        navOptions
                     )
                 } catch (e: Exception) {
                     android.util.Log.e("CheckoutFragment", "Navigation error: ${e.message}", e)
-                    // Fallback: pop back to cart
-                    findNavController().popBackStack()
+                    // Fallback: pop back to home
+                    findNavController().popBackStack(R.id.homeFragment, false)
                 }
                 
                 // Reset state for next time

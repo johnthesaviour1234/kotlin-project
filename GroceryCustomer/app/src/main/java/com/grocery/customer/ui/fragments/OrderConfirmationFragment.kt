@@ -186,28 +186,41 @@ class OrderConfirmationFragment : Fragment() {
     }
 
     private fun setupClickListeners() {
-        // View detailed order
+        // View detailed order - also clear backstack to prevent navigation issues
         buttonViewOrder.setOnClickListener {
             try {
+                // Clear backstack up to home before navigating to order details
+                // This prevents the Checkout and OrderConfirmation from remaining in backstack
+                val navOptions = androidx.navigation.NavOptions.Builder()
+                    .setPopUpTo(R.id.homeFragment, false) // Keep home, remove everything above it
+                    .build()
+                
                 findNavController().navigate(
                     OrderConfirmationFragmentDirections.actionOrderConfirmationToOrderDetail(
                         orderId = args.orderId
-                    )
+                    ),
+                    navOptions
                 )
             } catch (e: Exception) {
                 Log.e(TAG, "Navigation error: ${e.message}")
             }
         }
         
-        // Continue shopping - navigate to home
+        // Continue shopping - navigate to home and clear entire backstack
         buttonContinueShopping.setOnClickListener {
             try {
-                // Pop back stack to go home
-                findNavController().popBackStack(R.id.homeFragment, false)
+                // Clear the entire backstack and go to home
+                // This ensures no Checkout or OrderConfirmation remains in backstack
+                val navOptions = androidx.navigation.NavOptions.Builder()
+                    .setPopUpTo(R.id.homeFragment, true) // Pop everything including home
+                    .setLaunchSingleTop(true) // Reuse existing home instance if available
+                    .build()
+                    
+                findNavController().navigate(R.id.homeFragment, null, navOptions)
             } catch (e: Exception) {
                 Log.e(TAG, "Navigation error: ${e.message}")
-                // Fallback: navigate home
-                findNavController().navigate(R.id.homeFragment)
+                // Fallback: Just pop to home
+                findNavController().popBackStack(R.id.homeFragment, false)
             }
         }
     }

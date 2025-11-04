@@ -93,6 +93,12 @@ class OrdersFragment : Fragment() {
             viewModel.searchOrders(text?.toString() ?: "")
         }
 
+        // Toggle filter chips visibility
+        binding.btnToggleFilters.setOnClickListener {
+            val isVisible = binding.filterChipsScrollView.visibility == View.VISIBLE
+            binding.filterChipsScrollView.visibility = if (isVisible) View.GONE else View.VISIBLE
+        }
+
         // Status filter chips
         binding.chipGroupStatus.setOnCheckedStateChangeListener { _, checkedIds ->
             if (checkedIds.isEmpty()) {

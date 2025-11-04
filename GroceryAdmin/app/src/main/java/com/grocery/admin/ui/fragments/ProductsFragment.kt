@@ -92,6 +92,14 @@ class ProductsFragment : Fragment() {
         binding.etSearch.addTextChangedListener { text ->
             viewModel.searchProducts(text?.toString() ?: "")
         }
+        
+        // Search button click - focus on search field
+        binding.btnSearch.setOnClickListener {
+            binding.etSearch.requestFocus()
+            // Show keyboard
+            val imm = requireContext().getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+            imm.showSoftInput(binding.etSearch, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
+        }
 
         // Filter chips
         binding.chipGroupFilter.setOnCheckedStateChangeListener { _, checkedIds ->
@@ -101,11 +109,11 @@ class ProductsFragment : Fragment() {
             }
 
             when (checkedIds.first()) {
-                R.id.chipAll -> viewModel.filterByCategory(null)
-                R.id.chipActive -> {}
-                R.id.chipInactive -> {}
-                R.id.chipFeatured -> {}
-                R.id.chipLowStock -> {}
+                R.id.chipAll -> viewModel.showAllProducts()
+                R.id.chipActive -> viewModel.filterByActive()
+                R.id.chipInactive -> viewModel.filterByInactive()
+                R.id.chipFeatured -> viewModel.filterByFeatured()
+                R.id.chipLowStock -> viewModel.filterByLowStock()
             }
         }
     }
