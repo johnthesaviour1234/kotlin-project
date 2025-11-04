@@ -325,6 +325,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         super.onResume()
         // Reset toolbar title when returning to this activity
         supportActionBar?.title = "Available Orders"
+        // Reset bottom navigation selection to Available Orders
+        binding.bottomNavigation.selectedItemId = R.id.nav_available_orders
         // Reconnect realtime if needed
         if (!realtimeManager.isConnected()) {
             lifecycleScope.launch {
