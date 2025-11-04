@@ -102,7 +102,7 @@ class OrderHistoryFragment : Fragment() {
     }
 
     private fun setupStatusFilter() {
-        val statusOptions = arrayOf("All", "Pending", "Confirmed", "Preparing", "Ready", "Delivered", "Cancelled")
+        val statusOptions = arrayOf("All", "Pending", "Confirmed", "Out for Delivery", "Arrived", "Delivered", "Cancelled")
         val adapter = ArrayAdapter(requireContext(), R.layout.spinner_item_address, statusOptions)
         adapter.setDropDownViewResource(R.layout.spinner_item_address)
         
@@ -113,8 +113,8 @@ class OrderHistoryFragment : Fragment() {
                     0 -> "all"
                     1 -> "pending"
                     2 -> "confirmed"
-                    3 -> "preparing"
-                    4 -> "ready"
+                    3 -> "out_for_delivery"
+                    4 -> "arrived"
                     5 -> "delivered"
                     6 -> "cancelled"
                     else -> "all"
@@ -206,8 +206,8 @@ class OrderHistoryFragment : Fragment() {
             "all" -> 0
             "pending" -> 1
             "confirmed" -> 2
-            "preparing" -> 3
-            "ready" -> 4
+            "out_for_delivery" -> 3
+            "arrived" -> 4
             "delivered" -> 5
             "cancelled" -> 6
             else -> 0

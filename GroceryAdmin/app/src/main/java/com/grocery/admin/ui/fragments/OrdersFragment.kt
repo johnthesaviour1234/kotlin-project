@@ -231,7 +231,8 @@ class OrdersFragment : Fragment() {
     private fun showUpdateStatusDialog(order: OrderDto) {
         val dialog = UpdateOrderStatusDialog.newInstance(
             orderId = order.id,
-            currentStatus = order.status
+            currentStatus = order.status,
+            hasDeliveryAssignment = order.hasDeliveryAssignment()
         )
         dialog.show(childFragmentManager, "UpdateOrderStatusDialog")
     }

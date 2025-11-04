@@ -102,7 +102,7 @@ class DeliveryHistoryActivity : BaseActivity<ActivityDeliveryHistoryBinding>() {
     private fun updateStatsUI(stats: DeliveryHistoryViewModel.DeliveryStats) {
         binding.tvTotalDeliveries.text = stats.totalDeliveries.toString()
         
-        val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
+        val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
         binding.tvTotalEarnings.text = currencyFormatter.format(stats.totalEarnings)
         
         binding.tvAverageTime.text = "${stats.averageDeliveryTime} min"

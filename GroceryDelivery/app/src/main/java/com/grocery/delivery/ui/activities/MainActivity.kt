@@ -68,7 +68,22 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                         showEmptyState()
                     } else {
                         hideEmptyState()
-                        adapter.submitList(orders)
+                        // Sort orders: accepted/in_transit at top (newest first), then pending (newest first)
+                        val sortedOrders = orders.sortedWith(
+                            compareByDescending<DeliveryAssignment> { 
+                                // Priority: accepted > in_transit > arrived > pending
+                                when(it.status) {
+                                    "accepted" -> 4
+                                    "in_transit" -> 3
+                                    "arrived" -> 2
+                                    else -> 1
+                                }
+                            }.thenByDescending { 
+                                // Within same status, newest first (using assigned_at or created_at)
+                                it.assignedAt ?: it.createdAt ?: ""
+                            }
+                        )
+                        adapter.submitList(sortedOrders)
                     }
                 }
                 is Resource.Error -> {
@@ -90,8 +105,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                     Toast.makeText(this, resource.data ?: "Action completed", Toast.LENGTH_SHORT).show()
                     
                     // Navigate to active delivery screen after accepting
+                    // Update status to "accepted" before navigating so ActiveDeliveryActivity shows the correct button
                     acceptedAssignment?.let { assignment ->
-                        navigateToActiveDelivery(assignment)
+                        val updatedAssignment = assignment.copy(status = "accepted")
+                        navigateToActiveDelivery(updatedAssignment)
                         acceptedAssignment = null
                     }
                     
@@ -306,12 +323,16 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     
     override fun onResume() {
         super.onResume()
+        // Reset toolbar title when returning to this activity
+        supportActionBar?.title = "Available Orders"
         // Reconnect realtime if needed
         if (!realtimeManager.isConnected()) {
             lifecycleScope.launch {
                 realtimeManager.connect()
             }
         }
+        // Refresh orders when returning to screen
+        viewModel.refreshOrders()
     }
     
     override fun onPause() {

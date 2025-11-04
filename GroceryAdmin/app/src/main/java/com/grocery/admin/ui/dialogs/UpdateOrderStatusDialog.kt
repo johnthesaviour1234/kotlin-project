@@ -30,6 +30,7 @@ class UpdateOrderStatusDialog : DialogFragment() {
 
     private lateinit var orderId: String
     private lateinit var currentStatus: String
+    private var hasDeliveryAssignment: Boolean = false
 
     private val statusOptions = listOf(
         StatusOption("pending", "Pending", "Order placed, awaiting confirmation"),
@@ -44,6 +45,7 @@ class UpdateOrderStatusDialog : DialogFragment() {
         super.onCreate(savedInstanceState)
         orderId = arguments?.getString(ARG_ORDER_ID) ?: ""
         currentStatus = arguments?.getString(ARG_CURRENT_STATUS) ?: ""
+        hasDeliveryAssignment = arguments?.getBoolean(ARG_HAS_DELIVERY_ASSIGNMENT, false) ?: false
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -126,10 +128,27 @@ class UpdateOrderStatusDialog : DialogFragment() {
     private fun getAvailableStatusTransitions(currentStatus: String): List<StatusOption> {
         // Define valid status transitions
         val validTransitions = when (currentStatus.lowercase()) {
-            "pending" -> listOf("confirmed", "cancelled")
-            "confirmed" -> listOf("out_for_delivery", "arrived", "cancelled")
-            "out_for_delivery" -> listOf("arrived", "delivered", "cancelled")
-            "arrived" -> listOf("delivered", "cancelled")
+            "pending" -> {
+                // For pending orders, can only confirm or cancel
+                listOf("confirmed", "cancelled")
+            }
+            "confirmed" -> {
+                // For confirmed orders, require driver assignment before moving to delivery states
+                if (hasDeliveryAssignment) {
+                    listOf("out_for_delivery", "arrived", "cancelled")
+                } else {
+                    // Without driver assignment, can only cancel
+                    listOf("cancelled")
+                }
+            }
+            "out_for_delivery" -> {
+                // Must have driver assigned to reach this state
+                listOf("arrived", "delivered", "cancelled")
+            }
+            "arrived" -> {
+                // Must have driver assigned to reach this state
+                listOf("delivered", "cancelled")
+            }
             "delivered" -> emptyList() // Final state
             "cancelled" -> emptyList() // Final state
             else -> statusOptions.map { it.value }
@@ -237,12 +256,18 @@ class UpdateOrderStatusDialog : DialogFragment() {
     companion object {
         private const val ARG_ORDER_ID = "order_id"
         private const val ARG_CURRENT_STATUS = "current_status"
+        private const val ARG_HAS_DELIVERY_ASSIGNMENT = "has_delivery_assignment"
 
-        fun newInstance(orderId: String, currentStatus: String): UpdateOrderStatusDialog {
+        fun newInstance(
+            orderId: String, 
+            currentStatus: String,
+            hasDeliveryAssignment: Boolean = false
+        ): UpdateOrderStatusDialog {
             return UpdateOrderStatusDialog().apply {
                 arguments = Bundle().apply {
                     putString(ARG_ORDER_ID, orderId)
                     putString(ARG_CURRENT_STATUS, currentStatus)
+                    putBoolean(ARG_HAS_DELIVERY_ASSIGNMENT, hasDeliveryAssignment)
                 }
             }
         }

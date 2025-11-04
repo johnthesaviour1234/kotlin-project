@@ -53,7 +53,7 @@ class OrderDetailDialog(
             binding.tvAddress.text = order.getFormattedAddress()
             
             // Total amount
-            val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
+            val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
             binding.tvTotal.text = currencyFormatter.format(order.totalAmount)
             
             // Estimated delivery time

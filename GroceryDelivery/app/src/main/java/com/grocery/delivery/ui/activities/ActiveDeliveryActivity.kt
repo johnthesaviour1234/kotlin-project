@@ -155,7 +155,7 @@ class ActiveDeliveryActivity : BaseActivity<ActivityActiveDeliveryBinding>() {
         // Order info
         binding.tvOrderNumber.text = order.orderNumber
         
-        val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
+        val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
         binding.tvTotalAmount.text = currencyFormatter.format(order.totalAmount)
         
         val estimatedMinutes = assignment.estimatedDeliveryMinutes ?: 30

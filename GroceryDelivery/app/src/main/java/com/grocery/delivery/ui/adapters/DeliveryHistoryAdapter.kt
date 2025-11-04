@@ -50,7 +50,7 @@ class DeliveryHistoryAdapter(
             tvCustomerName.text = order.getCustomerName() ?: "Customer"
             tvDeliveryAddress.text = order.getFormattedAddress()
 
-            val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
+            val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
             tvAmount.text = currencyFormatter.format(order.totalAmount)
 
             // Format delivery date

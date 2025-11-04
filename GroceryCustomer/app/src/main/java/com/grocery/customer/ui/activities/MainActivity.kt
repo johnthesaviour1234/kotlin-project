@@ -1,9 +1,13 @@
 package com.grocery.customer.ui.activities
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -58,10 +62,60 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         Log.d(TAG, "MainActivity started")
         Log.d(TAG, "API Base URL: ${BuildConfig.API_BASE_URL}")
         Log.d(TAG, "Supabase URL: ${BuildConfig.SUPABASE_URL}")
+        setupToolbar()
         setupNavigation()
         setupCartBadge()
         testApiConnection()
         initializeRealtimeSync()
+    }
+    
+    private fun setupToolbar() {
+        setSupportActionBar(binding.toolbar)
+    }
+    
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+    
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_logout -> {
+                showLogoutConfirmation()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+    
+    private fun showLogoutConfirmation() {
+        AlertDialog.Builder(this)
+            .setTitle("Logout")
+            .setMessage("Are you sure you want to logout?")
+            .setPositiveButton("Logout") { _, _ ->
+                performLogout()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    private fun performLogout() {
+        // Clear all user data
+        lifecycleScope.launch {
+            try {
+                tokenStore.clearTokens()
+                realtimeManager.unsubscribeAll()
+                BackgroundSyncWorker.cancelAllSync(this@MainActivity)
+                
+                // Navigate to login screen
+                val intent = Intent(this@MainActivity, LoginActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+                finish()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error during logout", e)
+            }
+        }
     }
     
     private fun testApiConnection() {

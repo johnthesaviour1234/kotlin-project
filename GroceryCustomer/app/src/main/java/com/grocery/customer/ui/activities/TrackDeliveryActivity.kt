@@ -141,11 +141,22 @@ class TrackDeliveryActivity : AppCompatActivity() {
                         // Schedule next update
                         scheduleNextUpdate()
                     } else {
-                        // Location not yet available
-                        showError(
-                            message = "Driver location not yet available",
-                            details = data?.message ?: "Delivery hasn't started"
-                        )
+                        // Check if delivery is completed/not active based on status or message
+                        val message = data?.message ?: ""
+                        val deliveryStatus = data?.deliveryStatus ?: ""
+                        
+                        if (deliveryStatus == "completed" || deliveryStatus == "delivered" ||
+                            message.contains("completed", ignoreCase = true) ||
+                            message.contains("delivered", ignoreCase = true)) {
+                            // Delivery completed, navigate back to order details
+                            navigateToOrderDetails()
+                        } else {
+                            // Location not yet available - delivery hasn't started
+                            showError(
+                                message = "Driver location not yet available",
+                                details = message.ifEmpty { "Delivery hasn't started yet" }
+                            )
+                        }
                     }
                 } else {
                     // Check if delivery is completed/not in progress
