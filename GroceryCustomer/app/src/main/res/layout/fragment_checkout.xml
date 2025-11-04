@@ -358,16 +358,18 @@
                         android:id="@+id/radioButtonCard"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Debit/Credit Card"
-                        android:textColor="@color/text_primary"
+                        android:text="Debit/Credit Card (Coming Soon)"
+                        android:textColor="@color/text_secondary"
+                        android:enabled="false"
                         android:layout_marginBottom="8dp" />
 
                     <RadioButton
                         android:id="@+id/radioButtonUPI"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="UPI Payment"
-                        android:textColor="@color/text_primary" />
+                        android:text="UPI Payment (Coming Soon)"
+                        android:textColor="@color/text_secondary"
+                        android:enabled="false" />
 
                 </RadioGroup>
 
