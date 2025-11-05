@@ -22,6 +22,7 @@ import com.grocery.admin.ui.dialogs.AssignDriverDialog
 import com.grocery.admin.ui.viewmodels.OrdersViewModel
 import com.grocery.admin.util.Resource
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -41,6 +42,7 @@ class OrdersFragment : Fragment() {
 
     private val viewModel: OrdersViewModel by viewModels()
     private lateinit var ordersAdapter: OrdersAdapter
+    private var isPollingActive = false
     
     @Inject
     lateinit var realtimeManager: RealtimeManager
@@ -257,9 +259,41 @@ class OrdersFragment : Fragment() {
     private fun showSuccess(message: String) {
         Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
     }
+    
+    override fun onResume() {
+        super.onResume()
+        // Start polling for order updates
+        startOrderPolling()
+    }
+    
+    override fun onPause() {
+        super.onPause()
+        // Stop polling when not visible
+        isPollingActive = false
+    }
+    
+    /**
+     * Polls for order updates every 10 seconds.
+     * Ensures admin sees new orders and status changes automatically.
+     */
+    private fun startOrderPolling() {
+        isPollingActive = true
+        
+        viewLifecycleOwner.lifecycleScope.launch {
+            while (isPollingActive) {
+                delay(10_000) // Poll every 10 seconds
+                
+                if (isPollingActive) {
+                    android.util.Log.d(TAG, "Polling for order updates (admin)")
+                    viewModel.refreshOrders()
+                }
+            }
+        }
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        isPollingActive = false
         _binding = null
     }
 }

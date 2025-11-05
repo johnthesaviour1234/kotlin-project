@@ -18,6 +18,7 @@ import com.grocery.admin.ui.util.SessionExpiredHandler
 import com.grocery.admin.ui.viewmodels.DashboardViewModel
 import com.grocery.admin.util.Resource
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
@@ -29,6 +30,7 @@ class DashboardFragment : Fragment() {
     private val binding get() = _binding!!
     
     private val viewModel: DashboardViewModel by viewModels()
+    private var isPollingActive = false
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -178,8 +180,40 @@ class DashboardFragment : Fragment() {
         binding.tvLastUpdated.text = getString(R.string.last_updated, "Just now")
     }
     
+    override fun onResume() {
+        super.onResume()
+        // Start polling for dashboard updates
+        startDashboardPolling()
+    }
+    
+    override fun onPause() {
+        super.onPause()
+        // Stop polling when not visible
+        isPollingActive = false
+    }
+    
+    /**
+     * Polls for dashboard metric updates every 30 seconds.
+     * Less frequent polling since dashboard stats don't need real-time updates.
+     */
+    private fun startDashboardPolling() {
+        isPollingActive = true
+        
+        viewLifecycleOwner.lifecycleScope.launch {
+            while (isPollingActive) {
+                delay(30_000) // Poll every 30 seconds
+                
+                if (isPollingActive) {
+                    android.util.Log.d("DashboardFragment", "Polling for dashboard updates (admin)")
+                    viewModel.refreshDashboardMetrics()
+                }
+            }
+        }
+    }
+    
     override fun onDestroyView() {
         super.onDestroyView()
+        isPollingActive = false
         _binding = null
     }
 }

@@ -20,6 +20,9 @@ import com.grocery.admin.ui.dialogs.AssignDriverDialog
 import com.grocery.admin.ui.viewmodels.OrderDetailViewModel
 import com.grocery.admin.util.Resource
 import dagger.hilt.android.AndroidEntryPoint
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -37,6 +40,7 @@ class OrderDetailFragment : Fragment() {
     private lateinit var orderItemsAdapter: OrderItemsAdapter
 
     private var currentOrder: OrderDto? = null
+    private var isPollingActive = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -320,9 +324,43 @@ class OrderDetailFragment : Fragment() {
     private fun showError(message: String) {
         Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).show()
     }
+    
+    override fun onResume() {
+        super.onResume()
+        // Start polling for order detail updates
+        startOrderDetailPolling()
+    }
+    
+    override fun onPause() {
+        super.onPause()
+        // Stop polling when not visible
+        isPollingActive = false
+    }
+    
+    /**
+     * Polls for order detail updates every 15 seconds.
+     * Ensures admin sees status changes made by drivers.
+     */
+    private fun startOrderDetailPolling() {
+        isPollingActive = true
+        
+        viewLifecycleOwner.lifecycleScope.launch {
+            while (isPollingActive) {
+                delay(15_000) // Poll every 15 seconds
+                
+                if (isPollingActive) {
+                    android.util.Log.d("OrderDetailFragment", "Polling for order detail updates (admin)")
+                    currentOrder?.let { order ->
+                        viewModel.loadOrderDetails(order.id)
+                    }
+                }
+            }
+        }
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        isPollingActive = false
         _binding = null
     }
 
