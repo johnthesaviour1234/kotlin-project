@@ -74,7 +74,10 @@ export default async function handler(req, res) {
         success: false,
         error: 'Delivery is not currently in progress',
         data: {
-          status: assignment.status
+          has_location: false,
+          delivery_status: assignment.status,
+          assignment_status: assignment.status,
+          message: assignment.status === 'completed' ? 'Delivery has been completed' : `Delivery status: ${assignment.status}`
         }
       })
     }
