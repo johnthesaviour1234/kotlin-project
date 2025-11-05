@@ -31,6 +31,41 @@ class OrderHistoryViewModel @Inject constructor(
     init {
         loadOrders()
         // EventBus subscriptions removed as part of State Sync Migration
+        // Real-time updates handled via periodic refresh in Fragment
+    }
+    
+    /**
+     * Silently refresh orders without showing loading state.
+     * Used for real-time updates to keep order list fresh.
+     */
+    fun refreshOrdersSilently() {
+        viewModelScope.launch {
+            try {
+                val result = getOrderHistoryUseCase(
+                    page = 1,
+                    limit = PAGE_SIZE * _uiState.value.currentPage, // Get all loaded pages
+                    status = _uiState.value.selectedStatusFilter.takeIf { it != "all" }
+                )
+                
+                result.fold(
+                    onSuccess = { response ->
+                        // Update orders silently without touching loading state
+                        _uiState.value = _uiState.value.copy(
+                            orders = response.orders,
+                            hasNextPage = response.pagination.hasNextPage,
+                            totalItems = response.pagination.totalItems
+                        )
+                        android.util.Log.d("OrderHistoryViewModel", "Orders refreshed silently: ${response.orders.size} orders")
+                    },
+                    onFailure = { error ->
+                        // Silently fail - don't disrupt user experience
+                        android.util.Log.e("OrderHistoryViewModel", "Silent refresh failed: ${error.message}")
+                    }
+                )
+            } catch (e: Exception) {
+                android.util.Log.e("OrderHistoryViewModel", "Error during silent refresh: ${e.message}")
+            }
+        }
     }
 
     /**

@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 class OrderHistoryFragment : Fragment() {
 
     private val viewModel: OrderHistoryViewModel by viewModels()
+    private var isPollingActive = false
     
     // Views
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
@@ -154,6 +155,37 @@ class OrderHistoryFragment : Fragment() {
         
         buttonRetry.setOnClickListener {
             viewModel.retryLoadOrders()
+        }
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        // Start polling for order updates
+        startOrderPolling()
+    }
+    
+    override fun onPause() {
+        super.onPause()
+        // Stop polling when not visible
+        isPollingActive = false
+    }
+    
+    /**
+     * Polls for order updates every 10 seconds to catch driver status changes.
+     * Works in conjunction with Supabase Realtime for redundancy.
+     */
+    private fun startOrderPolling() {
+        isPollingActive = true
+        
+        viewLifecycleOwner.lifecycleScope.launch {
+            while (isPollingActive) {
+                kotlinx.coroutines.delay(10_000) // Poll every 10 seconds
+                
+                if (isPollingActive) {
+                    android.util.Log.d("OrderHistoryFragment", "Polling for order updates")
+                    viewModel.refreshOrdersSilently()
+                }
+            }
         }
     }
 

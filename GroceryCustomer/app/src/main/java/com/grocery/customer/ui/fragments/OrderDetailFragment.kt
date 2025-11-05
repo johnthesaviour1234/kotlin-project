@@ -18,14 +18,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import com.grocery.customer.R
 import com.grocery.customer.data.remote.dto.OrderDTO
+import com.grocery.customer.data.sync.RealtimeManager
 import com.grocery.customer.ui.activities.TrackDeliveryActivity
 import com.grocery.customer.ui.adapters.OrderItemsAdapter
 import com.grocery.customer.ui.viewmodels.OrderDetailViewModel
 import com.grocery.customer.ui.viewmodels.OrderDetailUiState
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.inject.Inject
 
 /**
  * Fragment for displaying detailed information about a specific order.
@@ -36,6 +39,9 @@ class OrderDetailFragment : Fragment() {
 
     private val viewModel: OrderDetailViewModel by viewModels()
     private val args: OrderDetailFragmentArgs by navArgs()
+    
+    @Inject
+    lateinit var realtimeManager: RealtimeManager
     
     // Views
     private lateinit var toolbarTitle: TextView
@@ -75,6 +81,7 @@ class OrderDetailFragment : Fragment() {
     
     private lateinit var orderItemsAdapter: OrderItemsAdapter
     private var currentOrder: OrderDTO? = null
+    private var isRealtimeSubscribed = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -169,6 +176,37 @@ class OrderDetailFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
                     updateUI(state)
+                }
+            }
+        }
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        // Start periodic refresh for order status updates
+        startOrderStatusPolling()
+    }
+    
+    override fun onPause() {
+        super.onPause()
+        // Stop polling when fragment is not visible
+        isRealtimeSubscribed = false
+    }
+    
+    /**
+     * Polls for order status updates every 10 seconds.
+     * This ensures the order status is always up-to-date even if realtime fails.
+     */
+    private fun startOrderStatusPolling() {
+        isRealtimeSubscribed = true
+        
+        viewLifecycleOwner.lifecycleScope.launch {
+            while (isRealtimeSubscribed) {
+                delay(10_000) // Poll every 10 seconds
+                
+                if (isRealtimeSubscribed) {
+                    android.util.Log.d("OrderDetailFragment", "Polling for order status updates")
+                    viewModel.refreshOrderDetails()
                 }
             }
         }

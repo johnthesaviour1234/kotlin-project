@@ -25,9 +25,6 @@ class OrderDetailViewModel @Inject constructor(
 
     private var currentOrderId: String? = null
 
-    // EventBus subscriptions removed as part of State Sync Migration
-    // Order updates will be handled via polling in Phase 2
-
     /**
      * Load detailed information for a specific order
      */
@@ -76,6 +73,35 @@ class OrderDetailViewModel @Inject constructor(
      */
     fun retryLoadOrderDetails(orderId: String) {
         loadOrderDetails(orderId)
+    }
+    
+    /**
+     * Refresh current order details without showing loading state.
+     * Useful for realtime updates where we want to silently refresh the order.
+     */
+    fun refreshOrderDetails() {
+        val orderId = currentOrderId ?: return
+        
+        viewModelScope.launch {
+            try {
+                val result = getOrderDetailsUseCase(orderId)
+                
+                result.fold(
+                    onSuccess = { order ->
+                        // Update order without touching loading/error states
+                        _uiState.value = _uiState.value.copy(
+                            order = order
+                        )
+                    },
+                    onFailure = { error ->
+                        // Silently fail - don't disrupt user experience
+                        android.util.Log.e("OrderDetailViewModel", "Failed to refresh order: ${error.message}")
+                    }
+                )
+            } catch (e: Exception) {
+                android.util.Log.e("OrderDetailViewModel", "Error refreshing order: ${e.message}")
+            }
+        }
     }
 
     /**
