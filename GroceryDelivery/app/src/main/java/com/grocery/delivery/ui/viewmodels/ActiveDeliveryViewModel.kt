@@ -70,4 +70,31 @@ class ActiveDeliveryViewModel @Inject constructor(
     fun getCurrentStatus(): String? {
         return currentAssignment?.status
     }
+    
+    /**
+     * Refresh delivery assignment details silently (for polling).
+     * Fetches latest data without showing loading state.
+     */
+    fun refreshDeliveryDetails(assignmentId: String) {
+        deliveryRepository.getAvailableOrders()
+            .onEach { resource ->
+                when (resource) {
+                    is Resource.Success -> {
+                        // Find the specific assignment by ID
+                        val assignment = resource.data?.firstOrNull { it.id == assignmentId }
+                        if (assignment != null) {
+                            currentAssignment = assignment
+                            _deliveryState.value = Resource.Success(assignment)
+                            android.util.Log.d("ActiveDeliveryViewModel", "Delivery details refreshed: status=${assignment.status}")
+                        }
+                    }
+                    is Resource.Error -> {
+                        // Silently fail - don't disrupt user experience
+                        android.util.Log.e("ActiveDeliveryViewModel", "Failed to refresh delivery: ${resource.message}")
+                    }
+                    else -> { /* Ignore loading state */ }
+                }
+            }
+            .launchIn(viewModelScope)
+    }
 }

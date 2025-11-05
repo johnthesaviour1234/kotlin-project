@@ -20,6 +20,7 @@ import com.grocery.delivery.ui.dialogs.OrderDetailDialog
 import com.grocery.delivery.ui.viewmodels.AvailableOrdersViewModel
 import com.grocery.delivery.utils.Resource
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,6 +33,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     private val viewModel: AvailableOrdersViewModel by viewModels()
     private lateinit var adapter: AvailableOrdersAdapter
     private var acceptedAssignment: DeliveryAssignment? = null
+    private var isPollingActive = false
     
     @Inject
     lateinit var preferencesManager: PreferencesManager
@@ -335,19 +337,44 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         }
         // Refresh orders when returning to screen
         viewModel.refreshOrders()
+        // Start polling as fallback to realtime
+        startOrderPolling()
     }
     
     override fun onPause() {
         super.onPause()
+        // Stop polling when not visible to save battery
+        isPollingActive = false
         // Keep realtime connected even when app is in background
         // Only disconnect on logout or when explicitly needed
     }
     
     override fun onDestroy() {
         super.onDestroy()
+        // Stop polling
+        isPollingActive = false
         // Disconnect realtime when activity is destroyed
         lifecycleScope.launch {
             realtimeManager.disconnect()
+        }
+    }
+    
+    /**
+     * Polls for order updates every 15 seconds as fallback to realtime.
+     * Ensures drivers don't miss new orders if WebSocket connection drops.
+     */
+    private fun startOrderPolling() {
+        isPollingActive = true
+        
+        lifecycleScope.launch {
+            while (isPollingActive) {
+                delay(15_000) // Poll every 15 seconds
+                
+                if (isPollingActive) {
+                    android.util.Log.d("MainActivity", "Polling for order updates (fallback to realtime)")
+                    viewModel.refreshOrders()
+                }
+            }
         }
     }
 }

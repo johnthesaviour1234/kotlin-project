@@ -11,8 +11,11 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.lifecycleScope
 import com.grocery.delivery.data.dto.DeliveryAssignment
 import com.grocery.delivery.data.dto.OrderStatus
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import com.grocery.delivery.databinding.ActivityActiveDeliveryBinding
 import com.grocery.delivery.services.LocationTrackingService
 import com.grocery.delivery.ui.viewmodels.ActiveDeliveryViewModel
@@ -31,6 +34,7 @@ class ActiveDeliveryActivity : BaseActivity<ActivityActiveDeliveryBinding>() {
     private val viewModel: ActiveDeliveryViewModel by viewModels()
     private var currentAssignment: DeliveryAssignment? = null
     private var isLocationTrackingActive = false
+    private var isPollingActive = false
     
     // Permission launcher for location permissions
     private val locationPermissionLauncher = registerForActivityResult(
@@ -280,8 +284,21 @@ class ActiveDeliveryActivity : BaseActivity<ActivityActiveDeliveryBinding>() {
         binding.progressBar.visibility = View.GONE
     }
     
+    override fun onResume() {
+        super.onResume()
+        // Start polling for delivery updates
+        startDeliveryPolling()
+    }
+    
+    override fun onPause() {
+        super.onPause()
+        // Stop polling when not visible
+        isPollingActive = false
+    }
+    
     override fun onDestroy() {
         super.onDestroy()
+        isPollingActive = false
         stopLocationTracking()
     }
     
@@ -401,6 +418,27 @@ class ActiveDeliveryActivity : BaseActivity<ActivityActiveDeliveryBinding>() {
             supportActionBar?.subtitle = "Location Tracking Active"
         } else {
             supportActionBar?.subtitle = null
+        }
+    }
+    
+    /**
+     * Polls for delivery assignment updates every 10 seconds.
+     * Ensures driver sees latest status if order is cancelled or modified.
+     */
+    private fun startDeliveryPolling() {
+        isPollingActive = true
+        
+        lifecycleScope.launch {
+            while (isPollingActive) {
+                delay(10_000) // Poll every 10 seconds
+                
+                if (isPollingActive) {
+                    android.util.Log.d("ActiveDeliveryActivity", "Polling for delivery updates")
+                    currentAssignment?.let { assignment ->
+                        viewModel.refreshDeliveryDetails(assignment.id)
+                    }
+                }
+            }
         }
     }
 
