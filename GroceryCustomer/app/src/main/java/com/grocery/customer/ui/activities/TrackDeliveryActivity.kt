@@ -159,24 +159,43 @@ class TrackDeliveryActivity : AppCompatActivity() {
                         }
                     }
                 } else {
-                    // Check if delivery is completed/not in progress
-                    val errorMsg = response.body()?.error ?: ""
-                    val errorData = response.body()?.data
+                    // Parse error body manually since Retrofit doesn't deserialize it for unsuccessful responses
+                    val errorBody = response.errorBody()?.string()
+                    android.util.Log.d("TrackDelivery", "Error response - Code: ${response.code()}")
+                    android.util.Log.d("TrackDelivery", "Raw error body: $errorBody")
                     
-                    // Check if error response contains delivery status indicating completion
-                    val deliveryStatus = when (errorData) {
-                        is com.grocery.customer.data.dto.DriverLocationResponse -> errorData.deliveryStatus
-                        else -> null
+                    // Try to parse the error response
+                    var errorMsg = ""
+                    var deliveryStatus: String? = null
+                    
+                    if (!errorBody.isNullOrEmpty()) {
+                        try {
+                            // Use Gson to parse the error body
+                            val gson = com.google.gson.Gson()
+                            val errorResponse = gson.fromJson(
+                                errorBody,
+                                com.grocery.customer.data.remote.dto.ApiResponse::class.java
+                            ) as com.grocery.customer.data.remote.dto.ApiResponse<com.grocery.customer.data.dto.DriverLocationResponse>
+                            
+                            errorMsg = errorResponse.error ?: ""
+                            deliveryStatus = errorResponse.data?.deliveryStatus
+                            
+                            android.util.Log.d("TrackDelivery", "Parsed error message: $errorMsg")
+                            android.util.Log.d("TrackDelivery", "Parsed delivery status: $deliveryStatus")
+                        } catch (e: Exception) {
+                            android.util.Log.e("TrackDelivery", "Failed to parse error body", e)
+                        }
                     }
                     
-                    if (response.code() == 400 && errorMsg.contains("not currently in progress", ignoreCase = true)) {
-                        // Delivery is completed, redirect to order details
+                    // Check if delivery is completed
+                    if (deliveryStatus == "completed" || deliveryStatus == "delivered") {
+                        android.util.Log.d("TrackDelivery", "Delivery completed - navigating to order details")
                         navigateToOrderDetails()
-                    } else if (deliveryStatus == "completed" || deliveryStatus == "delivered") {
-                        // Delivery status indicates completion, redirect to order details
+                    } else if (response.code() == 400 && errorMsg.contains("not currently in progress", ignoreCase = true)) {
+                        android.util.Log.d("TrackDelivery", "Delivery not in progress - navigating to order details")
                         navigateToOrderDetails()
                     } else if (response.code() == 404 && errorMsg.contains("No delivery assignment", ignoreCase = true)) {
-                        // No delivery assignment found, redirect to order details
+                        android.util.Log.d("TrackDelivery", "No delivery assignment - navigating to order details")
                         navigateToOrderDetails()
                     } else {
                         showError(
