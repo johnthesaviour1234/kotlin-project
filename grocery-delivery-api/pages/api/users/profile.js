@@ -50,7 +50,8 @@ export default async function handler(req, res) {
 
       const { data, error } = await supabase
         .from('user_profiles')
-        .upsert({ id: userId, ...updates, updated_at: new Date().toISOString() }, { onConflict: 'id' })
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', userId)
         .select('id,email,full_name,phone,user_type,avatar_url,date_of_birth,address,preferences,created_at,updated_at')
         .maybeSingle()
 
