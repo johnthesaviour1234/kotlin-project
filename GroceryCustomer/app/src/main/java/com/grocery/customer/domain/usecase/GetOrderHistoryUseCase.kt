@@ -51,7 +51,8 @@ class GetOrderHistoryUseCase @Inject constructor(
     private fun isValidOrderStatus(status: String): Boolean {
         val validStatuses = listOf(
             "pending", "confirmed", "preparing", 
-            "ready", "delivered", "cancelled", "all"
+            "ready", "out_for_delivery", "arrived",
+            "delivered", "cancelled", "all"
         )
         return status.lowercase() in validStatuses
     }
