@@ -351,7 +351,7 @@ class OrderDetailFragment : Fragment() {
                 if (isPollingActive) {
                     android.util.Log.d("OrderDetailFragment", "Polling for order detail updates (admin)")
                     currentOrder?.let { order ->
-                        viewModel.loadOrderDetails(order.id)
+                        viewModel.refreshOrderDetailsSilently(order.id)
                     }
                 }
             }

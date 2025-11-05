@@ -68,6 +68,34 @@ class OrdersViewModel @Inject constructor(
     fun refreshOrders() {
         loadOrders(currentPage, currentStatus)
     }
+    
+    /**
+     * Silently refresh orders without showing loading state (for polling)
+     */
+    fun refreshOrdersSilently() {
+        viewModelScope.launch {
+            ordersRepository.getOrders(
+                page = currentPage,
+                limit = 20,
+                status = currentStatus
+            ).collect { resource ->
+                when (resource) {
+                    is Resource.Success -> {
+                        allOrders = resource.data?.items ?: emptyList()
+                        applyFiltersAndSearch()
+                        android.util.Log.d("OrdersViewModel", "Orders refreshed silently: ${allOrders.size} orders")
+                    }
+                    is Resource.Error -> {
+                        // Silently fail - don't disrupt UI
+                        android.util.Log.e("OrdersViewModel", "Silent refresh failed: ${resource.message}")
+                    }
+                    is Resource.Loading -> {
+                        // Ignore loading state for silent refresh
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * Search orders by order number or customer email

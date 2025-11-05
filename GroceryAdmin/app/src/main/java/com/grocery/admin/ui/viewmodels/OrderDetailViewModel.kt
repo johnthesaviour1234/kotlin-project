@@ -42,6 +42,29 @@ class OrderDetailViewModel @Inject constructor(
             }
         }
     }
+    
+    /**
+     * Silently refresh order details without showing loading state (for polling)
+     */
+    fun refreshOrderDetailsSilently(orderId: String) {
+        viewModelScope.launch {
+            ordersRepository.getOrderById(orderId).collect { resource ->
+                when (resource) {
+                    is Resource.Success -> {
+                        _orderDetails.value = resource
+                        android.util.Log.d("OrderDetailViewModel", "Order details refreshed silently")
+                    }
+                    is Resource.Error -> {
+                        // Silently fail - don't disrupt UI
+                        android.util.Log.e("OrderDetailViewModel", "Silent refresh failed: ${resource.message}")
+                    }
+                    is Resource.Loading -> {
+                        // Ignore loading state for silent refresh
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * Update order status

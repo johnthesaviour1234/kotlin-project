@@ -285,7 +285,7 @@ class OrdersFragment : Fragment() {
                 
                 if (isPollingActive) {
                     android.util.Log.d(TAG, "Polling for order updates (admin)")
-                    viewModel.refreshOrders()
+                    viewModel.refreshOrdersSilently()
                 }
             }
         }
